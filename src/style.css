@@ -1,1 +1,28 @@
 @import "tailwindcss";
+
+@theme {
+  --shadow: 0 0 5px #0000004d;
+  --color-primary: #3b099d;
+}
+::-webkit-scrollbar {
+  /* width: 10px; */
+  width: 0px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+::-webkit-scrollbar-thumb {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--color-gray-dark);
+}
+.scrollbar-hide::-webkit-scrollbar {
+  display: none;
+}
+.scrollbar-hide {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}

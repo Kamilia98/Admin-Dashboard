@@ -4,10 +4,12 @@ import ProductsPage from "../pages/Products.page.vue";
 import OrdersPage from "../pages/Orders.page.vue";
 import StorePage from "../pages/Store.page.vue";
 import CustomersPage from "../pages/Customers.page.vue";
+import OrderPage from "../pages/Order.page.vue";
 
 const routes = [
   { path: "", component: DashboardPage },
   { path: "/orders", component: OrdersPage },
+  { path: "/orders/:id", name: "order-details", component: OrderPage },
   { path: "/customers", component: CustomersPage },
   { path: "/store", component: StorePage },
   { path: "/products", component: ProductsPage },

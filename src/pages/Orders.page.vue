@@ -5,6 +5,7 @@ import Dropdown from "../components/Dropdown.vue";
 import Pagination from "../components/Pagination.vue";
 import ActionsList from "../components/ActionsList.vue";
 import Table from "../components/Table.vue";
+import { useRouter } from "vue-router";
 
 // ==============================
 // Types
@@ -49,6 +50,8 @@ const sortOrder = ref("desc");
 // Dropdown for status update
 const openDropdownId = ref<string | null>(null);
 
+const router = useRouter();
+
 // ==============================
 // Utility Functions
 // ==============================
@@ -74,6 +77,11 @@ const getNextStatusOptions = (
   const options = next ? [{ label: capitalize(next), value: next }] : [];
 
   return [...options, { label: "Canceled", value: "canceled" }];
+};
+
+const viewDetails = (order: any) => {
+  console.log("View details for order:", order.id);
+  router.push({ name: "order-details", params: { id: order.id } });
 };
 
 // ==============================

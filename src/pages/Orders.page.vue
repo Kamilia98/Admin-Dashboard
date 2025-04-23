@@ -172,9 +172,9 @@ onMounted(() => {
         :selected-option="{ label: 'Default', value: 'default' }"
         :options="[
           { label: 'Default', value: 'default' },
-          { label: 'Created At', value: 'createdAt' },
-          { label: 'Total Amount', value: 'totalAmount' },
-          { label: 'Order Number', value: 'orderNumber' },
+          { label: 'Date', value: 'createdAt' },
+          { label: 'Total', value: 'totalAmount' },
+          { label: 'Order', value: 'orderNumber' },
         ]"
         @update:modelValue="fetchOrders(1)"
       />
@@ -195,10 +195,10 @@ onMounted(() => {
 
     <Table
       :headers="[
-        { key: 'orderNumber', label: 'Order Number' },
-        { key: 'userName', label: 'User Name' },
-        { key: 'total', label: 'Total Amount' },
-        { key: 'createdAt', label: 'Created At' },
+        { key: 'orderNumber', label: 'Order' },
+        { key: 'userName', label: 'User' },
+        { key: 'total', label: 'Total' },
+        { key: 'createdAt', label: 'Date' },
         { key: 'status', label: 'Status' },
         { key: 'actions', label: 'Actions' },
       ]"

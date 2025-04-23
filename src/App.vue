@@ -22,10 +22,13 @@
 </template>
 
 <script setup lang="ts">
-import { ref } from "vue";
+import { ref, watch, onMounted } from "vue";
+import { useRoute } from "vue-router";
 import Navbar from "./components/Navbar.vue";
 import Sidebar from "./components/Sidebar.vue";
+
 const activeTabIndex = ref<number | null>(null);
+const route = useRoute();
 
 const tabs = [
   { name: "Products", path: "/products" },
@@ -37,4 +40,13 @@ const tabs = [
 const updateActiveTab = (index: number | null) => {
   activeTabIndex.value = index;
 };
+
+
+const syncTabWithRoute = () => {
+  const index = tabs.findIndex((tab) => route.path.startsWith(tab.path));
+  activeTabIndex.value = index !== -1 ? index : null;
+};
+
+onMounted(syncTabWithRoute);
+watch(() => route.path, syncTabWithRoute);
 </script>

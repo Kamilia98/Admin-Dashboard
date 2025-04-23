@@ -3,12 +3,32 @@ import { ref, onMounted } from "vue";
 import axios from "axios";
 import Dropdown from "../components/Dropdown.vue";
 import Pagination from "../components/Pagination.vue";
+import ActionsList from "../components/ActionsList.vue";
+import Table from "../components/Table.vue";
 
-// ========== State ==========
+// ==============================
+// Types
+// ==============================
+type OrderStatus =
+  | "pending"
+  | "processing"
+  | "shipped"
+  | "canceled"
+  | "delivered";
+
+type StatusClasses = {
+  bg: string;
+  text: string;
+};
+
+// ==============================
+// Reactive State
+// ==============================
 const orders = ref<any[]>([]);
 const currentPage = ref(1);
 const totalPages = ref(1);
 const totalOrders = ref(1);
+
 const limit = 8;
 const orderStages: OrderStatus[] = [
   "pending",
@@ -17,63 +37,48 @@ const orderStages: OrderStatus[] = [
   "delivered",
 ];
 
-// ========== Filters ==========
-const statusFilter = ref<string>("all");
-const startDateFilter = ref<string>("");
-const endDateFilter = ref<string>("");
+// Filters
+const statusFilter = ref("all");
+const startDateFilter = ref("");
+const endDateFilter = ref("");
 
-// ========== Sorting ==========
-const sortBy = ref<string>("default");
-const sortOrder = ref<string>("desc");
+// Sorting
+const sortBy = ref("default");
+const sortOrder = ref("desc");
 
-// ========== Dropdown for Status Change ==========
+// Dropdown for status update
 const openDropdownId = ref<string | null>(null);
 
-const toggleDropdown = (orderId: string) => {
-  openDropdownId.value = openDropdownId.value === orderId ? null : orderId;
-};
+// ==============================
+// Utility Functions
+// ==============================
+const capitalize = (str: string): string =>
+  str.charAt(0).toUpperCase() + str.slice(1);
 
-const closeDropdown = () => {
-  openDropdownId.value = null;
-};
+const getStatusClasses = (status: OrderStatus): StatusClasses =>
+  ({
+    pending: { bg: "bg-yellow-100", text: "text-yellow-600" },
+    processing: { bg: "bg-purple-200", text: "text-purple-800" },
+    shipped: { bg: "bg-blue-200", text: "text-blue-800" },
+    delivered: { bg: "bg-green-200", text: "text-green-800" },
+    canceled: { bg: "bg-red-200", text: "text-red-800" },
+  })[status];
 
-const handleClickOutside = (event: MouseEvent) => {
-  const target = event.target as HTMLElement;
-  if (!target.closest(".dropdown-container")) {
-    closeDropdown();
-  }
-};
-
-function getNextStatusOptions(
+const getNextStatusOptions = (
   currentStatus: OrderStatus,
-): { label: string; value: OrderStatus }[] {
-  if (currentStatus === "cancelled" || currentStatus === "delivered") {
-    return [];
-  }
+): { label: string; value: OrderStatus }[] => {
+  if (["canceled", "delivered"].includes(currentStatus)) return [];
 
-  const currentIndex = orderStages.indexOf(currentStatus);
+  const index = orderStages.indexOf(currentStatus);
+  const next = orderStages[index + 1];
+  const options = next ? [{ label: capitalize(next), value: next }] : [];
 
-  if (currentIndex === -1)
-    return [{ label: capitalize(currentStatus), value: currentStatus }];
+  return [...options, { label: "Canceled", value: "canceled" }];
+};
 
-  const options: { label: string; value: OrderStatus }[] = [];
-
-  const nextStage = orderStages[currentIndex + 1];
-  if (nextStage) {
-    options.push({ label: capitalize(nextStage), value: nextStage });
-  }
-
-  // Add 'cancelled' as an option
-  options.push({ label: "Cancelled", value: "cancelled" });
-
-  return options;
-}
-
-function capitalize(str: string): string {
-  return str.charAt(0).toUpperCase() + str.slice(1);
-}
-
-// ========== API Calls ==========
+// ==============================
+// API Logic
+// ==============================
 const fetchOrders = async (page: number) => {
   try {
     const params: any = {
@@ -84,68 +89,42 @@ const fetchOrders = async (page: number) => {
       sortBy: sortBy.value,
       sortOrder: sortOrder.value,
     };
+
     if (statusFilter.value !== "all") {
       params.status = statusFilter.value;
     }
 
-    const response = await axios.get("http://localhost:5000/orders/all", {
+    const { data } = await axios.get("http://localhost:5000/orders/all", {
       params,
     });
-
-    orders.value = response.data.data.orders;
-    totalOrders.value = response.data.data.totalOrders;
-    totalPages.value = Math.ceil(response.data.data.totalOrders / limit);
+    orders.value = data.data.orders;
+    totalOrders.value = data.data.totalOrders;
+    totalPages.value = Math.ceil(data.data.totalOrders / limit);
     currentPage.value = page;
-  } catch (error) {
-    console.error("Error fetching orders:", error);
+  } catch (err) {
+    console.error("Error fetching orders:", err);
   }
 };
 
-const updateOrderStatus = async (orderId: string, newStatus: string) => {
+const updateOrderStatus = async (orderId: string, newStatus: OrderStatus) => {
   try {
-    const res = await axios.patch(
-      `http://localhost:5000/orders/${orderId}/status`,
-      { status: newStatus },
-    );
-    console.log(res.data);
+    await axios.patch(`http://localhost:5000/orders/${orderId}/status`, {
+      status: newStatus,
+    });
 
     const order = orders.value.find((o) => o.id === orderId);
     if (order) order.status = newStatus;
-  } catch (error) {
-    console.error("Error updating order status:", error);
+  } catch (err) {
+    console.error("Error updating status:", err);
   }
 };
 
-// ========== Lifecycle ==========
+// ==============================
+// Lifecycle
+// ==============================
 onMounted(() => {
-  window.addEventListener("click", handleClickOutside);
   fetchOrders(currentPage.value);
 });
-
-// ========== Status Classes ==========
-type OrderStatus =
-  | "pending"
-  | "processing"
-  | "shipped"
-  | "cancelled"
-  | "delivered";
-
-type StatusClasses = {
-  bg: string;
-  text: string;
-};
-
-const statusMap: Record<OrderStatus, StatusClasses> = {
-  pending: { bg: "bg-yellow-100", text: "text-yellow-600" },
-  processing: { bg: "bg-purple-200", text: "text-purple-800" },
-  shipped: { bg: "bg-blue-200", text: "text-blue-800" },
-  delivered: { bg: "bg-green-200", text: "text-green-800" },
-  cancelled: { bg: "bg-red-200", text: "text-red-800" },
-};
-
-function getStatusClasses(status: OrderStatus): StatusClasses {
-  return statusMap[status];
-}
 </script>
 
 <template>
@@ -164,7 +143,7 @@ function getStatusClasses(status: OrderStatus): StatusClasses {
           { label: 'Processing', value: 'processing' },
           { label: 'Shipped', value: 'shipped' },
           { label: 'Delivered', value: 'delivered' },
-          { label: 'Cancelled', value: 'cancelled' },
+          { label: 'Canceled', value: 'canceled' },
         ]"
         @update:modelValue="fetchOrders(1)"
       />
@@ -174,14 +153,14 @@ function getStatusClasses(status: OrderStatus): StatusClasses {
         type="date"
         v-model="startDateFilter"
         @change="fetchOrders(1)"
-        class="rounded border border-[#979797] px-2 py-1"
+        class="rounded border border-gray px-2 py-1"
       />
       <span class="mx-2">to</span>
       <input
         type="date"
         v-model="endDateFilter"
         @change="fetchOrders(1)"
-        class="rounded border border-[#979797] px-2 py-1"
+        class="rounded border border-gray px-2 py-1"
       />
     </div>
 
@@ -213,93 +192,43 @@ function getStatusClasses(status: OrderStatus): StatusClasses {
     </div>
 
     <!-- Table for Orders -->
-    <div class="flex h-min overflow-x-scroll">
-      <table class="min-w-full border-separate border-spacing-0 text-left">
-        <thead>
-          <tr class="font-normal">
-            <th
-              class="rounded-tl-2xl border border-r-0 border-[#979797] bg-[#fcfdfd] p-3 font-semibold"
-            >
-              Order Number
-            </th>
-            <th
-              class="border-y border-[#979797] bg-[#fcfdfd] p-3 font-semibold"
-            >
-              User name
-            </th>
 
-            <th
-              class="border-y border-[#979797] bg-[#fcfdfd] p-3 font-semibold"
-            >
-              Total Amount
-            </th>
-            <th
-              class="border-y border-[#979797] bg-[#fcfdfd] p-3 font-semibold"
-            >
-              Created At
-            </th>
-            <th
-              class="border-y border-[#979797] bg-[#fcfdfd] p-3 font-semibold"
-            >
-              Status
-            </th>
-            <th
-              class="rounded-tr-2xl border border-l-0 border-[#979797] bg-[#fcfdfd] p-3 text-center font-semibold"
-            >
-              Actions
-            </th>
-          </tr>
-        </thead>
-        <tbody class="text-sm font-normal">
-          <tr v-for="order in orders" :key="order.id">
-            <td class="border-b border-l border-[#979797] p-3">
-              {{ order.orderNumber }}
-            </td>
+    <Table
+      :headers="[
+        { key: 'orderNumber', label: 'Order Number' },
+        { key: 'userName', label: 'User Name' },
+        { key: 'total', label: 'Total Amount' },
+        { key: 'createdAt', label: 'Created At' },
+        { key: 'status', label: 'Status' },
+        { key: 'actions', label: 'Actions' },
+      ]"
+      :items="orders"
+      row-key="id"
+    >
+      <template #column-status="{ item }">
+        <Dropdown
+          v-model="item.status"
+          :selected-option="{
+            label: capitalize(item.status),
+            value: item.status,
+          }"
+          :options="getNextStatusOptions(item.status)"
+          :btn-bg-color-class="getStatusClasses(item.status).bg"
+          :btn-text-color-class="getStatusClasses(item.status).text"
+          @update:model-value="updateOrderStatus(item.id, $event)"
+        />
+      </template>
 
-            <td class="border-b border-[#979797] p-3">{{ order.userName }}</td>
-            <td class="border-b border-[#979797] p-3">{{ order.total }} $</td>
-            <td class="border-b border-[#979797] p-3">
-              {{ order.createdAt }}
-            </td>
-            <td class="border-b border-[#979797] p-3">
-              <Dropdown
-                v-model="order.status"
-                :selected-option="{
-                  label: capitalize(order.status),
-                  value: order.status,
-                }"
-                :options="getNextStatusOptions(order.status)"
-                :btn-bg-color-class="getStatusClasses(order.status).bg"
-                :btn-text-color-class="getStatusClasses(order.status).text"
-                @update:model-value="updateOrderStatus(order.id, $event)"
-              />
-            </td>
-
-            <td
-              class="dropdown-container relative border-r border-b border-[#979797] p-3 text-center"
-            >
-              <button
-                @click.stop="toggleDropdown(order.id)"
-                class="text-xl text-gray-600 hover:text-black"
-              >
-                ...
-              </button>
-
-              <div
-                v-if="openDropdownId === order.id"
-                class="absolute right-0 z-10 mt-2 w-32 rounded border border-[#979797] bg-white shadow-md"
-              >
-                <ul class="text-left text-sm">
-                  <li class="cursor-pointer px-4 py-2 hover:bg-gray-100">
-                    View Details
-                  </li>
-                </ul>
-              </div>
-            </td>
-          </tr>
-        </tbody>
-      </table>
-    </div>
+      <template #column-actions="{ item }">
+        <ActionsList
+          :items="[
+            { label: 'View Details', action: () => viewDetails(item) },
+            { label: 'Edit', action: () => editOrder(item) },
+            { label: 'Delete', action: () => deleteOrder(item.id) },
+          ]"
+        />
+      </template>
+    </Table>
 
     <Pagination
       title="orders"
@@ -311,14 +240,3 @@ function getStatusClasses(status: OrderStatus): StatusClasses {
     />
   </div>
 </template>
-
-<style scoped>
-tr:last-child td:first-child {
-  border-bottom-left-radius: 10px;
-}
-
-tr:last-child td:last-child {
-  border-bottom-right-radius: 10px;
-  color: #25006f;
-}
-</style>

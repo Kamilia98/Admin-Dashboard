@@ -1,21 +1,40 @@
 import { createRouter, createWebHistory } from "vue-router";
-import DashboardPage from "../pages/Dashboard.page.vue";
-import ProductsPage from "../pages/Products.page.vue";
-import OrdersPage from "../pages/Orders.page.vue";
-import StorePage from "../pages/Store.page.vue";
-import CustomersPage from "../pages/Customers.page.vue";
-import OrderPage from "../pages/Order.page.vue";
 
 const routes = [
-  { path: "", component: DashboardPage },
-  { path: "/orders", component: OrdersPage },
-  { path: "/orders/:id", name: "order-details", component: OrderPage },
-  { path: "/customers", component: CustomersPage },
-  { path: "/store", component: StorePage },
-  { path: "/products", component: ProductsPage },
+  {
+    path: "",
+    name: "dashboard",
+    component: () => import("../pages/Dashboard.page.vue"),
+  },
+  {
+    path: "/orders",
+    name: "orders",
+    component: () => import("../pages/Orders.page.vue"),
+  },
+  {
+    path: "/orders/:id",
+    name: "order-details",
+    component: () => import("../pages/Order.page.vue"),
+  },
+  {
+    path: "/customers",
+    name: "customers",
+    component: () => import("../pages/Customers.page.vue"),
+  },
+  {
+    path: "/store",
+    name: "store",
+    component: () => import("../pages/Store.page.vue"),
+  },
+  {
+    path: "/products",
+    name: "products",
+    component: () => import("../pages/Products.page.vue"),
+  },
 ];
 
 export const router = createRouter({
   history: createWebHistory(),
+
   routes,
 });

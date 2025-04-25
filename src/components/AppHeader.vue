@@ -90,7 +90,6 @@
 import { ref } from "vue";
 import { useSidebar } from "../composables/useSidebar";
 import ThemeToggler from "./ThemeToggler.vue";
-import SearchBar from "./header/SearchBar.vue";
 import HeaderLogo from "./header/HeaderLogo.vue";
 import NotificationMenu from "./header/NotificationMenu.vue";
 import UserMenu from "./header/UserMenu.vue";

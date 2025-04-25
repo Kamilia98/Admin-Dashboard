@@ -1,106 +1,115 @@
 <script setup lang="ts">
+/* ========== Imports ========== */
+
 import { ref, onMounted } from "vue";
-import axios from "axios";
-import Dropdown from "../components/Dropdown.vue";
-import Pagination from "../components/Pagination.vue";
-import ActionsList from "../components/ActionsList.vue";
-import Table from "../components/Table.vue";
 import { useRouter } from "vue-router";
-import { ElDatePicker, ElSelect, ElOption } from "element-plus";
+import axios from "axios";
+import Pagination from "../components/Pagination.vue";
+import Table from "../components/Table.vue";
+import {
+  ElDatePicker,
+  ElSelect,
+  ElOption,
+  ElDropdown,
+  ElDropdownItem,
+  ElDropdownMenu,
+} from "element-plus";
 
-// ==============================
-// Types
-// ==============================
+/* ========== Types ============ */
 type OrderStatus =
-  | "pending"
-  | "processing"
-  | "shipped"
-  | "canceled"
-  | "delivered";
+  | "Pending"
+  | "Processing"
+  | "Shipped"
+  | "Canceled"
+  | "Delivered";
 
-type StatusClasses = {
-  bg: string;
-  text: string;
-};
+/* ========= Constants ========= */
+const ORDER_LIMIT = 8;
+const ORDER_STAGES: OrderStatus[] = [
+  "Pending",
+  "Processing",
+  "Shipped",
+  "Delivered",
+];
+const STATUS_OPTIONS = [
+  { label: "Pending", value: "pending" },
+  { label: "Processing", value: "processing" },
+  { label: "Shipped", value: "shipped" },
+  { label: "Delivered", value: "delivered" },
+  { label: "Canceled", value: "canceled" },
+];
+const SORT_OPTIONS = [
+  { label: "Default", value: "default" },
+  { label: "Date", value: "createdAt" },
+  { label: "Total", value: "totalAmount" },
+  { label: "Order", value: "orderNumber" },
+];
+const ORDER_DIRECTIONS = [
+  { label: "Descending", value: "desc" },
+  { label: "Ascending", value: "asc" },
+];
 
-// ==============================
-// Reactive State
-// ==============================
+/* ========= Reactive ========== */
+
 const orders = ref<any[]>([]);
 const currentPage = ref(1);
 const totalPages = ref(1);
 const totalOrders = ref(1);
 
-const limit = 8;
-const orderStages: OrderStatus[] = [
-  "pending",
-  "processing",
-  "shipped",
-  "delivered",
-];
-
-// Filters
-const statusFilter = ref([]);
+const statusFilter = ref<string[]>([]);
 const dateRange = ref<[string, string]>(["", ""]);
 const startDateFilter = ref("");
 const endDateFilter = ref("");
-
-// Sorting
 const sortBy = ref("default");
 const sortOrder = ref("desc");
 
 const router = useRouter();
 
-// ==============================
-// Utility Functions
-// ==============================
+/* ========= Utilities ========== */
+
 const capitalize = (str: string): string =>
   str.charAt(0).toUpperCase() + str.slice(1);
 
-const getStatusClasses = (status: OrderStatus): StatusClasses =>
-  ({
-    pending: { bg: "bg-yellow-100", text: "text-yellow-600" },
-    processing: { bg: "bg-purple-200", text: "text-purple-800" },
-    shipped: { bg: "bg-blue-200", text: "text-blue-800" },
-    delivered: { bg: "bg-green-200", text: "text-green-800" },
-    canceled: { bg: "bg-red-200", text: "text-red-800" },
-  })[status];
+const getNextStatusOptions = (status: OrderStatus) => {
+  if (["Canceled", "Delivered"].includes(status)) return [];
 
-const getNextStatusOptions = (
-  currentStatus: OrderStatus,
-): { label: string; value: OrderStatus }[] => {
-  if (["canceled", "delivered"].includes(currentStatus)) return [];
+  const nextIndex = ORDER_STAGES.indexOf(status) + 1;
+  const options =
+    nextIndex < ORDER_STAGES.length
+      ? [
+          {
+            label: capitalize(ORDER_STAGES[nextIndex]),
+            value: ORDER_STAGES[nextIndex],
+          },
+        ]
+      : [];
 
-  const index = orderStages.indexOf(currentStatus);
-  const next = orderStages[index + 1];
-  const options = next ? [{ label: capitalize(next), value: next }] : [];
+  return [...options, { label: "Canceled", value: "Canceled" }];
+};
 
-  return [...options, { label: "Canceled", value: "canceled" }];
+const handleCommand = (command: any) => {
+  if (command.name === "view") {
+    viewDetails(command.item);
+  }
 };
 
 const viewDetails = (order: any) => {
-  console.log("View details for order:", order.id);
   router.push({ name: "order-details", params: { id: order.id } });
 };
 
 const handleDateChange = () => {
-  if (dateRange.value && dateRange.value.length === 2) {
-    startDateFilter.value = dateRange.value[0];
-    endDateFilter.value = dateRange.value[1];
-  } else {
-    startDateFilter.value = "";
-    endDateFilter.value = "";
-  }
+  const [start, end] = dateRange.value;
+  startDateFilter.value = start || "";
+  endDateFilter.value = end || "";
   fetchOrders(1);
 };
 
-// ==============================
-// API Logic
-// ==============================
+/* ========== API ============== */
+
 const fetchOrders = async (page: number) => {
   try {
     const params: any = {
-      limit,
+      limit: ORDER_LIMIT,
       page,
       startDate: startDateFilter.value,
       endDate: endDateFilter.value,
@@ -115,10 +124,14 @@ const fetchOrders = async (page: number) => {
     const { data } = await axios.get("http://localhost:5000/orders/all", {
       params,
     });
-    console.log("Fetched orders:", data.data.orders);
-    orders.value = data.data.orders;
+
+    orders.value = data.data.orders.map((order: any) => ({
+      ...order,
+      status: capitalize(order.status),
+    }));
+
     totalOrders.value = data.data.totalOrders;
-    totalPages.value = Math.ceil(data.data.totalOrders / limit);
+    totalPages.value = Math.ceil(data.data.totalOrders / ORDER_LIMIT);
     currentPage.value = page;
   } catch (err) {
     console.error("Error fetching orders:", err);
@@ -138,9 +151,8 @@ const updateOrderStatus = async (orderId: string, newStatus: OrderStatus) => {
   }
 };
 
-// ==============================
-// Lifecycle
-// ==============================
+/* ========= Lifecycle ========= */
+
 onMounted(() => {
   fetchOrders(currentPage.value);
 });
@@ -148,35 +160,28 @@ onMounted(() => {
 
 <template>
   <div class="flex flex-col gap-8">
-    <h1 class="text-xl font-bold">Orders Lists</h1>
+    <h1 class="text-xl font-bold">Orders List</h1>
 
-    <!-- Filter Section -->
+    <!-- Filters -->
     <div class="flex flex-wrap items-center gap-4">
+      <!-- Status Filter -->
       <div class="flex items-center">
         <label class="mr-2">Status:</label>
-
         <el-select
           v-model="statusFilter"
           multiple
-          placeholder="Select"
           style="width: 240px"
           @change="fetchOrders(1)"
         >
           <el-option
-            v-for="item in [
-              { label: 'Pending', value: 'pending' },
-              { label: 'Processing', value: 'processing' },
-              { label: 'Shipped', value: 'shipped' },
-              { label: 'Delivered', value: 'delivered' },
-              { label: 'Canceled', value: 'canceled' },
-            ]"
+            v-for="item in STATUS_OPTIONS"
             :key="item.value"
-            :label="item.label"
-            :value="item.value"
+            v-bind="item"
           />
         </el-select>
       </div>
 
+      <!-- Date Range -->
       <div class="flex items-center">
         <label class="mr-2">Date Range:</label>
         <el-date-picker
@@ -196,34 +201,36 @@ onMounted(() => {
     <div class="flex flex-wrap items-center gap-4">
       <div class="flex items-center">
         <label class="mr-2">Sort By:</label>
-        <Dropdown
+        <el-select
           v-model="sortBy"
-          :selected-option="{ label: 'Default', value: 'default' }"
-          :options="[
-            { label: 'Default', value: 'default' },
-            { label: 'Date', value: 'createdAt' },
-            { label: 'Total', value: 'totalAmount' },
-            { label: 'Order', value: 'orderNumber' },
-          ]"
-          @update:modelValue="fetchOrders(1)"
-        />
+          style="width: 240px"
+          @change="fetchOrders(1)"
+        >
+          <el-option
+            v-for="item in SORT_OPTIONS"
+            :key="item.value"
+            v-bind="item"
+          />
+        </el-select>
       </div>
 
       <div class="flex items-center">
         <label class="mr-2">Order:</label>
-        <Dropdown
+        <el-select
           v-model="sortOrder"
-          :selected-option="{ label: 'Descending', value: 'desc' }"
-          :options="[
-            { label: 'Descending', value: 'desc' },
-            { label: 'Ascending', value: 'asc' },
-          ]"
-          @update:modelValue="fetchOrders(1)"
-        />
+          style="width: 240px"
+          @change="fetchOrders(1)"
+        >
+          <el-option
+            v-for="item in ORDER_DIRECTIONS"
+            :key="item.value"
+            v-bind="item"
+          />
+        </el-select>
       </div>
     </div>
 
-    <!-- Table for Orders -->
+    <!-- Orders Table -->
     <Table
       :headers="[
         { key: 'orderNumber', label: 'Order' },
@@ -237,41 +244,81 @@ onMounted(() => {
       row-key="id"
     >
       <template #column-status="{ item }">
-        <Dropdown
+        <el-select
           v-model="item.status"
-          :selected-option="{
-            label: capitalize(item.status),
-            value: item.status,
-          }"
-          :options="getNextStatusOptions(item.status)"
-          :btn-bg-color-class="getStatusClasses(item.status).bg"
-          :btn-text-color-class="getStatusClasses(item.status).text"
-          @update:model-value="updateOrderStatus(item.id, $event)"
-        />
+          :class="item.status"
+          no-data-text="No options"
+          style="width: 120px"
+          @change="updateOrderStatus(item.id, $event)"
+        >
+          <el-option
+            v-for="opt in getNextStatusOptions(item.status)"
+            :key="opt.value"
+            v-bind="opt"
+          />
+        </el-select>
       </template>
 
       <template #column-actions="{ item }">
-        <ActionsList
-          :items="[{ label: 'View Details', action: () => viewDetails(item) }]"
-        />
+        <el-dropdown trigger="click" @command="handleCommand">
+          <button
+            class="el-dropdown-link rounded bg-gray-100 px-3 py-1 text-sm font-medium shadow"
+          >
+            ...
+          </button>
+          <template #dropdown>
+            <el-dropdown-menu>
+              <el-dropdown-item :command="{ name: 'view', item }"
+                >View Details</el-dropdown-item
+              >
+            </el-dropdown-menu>
+          </template>
+        </el-dropdown>
       </template>
     </Table>
 
+    <!-- Pagination -->
     <Pagination
       title="orders"
       :currentPage="currentPage"
       :totalPages="totalPages"
       :totalItems="totalOrders"
-      :limit="limit"
-      @changePage="(page) => fetchOrders(page)"
+      :limit="ORDER_LIMIT"
+      @changePage="fetchOrders"
     />
   </div>
 </template>
 
 <style scoped>
-/* Custom styling for the date picker */
-:deep(.el-date-editor .el-range-separator) {
-  padding: 0;
-  color: inherit;
+:deep(.Pending .el-select__placeholder span) {
+  color: oklch(0.769 0.188 70.08);
+}
+:deep(.Processing .el-select__placeholder span) {
+  color: oklch(0.558 0.288 302.321);
+}
+:deep(.Shipped .el-select__placeholder span) {
+  color: oklch(0.546 0.245 262.881);
+}
+:deep(.Delivered .el-select__placeholder span) {
+  color: oklch(0.627 0.194 149.214);
+}
+:deep(.Canceled .el-select__placeholder span) {
+  color: oklch(0.577 0.245 27.325);
+}
+
+:deep(.Pending .el-select__wrapper) {
+  background-color: oklch(0.962 0.059 95.617) !important;
+}
+:deep(.Processing .el-select__wrapper) {
+  background-color: oklch(0.946 0.033 307.174) !important;
+}
+:deep(.Shipped .el-select__wrapper) {
+  background-color: oklch(0.932 0.032 255.585) !important;
+}
+:deep(.Delivered .el-select__wrapper) {
+  background-color: oklch(0.962 0.044 156.743) !important;
+}
+:deep(.Canceled .el-select__wrapper) {
+  background-color: oklch(0.936 0.032 17.717) !important;
 }
 </style>

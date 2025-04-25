@@ -69,7 +69,7 @@
             />
           </svg>
         </button>
-        <SearchBar />
+        <!-- <SearchBar /> -->
       </div>
 
       <div

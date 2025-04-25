@@ -1,6 +1,6 @@
 <template>
   <div
-    class="flex h-[60px] cursor-pointer flex-col items-center justify-center"
+    class="flex h-[60px] cursor-pointer flex-col items-center justify-center font-semibold"
     @click="handleClick"
   >
     <div
@@ -24,7 +24,7 @@
 import Icon from "./Icon.vue";
 
 const props = defineProps({
-  tab: {type: String, required: true},
+  tab: { type: String, required: true },
   index: Number,
   active: Boolean,
   isSidebarOpen: Boolean,

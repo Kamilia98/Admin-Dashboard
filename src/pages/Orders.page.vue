@@ -6,6 +6,7 @@ import Pagination from "../components/Pagination.vue";
 import ActionsList from "../components/ActionsList.vue";
 import Table from "../components/Table.vue";
 import { useRouter } from "vue-router";
+import { ElDatePicker, ElSelect, ElOption } from "element-plus";
 
 // ==============================
 // Types
@@ -39,16 +40,14 @@ const orderStages: OrderStatus[] = [
 ];
 
 // Filters
-const statusFilter = ref("all");
+const statusFilter = ref([]);
+const dateRange = ref<[string, string]>(["", ""]);
 const startDateFilter = ref("");
 const endDateFilter = ref("");
 
 // Sorting
 const sortBy = ref("default");
 const sortOrder = ref("desc");
-
-// Dropdown for status update
-const openDropdownId = ref<string | null>(null);
 
 const router = useRouter();
 
@@ -84,6 +83,17 @@ const viewDetails = (order: any) => {
   router.push({ name: "order-details", params: { id: order.id } });
 };
 
+const handleDateChange = () => {
+  if (dateRange.value && dateRange.value.length === 2) {
+    startDateFilter.value = dateRange.value[0];
+    endDateFilter.value = dateRange.value[1];
+  } else {
+    startDateFilter.value = "";
+    endDateFilter.value = "";
+  }
+  fetchOrders(1);
+};
+
 // ==============================
 // API Logic
 // ==============================
@@ -98,13 +108,14 @@ const fetchOrders = async (page: number) => {
       sortOrder: sortOrder.value,
     };
 
-    if (statusFilter.value !== "all") {
+    if (statusFilter.value.length) {
       params.status = statusFilter.value;
     }
 
     const { data } = await axios.get("http://localhost:5000/orders/all", {
       params,
     });
+    console.log("Fetched orders:", data.data.orders);
     orders.value = data.data.orders;
     totalOrders.value = data.data.totalOrders;
     totalPages.value = Math.ceil(data.data.totalOrders / limit);
@@ -140,67 +151,79 @@ onMounted(() => {
     <h1 class="text-xl font-bold">Orders Lists</h1>
 
     <!-- Filter Section -->
-    <div>
-      <label class="mr-2">Status:</label>
-      <Dropdown
-        v-model="statusFilter"
-        :selected-option="{ label: 'All', value: 'all' }"
-        :options="[
-          { label: 'All', value: 'all' },
-          { label: 'Pending', value: 'pending' },
-          { label: 'Processing', value: 'processing' },
-          { label: 'Shipped', value: 'shipped' },
-          { label: 'Delivered', value: 'delivered' },
-          { label: 'Canceled', value: 'canceled' },
-        ]"
-        @update:modelValue="fetchOrders(1)"
-      />
+    <div class="flex flex-wrap items-center gap-4">
+      <div class="flex items-center">
+        <label class="mr-2">Status:</label>
 
-      <label class="mr-2 ml-4">Date Range:</label>
-      <input
-        type="date"
-        v-model="startDateFilter"
-        @change="fetchOrders(1)"
-        class="rounded border border-gray px-2 py-1"
-      />
-      <span class="mx-2">to</span>
-      <input
-        type="date"
-        v-model="endDateFilter"
-        @change="fetchOrders(1)"
-        class="rounded border border-gray px-2 py-1"
-      />
+        <el-select
+          v-model="statusFilter"
+          multiple
+          placeholder="Select"
+          style="width: 240px"
+          @change="fetchOrders(1)"
+        >
+          <el-option
+            v-for="item in [
+              { label: 'Pending', value: 'pending' },
+              { label: 'Processing', value: 'processing' },
+              { label: 'Shipped', value: 'shipped' },
+              { label: 'Delivered', value: 'delivered' },
+              { label: 'Canceled', value: 'canceled' },
+            ]"
+            :key="item.value"
+            :label="item.label"
+            :value="item.value"
+          />
+        </el-select>
+      </div>
+
+      <div class="flex items-center">
+        <label class="mr-2">Date Range:</label>
+        <el-date-picker
+          v-model="dateRange"
+          type="daterange"
+          range-separator="to"
+          start-placeholder="Start date"
+          end-placeholder="End date"
+          value-format="YYYY-MM-DD"
+          @change="handleDateChange"
+          class="w-[250px]"
+        />
+      </div>
     </div>
 
     <!-- Sorting -->
-    <div>
-      <label class="mr-2">Sort By:</label>
-      <Dropdown
-        v-model="sortBy"
-        :selected-option="{ label: 'Default', value: 'default' }"
-        :options="[
-          { label: 'Default', value: 'default' },
-          { label: 'Date', value: 'createdAt' },
-          { label: 'Total', value: 'totalAmount' },
-          { label: 'Order', value: 'orderNumber' },
-        ]"
-        @update:modelValue="fetchOrders(1)"
-      />
+    <div class="flex flex-wrap items-center gap-4">
+      <div class="flex items-center">
+        <label class="mr-2">Sort By:</label>
+        <Dropdown
+          v-model="sortBy"
+          :selected-option="{ label: 'Default', value: 'default' }"
+          :options="[
+            { label: 'Default', value: 'default' },
+            { label: 'Date', value: 'createdAt' },
+            { label: 'Total', value: 'totalAmount' },
+            { label: 'Order', value: 'orderNumber' },
+          ]"
+          @update:modelValue="fetchOrders(1)"
+        />
+      </div>
 
-      <label class="mr-2 ml-2">Order:</label>
-      <Dropdown
-        v-model="sortOrder"
-        :selected-option="{ label: 'Descending', value: 'desc' }"
-        :options="[
-          { label: 'Descending', value: 'desc' },
-          { label: 'Ascending', value: 'asc' },
-        ]"
-        @update:modelValue="fetchOrders(1)"
-      />
+      <div class="flex items-center">
+        <label class="mr-2">Order:</label>
+        <Dropdown
+          v-model="sortOrder"
+          :selected-option="{ label: 'Descending', value: 'desc' }"
+          :options="[
+            { label: 'Descending', value: 'desc' },
+            { label: 'Ascending', value: 'asc' },
+          ]"
+          @update:modelValue="fetchOrders(1)"
+        />
+      </div>
     </div>
 
     <!-- Table for Orders -->
-
     <Table
       :headers="[
         { key: 'orderNumber', label: 'Order' },
@@ -229,11 +252,7 @@ onMounted(() => {
 
       <template #column-actions="{ item }">
         <ActionsList
-          :items="[
-            { label: 'View Details', action: () => viewDetails(item) },
-            { label: 'Edit', action: () => editOrder(item) },
-            { label: 'Delete', action: () => deleteOrder(item.id) },
-          ]"
+          :items="[{ label: 'View Details', action: () => viewDetails(item) }]"
         />
       </template>
     </Table>
@@ -248,3 +267,11 @@ onMounted(() => {
     />
   </div>
 </template>
+
+<style scoped>
+/* Custom styling for the date picker */
+:deep(.el-date-editor .el-range-separator) {
+  padding: 0;
+  color: inherit;
+}
+</style>

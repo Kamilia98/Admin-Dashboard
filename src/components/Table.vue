@@ -1,12 +1,9 @@
-<script setup>
-defineProps({
-  headers: Array,
-  items: Array,
-  rowKey: {
-    type: String,
-    default: "id",
-  },
-});
+<script setup lang="ts">
+defineProps<{
+  headers: { key: string; label: string }[];
+  items: Record<string, any>[];
+  rowKey?: string;
+}>();
 </script>
 
 <template>
@@ -30,7 +27,7 @@ defineProps({
         </tr>
       </thead>
       <tbody class="text-sm font-normal">
-        <tr v-for="item in items" :key="item[rowKey]">
+        <tr v-for="item in items" :key="rowKey ? item[rowKey] : item.id">
           <td
             v-for="(header, index) in headers"
             :key="index"

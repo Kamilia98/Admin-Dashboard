@@ -34,13 +34,12 @@ const tabs = [
   { name: "Products", path: "/products" },
   { name: "Orders", path: "/orders" },
   { name: "Customers", path: "/customers" },
-  { name: "Store", path: "/store" },
+  { name: "Settings", path: "/store" },
 ];
 
 const updateActiveTab = (index: number | null) => {
   activeTabIndex.value = index;
 };
-
 
 const syncTabWithRoute = () => {
   const index = tabs.findIndex((tab) => route.path.startsWith(tab.path));

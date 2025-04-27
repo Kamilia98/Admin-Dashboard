@@ -182,7 +182,7 @@ onMounted(async (): Promise<void> => {
                     order.status.toLowerCase() === 'shipped',
                   'bg-amber-100 text-amber-500':
                     order.status.toLowerCase() === 'pending',
-                  'bg-red-100 text-red-600':
+                  'bg-red-100 text-red-500':
                     order.status.toLowerCase() === 'canceled',
                 }"
                 class="rounded-full px-3 py-1 text-xs font-medium"

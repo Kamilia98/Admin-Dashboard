@@ -347,7 +347,7 @@ onMounted(() => {
 }
 
 :deep(.Pending .el-select__wrapper) {
-  background-color: oklch(0.962 0.059 95.617) !important;
+  background-color: var(--color-orange-100) !important;
 }
 :deep(.Processing .el-select__wrapper) {
   background-color: oklch(0.946 0.033 307.174) !important;
@@ -358,7 +358,7 @@ onMounted(() => {
 
 html.dark {
   :deep(.Pending .el-select__placeholder span) {
-    color: oklch(0.9 0.188 70.08);
+    color: var(--color-orange-400);
   }
   :deep(.Processing .el-select__placeholder span) {
     color: oklch(0.7 0.288 302.321);
@@ -389,12 +389,12 @@ html.dark {
 }
 
 :deep(.Canceled) {
-  --tag-color: oklch(0.577 0.245 27.325);
-  --tag-bg: oklch(0.936 0.032 17.717);
+  --tag-color: var(--color-red-500);
+  --tag-bg: var(--color-red-100);
 }
 :deep(.Delivered) {
-  --tag-color: oklch(0.627 0.194 149.214);
-  --tag-bg: oklch(0.962 0.044 156.743);
+  --tag-color: var(--color-green-600);
+  --tag-bg: var(--color-green-100);
 }
 
 :deep(.Canceled),
@@ -409,6 +409,7 @@ html.dark {
     --tag-bg: oklch(0.22 0.032 17.717);
   }
 }
+
 html.dark {
   .Delivered {
     --tag-color: oklch(0.8 0.15 149.214);

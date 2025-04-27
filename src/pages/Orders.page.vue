@@ -201,64 +201,67 @@ onMounted(() => {
         </button>
         <template #dropdown>
           <!-- Filters -->
-          <div class="flex max-w-[450px] flex-col gap-4 p-4">
-            <!-- Status Filter -->
-            <div class="flex items-center gap-1">
-              <label class="w-10">Status:</label>
-              <el-select
-                v-model="statusFilter"
-                multiple
-                style="width: 240px"
-                :teleported="false"
-              >
-                <el-option
-                  v-for="item in STATUS_OPTIONS"
-                  :key="item.value"
-                  v-bind="item"
+          <div class="rounded-md bg-white dark:bg-gray-900">
+            <div class="flex max-w-[450px] flex-col gap-4 bg-white/[0.03] p-4">
+              <!-- Status Filter -->
+              <div class="flex items-center gap-1">
+                <label class="w-10 dark:text-white/90">Status:</label>
+                <el-select
+                  v-model="statusFilter"
+                  multiple
+                  style="width: 240px"
+                  :teleported="false"
+                  class="bg-white/[0.03]"
+                >
+                  <el-option
+                    v-for="item in STATUS_OPTIONS"
+                    :key="item.value"
+                    v-bind="item"
+                  />
+                </el-select>
+              </div>
+
+              <!-- Date Range Filter -->
+              <div class="flex items-center gap-1">
+                <label class="w-10 dark:text-white/90">Date:</label>
+                <el-date-picker
+                  v-model="dateRange"
+                  type="daterange"
+                  range-separator="to"
+                  start-placeholder="Start date"
+                  end-placeholder="End date"
+                  @change="handleDateChange"
                 />
-              </el-select>
-            </div>
+              </div>
 
-            <!-- Date Range Filter -->
-            <div class="flex items-center gap-1">
-              <label class="w-10">Date:</label>
-              <el-date-picker
-                v-model="dateRange"
-                type="daterange"
-                range-separator="to"
-                start-placeholder="Start date"
-                end-placeholder="End date"
-                @change="handleDateChange"
-              />
-            </div>
-
-            <div class="flex items-center gap-2">
-              <label class="w-10">Total:</label>
-              <el-input-number
-                v-model="minAmount"
-                placeholder="Min amount"
-                :precision="2"
-              />
-              <span>to</span>
-              <el-input-number
-                v-model="maxAmount"
-                placeholder="Max amount"
-                :precision="2"
-              />
-            </div>
-            <div class="self-center">
-              <el-button plain @click="fetchOrders(1)" size="large">
-                Apply Filters
-              </el-button>
-              <el-button
-                plain
-                @click="handleReset"
-                size="large"
-                type="danger"
-                :icon="RefreshLeft"
-              >
-                Reset Filters
-              </el-button>
+              <div class="flex items-center gap-2">
+                <label class="w-10 dark:text-white/90">Total:</label>
+                <el-input-number
+                  v-model="minAmount"
+                  placeholder="Min amount"
+                  :precision="2"
+                />
+                <span class="dark:text-white/90">to</span>
+                <el-input-number
+                  v-model="maxAmount"
+                  placeholder="Max amount"
+                  :precision="2"
+                />
+              </div>
+              <div class="self-center">
+                <el-button plain @click="fetchOrders(1)" size="large">
+                  Apply Filters
+                </el-button>
+                <el-button
+                  plain
+                  @click="handleReset"
+                  size="large"
+                  type="danger"
+                  :icon="RefreshLeft"
+                >
+                  Reset Filters
+                </el-button>
+              </div>
             </div>
           </div>
         </template>
@@ -298,31 +301,14 @@ onMounted(() => {
         </el-select>
         <el-tag
           v-else-if="item.status === 'Canceled'"
-          style="
-            width: 120px;
-            color: oklch(0.577 0.245 27.325);
-            padding: 4px 12px;
-            display: block;
-            height: auto;
-            font-size: 14px;
-            line-height: 24px;
-          "
-          color="oklch(0.936 0.032 17.717)"
+          class="status-tag Canceled"
         >
           {{ item.status }}
         </el-tag>
+
         <el-tag
           v-else-if="item.status === 'Delivered'"
-          style="
-            width: 120px;
-            color: oklch(0.627 0.194 149.214);
-            padding: 4px 12px;
-            display: block;
-            height: auto;
-            font-size: 14px;
-            line-height: 24px;
-          "
-          color="oklch(0.962 0.044 156.743)"
+          class="status-tag Delivered"
         >
           {{ item.status }}
         </el-tag>
@@ -330,7 +316,7 @@ onMounted(() => {
 
       <template #column-actions="{ item }">
         <div class="flex justify-center">
-          <el-icon @click="viewDetails(item)" class="cursor-pointer"
+          <el-icon @click="viewDetails(item)" class="cursor-pointer" size="16"
             ><View
           /></el-icon>
         </div>
@@ -359,12 +345,6 @@ onMounted(() => {
 :deep(.Shipped .el-select__placeholder span) {
   color: oklch(0.546 0.245 262.881);
 }
-:deep(.Delivered .el-select__placeholder span) {
-  color: oklch(0.627 0.194 149.214);
-}
-:deep(.Canceled .el-select__placeholder span) {
-  color: oklch(0.577 0.245 27.325);
-}
 
 :deep(.Pending .el-select__wrapper) {
   background-color: oklch(0.962 0.059 95.617) !important;
@@ -375,10 +355,64 @@ onMounted(() => {
 :deep(.Shipped .el-select__wrapper) {
   background-color: oklch(0.932 0.032 255.585) !important;
 }
-:deep(.Delivered .el-select__wrapper) {
-  background-color: oklch(0.962 0.044 156.743) !important;
+
+html.dark {
+  :deep(.Pending .el-select__placeholder span) {
+    color: oklch(0.9 0.188 70.08);
+  }
+  :deep(.Processing .el-select__placeholder span) {
+    color: oklch(0.7 0.288 302.321);
+  }
+  :deep(.Shipped .el-select__placeholder span) {
+    color: oklch(0.7 0.245 262.881);
+  }
+
+  :deep(.Pending .el-select__wrapper) {
+    background-color: oklch(0.25 0.059 95.617) !important;
+  }
+  :deep(.Processing .el-select__wrapper) {
+    background-color: oklch(0.23 0.033 307.174) !important;
+  }
+  :deep(.Shipped .el-select__wrapper) {
+    background-color: oklch(0.22 0.032 255.585) !important;
+  }
 }
-:deep(.Canceled .el-select__wrapper) {
-  background-color: oklch(0.936 0.032 17.717) !important;
+
+:deep(.status-tag) {
+  border: none;
+  width: 120px;
+  padding: 4px 12px;
+  display: block;
+  height: auto;
+  font-size: 14px;
+  line-height: 24px;
+}
+
+:deep(.Canceled) {
+  --tag-color: oklch(0.577 0.245 27.325);
+  --tag-bg: oklch(0.936 0.032 17.717);
+}
+:deep(.Delivered) {
+  --tag-color: oklch(0.627 0.194 149.214);
+  --tag-bg: oklch(0.962 0.044 156.743);
+}
+
+:deep(.Canceled),
+:deep(.Delivered) {
+  color: var(--tag-color);
+  background-color: var(--tag-bg) !important;
+}
+
+html.dark {
+  .Canceled {
+    --tag-color: oklch(0.8 0.18 27.325);
+    --tag-bg: oklch(0.22 0.032 17.717);
+  }
+}
+html.dark {
+  .Delivered {
+    --tag-color: oklch(0.8 0.15 149.214);
+    --tag-bg: oklch(0.25 0.044 156.743);
+  }
 }
 </style>

@@ -4,7 +4,20 @@ layer(base);
 @import "tailwindcss";
 
 @custom-variant dark (&:is(.dark *));
-
+.el-button--danger.is-plain {
+  --el-button-bg-color: var(--el-fill-color-blank) !important;
+}
+html.dark {
+  --el-bg-color-overlay: var(--color-gray-dark);
+  --el-fill-color-light: var(--color-gray-800);
+  --el-fill-color: var(--color-gray-800);
+  --el-fill-color-darker: var(--color-gray-dark);
+  --el-fill-color-blank: var(--color-gray-800);
+  --el-border-color-light: var(--color-gray-800);
+  --el-color-info-light-9:  var(--color-gray-dark) !important;
+  --el-border-color: var(--color-gray-800);
+  --el-text-color-regular: var(--color-gray-50);
+}
 @theme {
   --font-*: initial;
   --font-outfit: Outfit, sans-serif;

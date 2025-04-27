@@ -3,7 +3,7 @@
     <img class="dark:hidden" src="/images/logo/logo.svg" alt="Logo" />
     <img
       class="hidden dark:block"
-      src=""
+      src="/images/logo/logo.svg"
       alt="Logo"
     />
   </router-link>

@@ -1,7 +1,7 @@
-@import url('https://fonts.googleapis.com/css2?family=Outfit:wght@100..900&display=swap')
+@import url("https://fonts.googleapis.com/css2?family=Outfit:wght@100..900&display=swap")
 layer(base);
 
-@import 'tailwindcss';
+@import "tailwindcss";
 
 @custom-variant dark (&:is(.dark *));
 
@@ -137,21 +137,29 @@ layer(base);
 
   --color-theme-purple-500: #7a5af8;
 
-  --shadow-theme-md: 0px 4px 8px -2px rgba(16, 24, 40, 0.1), 0px 2px 4px -2px rgba(16, 24, 40, 0.06);
-  --shadow-theme-lg: 0px 12px 16px -4px rgba(16, 24, 40, 0.08),
+  --shadow-theme-md:
+    0px 4px 8px -2px rgba(16, 24, 40, 0.1),
+    0px 2px 4px -2px rgba(16, 24, 40, 0.06);
+  --shadow-theme-lg:
+    0px 12px 16px -4px rgba(16, 24, 40, 0.08),
     0px 4px 6px -2px rgba(16, 24, 40, 0.03);
-  --shadow-theme-sm: 0px 1px 3px 0px rgba(16, 24, 40, 0.1), 0px 1px 2px 0px rgba(16, 24, 40, 0.06);
+  --shadow-theme-sm:
+    0px 1px 3px 0px rgba(16, 24, 40, 0.1),
+    0px 1px 2px 0px rgba(16, 24, 40, 0.06);
   --shadow-theme-xs: 0px 1px 2px 0px rgba(16, 24, 40, 0.05);
-  --shadow-theme-xl: 0px 20px 24px -4px rgba(16, 24, 40, 0.08),
+  --shadow-theme-xl:
+    0px 20px 24px -4px rgba(16, 24, 40, 0.08),
     0px 8px 8px -4px rgba(16, 24, 40, 0.03);
   --shadow-datepicker: -5px 0 0 #262d3c, 5px 0 0 #262d3c;
   --shadow-focus-ring: 0px 0px 0px 4px rgba(70, 95, 255, 0.12);
-  --shadow-slider-navigation: 0px 1px 2px 0px rgba(16, 24, 40, 0.1),
-    0px 1px 3px 0px rgba(16, 24, 40, 0.1);
-  --shadow-tooltip: 0px 4px 6px -2px rgba(16, 24, 40, 0.05),
+  --shadow-slider-navigation:
+    0px 1px 2px 0px rgba(16, 24, 40, 0.1), 0px 1px 3px 0px rgba(16, 24, 40, 0.1);
+  --shadow-tooltip:
+    0px 4px 6px -2px rgba(16, 24, 40, 0.05),
     -8px 0px 20px 8px rgba(16, 24, 40, 0.05);
 
-  --drop-shadow-4xl: 0 35px 35px rgba(0, 0, 0, 0.25), 0 45px 65px rgba(0, 0, 0, 0.15);
+  --drop-shadow-4xl:
+    0 35px 35px rgba(0, 0, 0, 0.25), 0 45px 65px rgba(0, 0, 0, 0.15);
 
   --z-index-1: 1;
   --z-index-9: 9;
@@ -180,16 +188,16 @@ layer(base);
     border-color: var(--color-gray-200, currentColor);
   }
   button:not(:disabled),
-  [role='button']:not(:disabled) {
+  [role="button"]:not(:disabled) {
     cursor: pointer;
   }
   body {
-    @apply relative font-normal font-outfit z-1 bg-gray-50;
+    @apply relative z-1 bg-gray-50 font-outfit font-normal;
   }
 }
 
 @utility menu-item {
-  @apply relative flex items-center w-full gap-3 px-3 py-2 font-medium rounded-lg text-theme-sm;
+  @apply relative flex w-full items-center gap-3 rounded-lg px-3 py-2 text-theme-sm font-medium;
 }
 
 @utility menu-item-active {
@@ -197,7 +205,7 @@ layer(base);
 }
 
 @utility menu-item-inactive {
-  @apply text-gray-700 hover:bg-gray-100 group-hover:text-gray-700 dark:text-gray-300 dark:hover:bg-white/5 dark:hover:text-gray-300;
+  @apply text-gray-700 group-hover:text-gray-700 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-white/5 dark:hover:text-gray-300;
 }
 
 @utility menu-item-icon {
@@ -237,7 +245,7 @@ layer(base);
 }
 
 @utility menu-dropdown-badge {
-  @apply block rounded-full px-2.5 py-0.5 text-xs font-medium uppercase text-brand-500 dark:text-brand-400;
+  @apply block rounded-full px-2.5 py-0.5 text-xs font-medium text-brand-500 uppercase dark:text-brand-400;
 }
 
 @utility menu-dropdown-badge-active {
@@ -267,7 +275,7 @@ layer(base);
   }
 
   &::-webkit-scrollbar-thumb {
-    @apply bg-gray-200 rounded-full dark:bg-gray-700;
+    @apply rounded-full bg-gray-200 dark:bg-gray-700;
   }
 }
 
@@ -277,10 +285,10 @@ layer(base);
 
 @layer utilities {
   /* For Remove Date Icon */
-  input[type='date']::-webkit-inner-spin-button,
-  input[type='time']::-webkit-inner-spin-button,
-  input[type='date']::-webkit-calendar-picker-indicator,
-  input[type='time']::-webkit-calendar-picker-indicator {
+  input[type="date"]::-webkit-inner-spin-button,
+  input[type="time"]::-webkit-inner-spin-button,
+  input[type="date"]::-webkit-calendar-picker-indicator,
+  input[type="time"]::-webkit-calendar-picker-indicator {
     display: none;
     -webkit-appearance: none;
   }
@@ -407,7 +415,7 @@ layer(base);
   @apply w-full;
 }
 .flatpickr-calendar {
-  @apply mt-2  rounded-xl! bg-black p-5! border! border-transparent! dark:border-white/5! text-gray-500! dark:bg-gray-900! dark:text-gray-400! dark:shadow-theme-xl! 2xsm:w-auto!;
+  @apply mt-2 rounded-xl! border! border-transparent! bg-black p-5! text-gray-500! 2xsm:w-auto! dark:border-white/5! dark:bg-gray-900! dark:text-gray-400! dark:shadow-theme-xl!;
 }
 .flatpickr-time input {
   background-color: #f9fafb !important;
@@ -431,7 +439,7 @@ layer(base);
 }
 
 .flatpickr-weekdays {
-  @apply h-auto mt-6 mb-4;
+  @apply mt-6 mb-4 h-auto;
 }
 
 .flatpickr-weekday {
@@ -535,7 +543,7 @@ span.flatpickr-weekday,
   border: transparent !important;
 }
 .fc .fc-view-harness {
-  @apply max-w-full overflow-x-auto custom-scrollbar;
+  @apply custom-scrollbar max-w-full overflow-x-auto;
 }
 .fc-dayGridMonth-view.fc-view.fc-daygrid {
   @apply min-w-[718px];
@@ -558,11 +566,11 @@ span.flatpickr-weekday,
 }
 
 .fc-button-group .fc-button.fc-prev-button:before {
-  @apply inline-block mt-1;
+  @apply mt-1 inline-block;
   content: url("data:image/svg+xml,%3Csvg width='25' height='24' viewBox='0 0 25 24' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M16.0068 6L9.75684 12.25L16.0068 18.5' stroke='%23344054' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E%0A");
 }
 .fc-button-group .fc-button.fc-next-button:before {
-  @apply inline-block mt-1;
+  @apply mt-1 inline-block;
   content: url("data:image/svg+xml,%3Csvg width='25' height='24' viewBox='0 0 25 24' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M9.50684 19L15.7568 12.75L9.50684 6.5' stroke='%23344054' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E%0A");
 }
 .dark .fc-button-group .fc-button.fc-prev-button:before {
@@ -586,8 +594,10 @@ span.flatpickr-weekday,
 .fc-header-toolbar.fc-toolbar .fc-toolbar-chunk:last-child .fc-button {
   @apply h-auto! w-auto! rounded-md border-0! bg-transparent px-5! py-2! text-sm font-medium text-gray-500 hover:text-gray-700 focus:shadow-none! dark:text-gray-400;
 }
-.fc-header-toolbar.fc-toolbar .fc-toolbar-chunk:last-child .fc-button.fc-button-active {
-  @apply text-gray-900 bg-white dark:bg-gray-800 dark:text-white;
+.fc-header-toolbar.fc-toolbar
+  .fc-toolbar-chunk:last-child
+  .fc-button.fc-button-active {
+  @apply bg-white text-gray-900 dark:bg-gray-800 dark:text-white;
 }
 .fc-theme-standard th {
   @apply border-x-0! border-t border-gray-200! bg-gray-50 text-left! dark:border-gray-800! dark:bg-gray-900;
@@ -597,7 +607,7 @@ span.flatpickr-weekday,
   @apply border-gray-200! dark:border-gray-800!;
 }
 .fc .fc-col-header-cell-cushion {
-  @apply px-5! py-4! text-sm font-medium uppercase text-gray-400;
+  @apply px-5! py-4! text-sm font-medium text-gray-400 uppercase;
 }
 .fc .fc-daygrid-day.fc-day-today {
   @apply bg-transparent;
@@ -621,13 +631,13 @@ span.flatpickr-weekday,
   @apply text-gray-400 dark:text-white/30;
 }
 .event-fc-color {
-  @apply rounded-lg py-2.5 pl-4 pr-3;
+  @apply rounded-lg py-2.5 pr-3 pl-4;
 }
 .event-fc-color .fc-event-title {
   @apply p-0 text-sm font-normal text-gray-700;
 }
 .fc-daygrid-event-dot {
-  @apply w-1 h-5 ml-0 mr-3 border-none rounded-sm;
+  @apply mr-3 ml-0 h-5 w-1 rounded-sm border-none;
 }
 .fc-event {
   @apply focus:shadow-none;
@@ -759,5 +769,5 @@ span.flatpickr-weekday,
 }
 
 .edit-button {
-  @apply flex w-full items-center justify-center gap-2 rounded-full border border-gray-300 bg-white px-4 py-3 text-sm font-medium text-gray-700 shadow-theme-xs hover:bg-gray-50 hover:text-gray-800 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-400 dark:hover:bg-white/[0.03] dark:hover:text-gray-200 lg:inline-flex lg:w-auto;
+  @apply flex w-full items-center justify-center gap-2 rounded-full border border-gray-300 bg-white px-4 py-3 text-sm font-medium text-gray-700 shadow-theme-xs hover:bg-gray-50 hover:text-gray-800 lg:inline-flex lg:w-auto dark:border-gray-700 dark:bg-gray-800 dark:text-gray-400 dark:hover:bg-white/[0.03] dark:hover:text-gray-200;
 }

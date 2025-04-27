@@ -8,6 +8,7 @@ interface OrderItem {
   quantity: number;
   price: number;
   sku?: string;
+  image: string;
 }
 
 interface ShippingAddress {
@@ -104,7 +105,7 @@ onMounted(async (): Promise<void> => {
 </script>
 
 <template>
-  <div class="min-h-screen bg-gray-50 px-4 py-8">
+  <div class="min-h-screen bg-gray-50">
     <div class="mx-auto">
       <!-- Header -->
       <div class="mb-8">
@@ -167,11 +168,16 @@ onMounted(async (): Promise<void> => {
             <div class="mt-3 sm:mt-0">
               <span
                 :class="{
-                  'bg-green-100 text-green-800': order.status === 'delivered',
-                  'bg-yellow-100 text-yellow-800':
-                    order.status === 'processing',
-                  'bg-blue-100 text-blue-800': order.status === 'shipped',
-                  'bg-red-100 text-red-800': order.status === 'cancelled',
+                  'bg-green-100 text-green-600':
+                    order.status.toLowerCase() === 'delivered',
+                  'bg-purple-100 text-purple-600':
+                    order.status.toLowerCase() === 'processing',
+                  'bg-blue-100 text-blue-600':
+                    order.status.toLowerCase() === 'shipped',
+                  'bg-amber-100 text-amber-500':
+                    order.status.toLowerCase() === 'pending',
+                  'bg-red-100 text-red-600':
+                    order.status.toLowerCase() === 'canceled',
                 }"
                 class="rounded-full px-3 py-1 text-xs font-medium"
               >
@@ -253,9 +259,13 @@ onMounted(async (): Promise<void> => {
                   <td class="px-6 py-4 whitespace-nowrap">
                     <div class="flex items-center">
                       <div
-                        class="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-md bg-gray-200"
+                        class="flex h-10 w-10 flex-shrink-0 items-center justify-center bg-gray-200"
                       >
-                        <span class="text-xs text-gray-500">Image</span>
+                        <img
+                          :src="item.image"
+                          alt=""
+                          class="rounded-md object-cover"
+                        />
                       </div>
                       <div class="ml-4">
                         <div class="text-sm font-medium text-gray-900">

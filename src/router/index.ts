@@ -50,7 +50,7 @@ export const router = createRouter({
   history: createWebHistory(),
   scrollBehavior(_to, _from, savedPosition) {
     return savedPosition || { left: 0, top: 0 };
-  }
+  },
   routes,
 });
 
@@ -62,10 +62,8 @@ router.beforeEach((to, _from, next) => {
   initAuth();
 
   if (to.meta.requiresAuth && !isAuthenticated.value) {
-
     next({ name: "login" });
   } else if (to.name === "login" && isAuthenticated.value) {
-
     next({ name: "dashboard" });
   } else {
     next();

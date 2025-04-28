@@ -1,5 +1,6 @@
 <script setup lang="ts">
-import Icon from "./Icon.vue";
+import { ElIcon } from "element-plus";
+import { ArrowRight, ArrowLeft } from "@element-plus/icons-vue";
 
 const props = defineProps<{
   title: string;
@@ -37,9 +38,9 @@ const changePage = (page: number) => {
         <button
           @click="changePage(currentPage - 1)"
           :disabled="currentPage <= 1"
-          class="w-4 cursor-pointer disabled:text-gray-500 dark:text-white"
+          class="flex cursor-pointer disabled:text-gray-500 dark:text-white"
         >
-          <Icon name="arrow" :flip="true" />
+          <ElIcon size="16"><ArrowLeft /></ElIcon>
         </button>
       </div>
       <div
@@ -54,9 +55,9 @@ const changePage = (page: number) => {
         <button
           @click="changePage(currentPage + 1)"
           :disabled="currentPage >= totalPages"
-          class="w-4 cursor-pointer disabled:text-gray-500 dark:text-white"
+          class="flex cursor-pointer disabled:text-gray-500 dark:text-white"
         >
-          <Icon name="arrow" />
+          <ElIcon size="16"><ArrowRight /></ElIcon>
         </button>
       </div>
     </div>

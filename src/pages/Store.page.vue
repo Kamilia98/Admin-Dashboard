@@ -1,3 +1,65 @@
+<script setup lang="ts">
+import { onMounted, ref } from "vue";
+import { useSettings } from "../composables/useSettings";
+
+const showSuccess = ref(false);
+
+const {
+  profile,
+  theme,
+  notifications,
+  security,
+  isLoading,
+  error,
+  updateProfile,
+  updateTheme,
+  updateNotifications,
+  updateSecurity,
+  saveSettings,
+  resetSettings,
+  loadSettings,
+} = useSettings();
+
+
+const handleProfilePicture = (event: Event) => {
+  const input = event.target as HTMLInputElement;
+  if (input.files && input.files[0]) {
+    updateProfile({ picture: input.files[0] });
+  }
+};
+
+
+const handleSave = async () => {
+  try {
+    showSuccess.value = false;
+    console.log("Saving settings:", {
+      profile: { ...profile },
+      theme: { ...theme },
+      notifications: { ...notifications },
+      security: { ...security },
+    });
+    await saveSettings();
+    console.log("Settings saved successfully");
+    showSuccess.value = true;
+
+    setTimeout(() => {
+      showSuccess.value = false;
+    }, 3000);
+  } catch (err) {
+    console.error("Failed to save settings:", err);
+  }
+};
+
+
+const handleReset = () => {
+  resetSettings();
+};
+
+onMounted(() => {
+  loadSettings();
+});
+</script>
+
 <template>
   <div class="container mx-auto max-w-7xl px-8 py-8">
     <h1 class="mb-8 text-3xl font-bold text-gray-900 dark:text-white">
@@ -273,64 +335,3 @@
   </div>
 </template>
 
-<script setup lang="ts">
-import { onMounted, ref } from "vue";
-import { useSettings } from "../composables/useSettings";
-
-const showSuccess = ref(false);
-
-const {
-  profile,
-  theme,
-  notifications,
-  security,
-  isLoading,
-  error,
-  updateProfile,
-  updateTheme,
-  updateNotifications,
-  updateSecurity,
-  saveSettings,
-  resetSettings,
-  loadSettings,
-} = useSettings();
-
-
-const handleProfilePicture = (event: Event) => {
-  const input = event.target as HTMLInputElement;
-  if (input.files && input.files[0]) {
-    updateProfile({ picture: input.files[0] });
-  }
-};
-
-
-const handleSave = async () => {
-  try {
-    showSuccess.value = false;
-    console.log("Saving settings:", {
-      profile: { ...profile },
-      theme: { ...theme },
-      notifications: { ...notifications },
-      security: { ...security },
-    });
-    await saveSettings();
-    console.log("Settings saved successfully");
-    showSuccess.value = true;
-
-    setTimeout(() => {
-      showSuccess.value = false;
-    }, 3000);
-  } catch (err) {
-    console.error("Failed to save settings:", err);
-  }
-};
-
-
-const handleReset = () => {
-  resetSettings();
-};
-
-onMounted(() => {
-  loadSettings();
-});
-</script>

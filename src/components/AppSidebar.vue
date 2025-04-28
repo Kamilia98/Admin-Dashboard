@@ -199,7 +199,13 @@
 import { computed } from "vue";
 import { useRoute } from "vue-router";
 
-import { GridIcon, HorizontalDots, SettingsIcon, ProductsIcon } from "../icons";
+import {
+  GridIcon,
+  HorizontalDots,
+  SettingsIcon,
+  ProductsIcon,
+  ChevronDownIcon,
+} from "../icons";
 
 import { useSidebar } from "../composables/useSidebar";
 import UserGroupIcon from "../icons/UserGroupIcon.vue";

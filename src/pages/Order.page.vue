@@ -8,6 +8,7 @@ interface OrderItem {
   quantity: number;
   price: number;
   sku?: string;
+  image: string;
 }
 
 interface ShippingAddress {
@@ -104,11 +105,13 @@ onMounted(async (): Promise<void> => {
 </script>
 
 <template>
-  <div class="min-h-screen bg-gray-50 px-4 py-8">
+  <div class="min-h-screen">
     <div class="mx-auto">
       <!-- Header -->
       <div class="mb-8">
-        <h1 class="text-3xl font-extrabold text-gray-900">Order Details</h1>
+        <h1 class="text-3xl font-extrabold text-gray-900 dark:text-white/90">
+          Order Details
+        </h1>
       </div>
 
       <!-- Loading State -->
@@ -149,15 +152,19 @@ onMounted(async (): Promise<void> => {
       <!-- Order Details -->
       <div
         v-else-if="order"
-        class="overflow-hidden bg-white shadow sm:rounded-lg"
+        class="overflow-hidden border-gray-200 bg-white shadow sm:rounded-lg dark:border-gray-800 dark:bg-white/[0.03]"
       >
         <!-- Order Summary -->
-        <div class="border-b border-gray-200 px-4 py-5 sm:px-6">
+        <div
+          class="border-b border-gray-200 px-4 py-5 sm:px-6 dark:border-gray-800"
+        >
           <div
             class="flex flex-col sm:flex-row sm:items-center sm:justify-between"
           >
             <div>
-              <h3 class="text-lg leading-6 font-medium text-gray-900">
+              <h3
+                class="text-lg leading-6 font-medium text-gray-900 dark:text-white/90"
+              >
                 Order #{{ order.orderNumber }}
               </h3>
               <p class="mt-1 max-w-2xl text-sm text-gray-500">
@@ -167,11 +174,16 @@ onMounted(async (): Promise<void> => {
             <div class="mt-3 sm:mt-0">
               <span
                 :class="{
-                  'bg-green-100 text-green-800': order.status === 'delivered',
-                  'bg-yellow-100 text-yellow-800':
-                    order.status === 'processing',
-                  'bg-blue-100 text-blue-800': order.status === 'shipped',
-                  'bg-red-100 text-red-800': order.status === 'cancelled',
+                  'bg-green-100 text-green-600':
+                    order.status.toLowerCase() === 'delivered',
+                  'bg-purple-100 text-purple-600':
+                    order.status.toLowerCase() === 'processing',
+                  'bg-blue-100 text-blue-600':
+                    order.status.toLowerCase() === 'shipped',
+                  'bg-amber-100 text-amber-500':
+                    order.status.toLowerCase() === 'pending',
+                  'bg-red-100 text-red-600':
+                    order.status.toLowerCase() === 'canceled',
                 }"
                 class="rounded-full px-3 py-1 text-xs font-medium"
               >
@@ -185,7 +197,7 @@ onMounted(async (): Promise<void> => {
 
         <!-- Customer and Shipping Info -->
         <div
-          class="border-b border-gray-200 px-4 py-5 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6"
+          class="border-b border-gray-200 px-4 py-5 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6 dark:border-gray-800"
         >
           <div class="sm:col-span-1">
             <h4 class="text-sm font-medium text-gray-500">
@@ -193,19 +205,21 @@ onMounted(async (): Promise<void> => {
             </h4>
           </div>
           <div class="mt-1 text-sm text-gray-900 sm:col-span-2 sm:mt-0">
-            <p>{{ order.user.username }}</p>
+            <p class="dark:text-white/90">{{ order.user.username }}</p>
             <p class="text-gray-500">{{ order.user.email }}</p>
             <p class="text-gray-500">{{ order.shippingAddress.phone }}</p>
           </div>
         </div>
 
         <div
-          class="border-b border-gray-200 px-4 py-5 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6"
+          class="border-b border-gray-200 px-4 py-5 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6 dark:border-gray-800"
         >
           <div class="sm:col-span-1">
             <h4 class="text-sm font-medium text-gray-500">Shipping Address</h4>
           </div>
-          <div class="mt-1 text-sm text-gray-900 sm:col-span-2 sm:mt-0">
+          <div
+            class="mt-1 text-sm text-gray-900 sm:col-span-2 sm:mt-0 dark:text-white/90"
+          >
             <p>{{ order.shippingAddress.address }}</p>
             <p>
               {{ order.shippingAddress.city }},
@@ -218,63 +232,80 @@ onMounted(async (): Promise<void> => {
         <!-- Order Items -->
         <div class="px-4 py-5 sm:px-6">
           <h4 class="mb-4 text-sm font-medium text-gray-500">Order Items</h4>
-          <div class="overflow-hidden rounded-lg border border-gray-200">
-            <table class="min-w-full divide-y divide-gray-200">
-              <thead class="bg-gray-50">
+          <div
+            class="overflow-hidden rounded-lg border border-gray-200 dark:border-gray-800"
+          >
+            <table
+              class="min-w-full divide-y divide-gray-200 dark:divide-gray-700"
+            >
+              <thead class="bg-gray-50 dark:bg-white/[0.03]">
                 <tr>
                   <th
                     scope="col"
-                    class="px-6 py-3 text-left text-xs font-medium tracking-wider text-gray-500 uppercase"
+                    class="px-6 py-3 text-left text-xs font-medium tracking-wider text-gray-500 uppercase dark:text-gray-400"
                   >
                     Product
                   </th>
                   <th
                     scope="col"
-                    class="px-6 py-3 text-left text-xs font-medium tracking-wider text-gray-500 uppercase"
+                    class="px-6 py-3 text-left text-xs font-medium tracking-wider text-gray-500 uppercase dark:text-gray-400"
                   >
                     Quantity
                   </th>
                   <th
                     scope="col"
-                    class="px-6 py-3 text-left text-xs font-medium tracking-wider text-gray-500 uppercase"
+                    class="px-6 py-3 text-left text-xs font-medium tracking-wider text-gray-500 uppercase dark:text-gray-400"
                   >
                     Price
                   </th>
                   <th
                     scope="col"
-                    class="px-6 py-3 text-left text-xs font-medium tracking-wider text-gray-500 uppercase"
+                    class="px-6 py-3 text-left text-xs font-medium tracking-wider text-gray-500 uppercase dark:text-gray-400"
                   >
                     Total
                   </th>
                 </tr>
               </thead>
-              <tbody class="divide-y divide-gray-200 bg-white">
+
+              <tbody
+                class="divide-y divide-gray-200 bg-white dark:divide-gray-700 dark:bg-white/[0.03]"
+              >
                 <tr v-for="(item, index) in order.orderItems" :key="index">
                   <td class="px-6 py-4 whitespace-nowrap">
                     <div class="flex items-center">
                       <div
-                        class="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-md bg-gray-200"
+                        class="flex h-10 w-10 flex-shrink-0 items-center justify-center bg-gray-200 dark:bg-gray-700"
                       >
-                        <span class="text-xs text-gray-500">Image</span>
+                        <img
+                          :src="item.image"
+                          alt=""
+                          class="rounded-md object-cover"
+                        />
                       </div>
                       <div class="ml-4">
-                        <div class="text-sm font-medium text-gray-900">
+                        <div
+                          class="text-sm font-medium text-gray-900 dark:text-gray-100"
+                        >
                           {{ item.name }}
                         </div>
-                        <div class="text-sm text-gray-500">
+                        <div class="text-sm text-gray-500 dark:text-gray-400">
                           SKU: {{ item.sku || "N/A" }}
                         </div>
                       </div>
                     </div>
                   </td>
-                  <td class="px-6 py-4 text-sm whitespace-nowrap text-gray-500">
+                  <td
+                    class="px-6 py-4 text-sm whitespace-nowrap text-gray-500 dark:text-gray-400"
+                  >
                     {{ item.quantity }}
                   </td>
-                  <td class="px-6 py-4 text-sm whitespace-nowrap text-gray-500">
+                  <td
+                    class="px-6 py-4 text-sm whitespace-nowrap text-gray-500 dark:text-gray-400"
+                  >
                     ${{ item.price }}
                   </td>
                   <td
-                    class="px-6 py-4 text-sm font-medium whitespace-nowrap text-gray-900"
+                    class="px-6 py-4 text-sm font-medium whitespace-nowrap text-gray-900 dark:text-gray-100"
                   >
                     ${{ (item.price * item.quantity).toFixed(2) }}
                   </td>
@@ -285,34 +316,39 @@ onMounted(async (): Promise<void> => {
         </div>
 
         <!-- Order Summary -->
-        <div class="bg-gray-50 px-4 py-5 sm:px-6">
-          <div class="flex justify-end">
-            <div class="w-full max-w-md space-y-4">
-              <div class="flex justify-between">
-                <span class="text-sm text-gray-600">Subtotal</span>
-                <span class="text-sm font-medium"
-                  >${{ order.totalAmount }}</span
-                >
-              </div>
-              <div class="flex justify-between">
-                <span class="text-sm text-gray-600">Shipping</span>
-                <span class="text-sm font-medium">$0.00</span>
-              </div>
-              <div class="flex justify-between border-t border-gray-200 pt-4">
-                <span class="text-base font-medium">Total</span>
-                <span class="text-base font-bold"
-                  >${{ order.totalAmount }}</span
-                >
-              </div>
-              <div class="flex justify-between">
-                <span class="text-sm text-gray-600">Payment Method</span>
-                <span class="text-sm font-medium capitalize">{{
-                  order.paymentMethod
-                }}</span>
-              </div>
-            </div>
-          </div>
-        </div>
+        <div class="bg-gray-50 dark:bg-white/[0.03] px-4 py-5 sm:px-6">
+  <div class="flex justify-end">
+    <div class="w-full max-w-md space-y-4">
+      <div class="flex justify-between">
+        <span class="text-sm text-gray-600 dark:text-gray-400">Subtotal</span>
+        <span class="text-sm font-medium text-gray-900 dark:text-gray-100">
+          ${{ order.totalAmount }}
+        </span>
+      </div>
+      <div class="flex justify-between">
+        <span class="text-sm text-gray-600 dark:text-gray-400">Shipping</span>
+        <span class="text-sm font-medium text-gray-900 dark:text-gray-100">
+          $0.00
+        </span>
+      </div>
+      <div class="flex justify-between border-t border-gray-200 dark:border-gray-700 pt-4">
+        <span class="text-base font-medium text-gray-900 dark:text-gray-100">
+          Total
+        </span>
+        <span class="text-base font-bold text-gray-900 dark:text-gray-100">
+          ${{ order.totalAmount }}
+        </span>
+      </div>
+      <div class="flex justify-between">
+        <span class="text-sm text-gray-600 dark:text-gray-400">Payment Method</span>
+        <span class="text-sm font-medium text-gray-900 dark:text-gray-100 capitalize">
+          {{ order.paymentMethod }}
+        </span>
+      </div>
+    </div>
+  </div>
+</div>
+
       </div>
 
       <!-- No Order Found -->

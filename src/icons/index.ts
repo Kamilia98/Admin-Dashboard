@@ -47,7 +47,9 @@ import BellIcon from "./BellIcon.vue";
 import BarChartIcon from "./BarChartIcon.vue";
 import ProductsIcon from "./ProductsIcon.vue";
 import OrdersIcon from "./OrdersIcon.vue";
-
+import FilterIcon from "./FilterIcon.vue";
+import SearchIcon from "./SearchIcon.vue";
+import UserIcon from "./UserIcon.vue";
 export {
   BellIcon,
   BarChartIcon,
@@ -98,4 +100,7 @@ export {
   DraftIcon,
   ProductsIcon,
   OrdersIcon,
+  FilterIcon,
+  SearchIcon,
+  UserIcon,
 };

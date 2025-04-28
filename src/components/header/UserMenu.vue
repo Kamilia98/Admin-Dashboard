@@ -5,7 +5,7 @@
       @click.prevent="toggleDropdown"
     >
       <span class="mr-3 h-5 w-5 overflow-hidden">
-        <img src="/icons/user.svg" alt="User" />
+        <UserIcon />
       </span>
 
       <span class="mr-1 block text-theme-sm font-medium">{{ user.fname }}</span>
@@ -70,6 +70,7 @@ import {
   LogoutIcon,
   SettingsIcon,
   InfoCircleIcon,
+  UserIcon,
 } from "../../icons";
 import { RouterLink } from "vue-router";
 import { ref, onMounted, onUnmounted } from "vue";

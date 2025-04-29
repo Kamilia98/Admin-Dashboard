@@ -16,14 +16,14 @@
     <div
       :class="[
         'flex h-30 py-8',
-        { 'justify-center': !isExpanded && !isHovered },
+        { 'justify-center': !isExpanded && !isHovered && !isMobileOpen },
       ]"
     >
       <router-link to="/">
         <div class="flex items-center gap-2">
           <img src="/images/logo/logo.svg" alt="Logo" />
           <span
-            v-if="isExpanded || isHovered"
+            v-if="isExpanded || isMobileOpen"
             class="text-4xl font-semibold dark:text-white"
             >Admin</span
           >

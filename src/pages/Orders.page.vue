@@ -21,30 +21,24 @@ import Table from "../components/Table.vue";
 import OrderStatistics from "../components/OrderStatistics.vue";
 import FilterIcon from "../icons/FilterIcon.vue";
 
-/* ========== Types ========== */
-type OrderStatus =
-  | "Pending"
-  | "Processing"
-  | "Shipped"
-  | "Canceled"
-  | "Delivered";
+import { OrderStatus } from "../types/order-status";
 
 /* ========== Constants ========== */
 const ORDER_LIMIT = 8;
 
 const ORDER_STAGES: OrderStatus[] = [
-  "Pending",
-  "Processing",
-  "Shipped",
-  "Delivered",
+  OrderStatus.pending,
+  OrderStatus.processing,
+  OrderStatus.shipped,
+  OrderStatus.delivered,
 ];
 
 const STATUS_OPTIONS = [
-  { label: "Pending", value: "pending" },
-  { label: "Processing", value: "processing" },
-  { label: "Shipped", value: "shipped" },
-  { label: "Delivered", value: "delivered" },
-  { label: "Canceled", value: "canceled" },
+  { label: OrderStatus.pending, value: OrderStatus.pending },
+  { label: OrderStatus.processing, value: OrderStatus.processing },
+  { label: OrderStatus.shipped, value: OrderStatus.shipped },
+  { label: OrderStatus.delivered, value: OrderStatus.delivered },
+  { label: OrderStatus.canceled, value: OrderStatus.canceled },
 ];
 
 /* ========== State ========== */
@@ -85,10 +79,14 @@ const getNextStatusOptions = (status: OrderStatus) => {
         ]
       : [];
 
-  return [...options, { label: "Canceled", value: "Canceled" }];
+  return [
+    ...options,
+    { label: OrderStatus.canceled, value: OrderStatus.canceled },
+  ];
 };
 
 const viewDetails = (order: any) => {
+  console.log(`[View Details] Navigating to order ID: ${order.id}`);
   router.push({ name: "order-details", params: { id: order.id } });
 };
 
@@ -96,17 +94,25 @@ const handleDateChange = () => {
   const [start, end] = dateRange.value;
   startDateFilter.value = start || "";
   endDateFilter.value = end || "";
+  console.log(
+    "[Date Change] Start Date:",
+    startDateFilter.value,
+    "End Date:",
+    endDateFilter.value,
+  );
 };
 
 const handleSort = (payload: { key: string; direction: "asc" | "desc" }) => {
-  console.log("Sort by:", payload.key, "Direction:", payload.direction);
+  console.log(
+    `[Sorting] Sort By: ${payload.key}, Direction: ${payload.direction}`,
+  );
   sortBy.value = payload.key;
   sortOrder.value = payload.direction;
   fetchOrders(1);
 };
 
 const handleReset = () => {
-  // Reset filters
+  console.log("[Filters Reset] Resetting all filters to default");
   statusFilter.value = [];
   dateRange.value = ["", ""];
   startDateFilter.value = "";
@@ -114,14 +120,16 @@ const handleReset = () => {
   minAmount.value = 0;
   maxAmount.value = 0;
 
-  // Fetch orders with reset filters
   fetchOrders(1);
 };
 
 /* ========== API Calls ========== */
 const fetchOrders = async (page: number) => {
   loading.value = true;
-  console.log("Fetching orders for page:", searchQuery.value);
+  console.log(
+    `[Fetch Orders] Fetching orders - Page: ${page}, Query: "${searchQuery.value}"`,
+  );
+
   try {
     const params: any = {
       limit: ORDER_LIMIT,
@@ -136,48 +144,62 @@ const fetchOrders = async (page: number) => {
 
     if (statusFilter.value.length) {
       params.status = statusFilter.value;
+      console.log("[Filter Applied] Statuses:", statusFilter.value);
     }
 
     if (searchQuery.value.trim() !== "") {
       params.searchQuery = searchQuery.value.trim();
+      console.log("[Search Applied] Query:", params.searchQuery);
     }
 
     const { data } = await axios.get("http://localhost:5000/orders/all", {
       params,
     });
-    console.log("Fetched orders:", data.data.orders);
+
+    console.log(`[Fetch Success] Total Orders: ${data.data.totalOrders}`);
+    console.table(data.data.orders);
+
     orders.value = data.data.orders.map((order: any) => ({
       ...order,
-      status: capitalize(order.status),
     }));
 
     totalOrders.value = data.data.totalOrders;
     totalPages.value = Math.ceil(totalOrders.value / ORDER_LIMIT);
     currentPage.value = page;
-    loading.value = false;
   } catch (err) {
-    loading.value = false;
+    console.error("[Fetch Error] Failed to fetch orders:", err);
     orders.value = [];
     totalOrders.value = 0;
-    console.error("Error fetching orders:", err);
+  } finally {
+    loading.value = false;
+    console.log("[Fetch Orders] Loading completed.");
   }
 };
 
 const updateOrderStatus = async (orderId: string, newStatus: OrderStatus) => {
+  console.log(
+    `[Update Status] Updating order ID ${orderId} to status: ${newStatus}`,
+  );
   try {
     await axios.patch(`http://localhost:5000/orders/${orderId}/status`, {
       status: newStatus,
     });
 
     const order = orders.value.find((o) => o.id === orderId);
-    if (order) order.status = newStatus;
+    if (order) {
+      order.status = newStatus;
+      console.log(
+        `[Update Status] Order ID ${orderId} status updated locally.`,
+      );
+    }
   } catch (err) {
-    console.error("Error updating status:", err);
+    console.error("[Update Status Error] Failed to update order status:", err);
   }
 };
 
 /* ========== Lifecycle ========== */
 onMounted(() => {
+  console.log("[Mounted] Component mounted. Fetching initial orders...");
   fetchOrders(currentPage.value);
 });
 </script>
@@ -300,15 +322,15 @@ onMounted(() => {
           />
         </el-select>
         <el-tag
-          v-else-if="item.status === 'Canceled'"
-          class="status-tag Canceled"
+          v-else-if="item.status === OrderStatus.canceled"
+          :class="['status-tag', OrderStatus.canceled]"
         >
           {{ item.status }}
         </el-tag>
 
         <el-tag
-          v-else-if="item.status === 'Delivered'"
-          class="status-tag Delivered"
+          v-else-if="item.status === OrderStatus.delivered"
+          :class="['status-tag', OrderStatus.delivered]"
         >
           {{ item.status }}
         </el-tag>
@@ -375,45 +397,6 @@ html.dark {
   }
   :deep(.Shipped .el-select__wrapper) {
     background-color: oklch(0.22 0.032 255.585) !important;
-  }
-}
-
-:deep(.status-tag) {
-  border: none;
-  width: 120px;
-  padding: 4px 12px;
-  display: block;
-  height: auto;
-  font-size: 14px;
-  line-height: 24px;
-}
-
-:deep(.Canceled) {
-  --tag-color: var(--color-red-500);
-  --tag-bg: var(--color-red-100);
-}
-:deep(.Delivered) {
-  --tag-color: var(--color-green-600);
-  --tag-bg: var(--color-green-100);
-}
-
-:deep(.Canceled),
-:deep(.Delivered) {
-  color: var(--tag-color);
-  background-color: var(--tag-bg) !important;
-}
-
-html.dark {
-  .Canceled {
-    --tag-color: oklch(0.8 0.18 27.325);
-    --tag-bg: oklch(0.22 0.032 17.717);
-  }
-}
-
-html.dark {
-  .Delivered {
-    --tag-color: oklch(0.8 0.15 149.214);
-    --tag-bg: oklch(0.25 0.044 156.743);
   }
 }
 </style>

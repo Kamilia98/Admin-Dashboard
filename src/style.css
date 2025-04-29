@@ -14,11 +14,10 @@ html.dark {
   --el-fill-color-darker: var(--color-gray-dark);
   --el-fill-color-blank: var(--color-gray-800);
   --el-border-color-light: var(--color-gray-800);
-  --el-color-info-light-9:  var(--color-gray-dark) !important;
+  --el-color-info-light-9: var(--color-gray-dark) !important;
   --el-border-color: var(--color-gray-800);
   --el-text-color-regular: var(--color-gray-50);
 }
-
 
 @theme {
   --font-*: initial;
@@ -192,6 +191,78 @@ html.dark {
   If we ever want to remove these styles, we need to add an explicit border
   color utility to any element that depends on these defaults.
 */
+/* status-colors.css */
+
+.status-tag {
+  width: 98px;
+  padding: 4px 12px !important;
+  text-align: start !important;
+  display: flex !important;
+  justify-content: start !important;
+  box-sizing: content-box !important;
+
+  span {
+    font-size: 14px;
+    line-height: 24px;
+  }
+}
+
+/* Light Mode */
+.Pending {
+  --tag-color: oklch(0.769 0.188 70.08);
+  --tag-bg: var(--color-orange-100);
+}
+.Processing {
+  --tag-color: oklch(0.558 0.288 302.321);
+  --tag-bg: oklch(0.946 0.033 307.174);
+}
+.Shipped {
+  --tag-color: oklch(0.546 0.245 262.881);
+  --tag-bg: oklch(0.932 0.032 255.585);
+}
+.Canceled {
+  --tag-color: var(--color-red-500);
+  --tag-bg: var(--color-red-100);
+}
+.Delivered {
+  --tag-color: var(--color-green-600);
+  --tag-bg: var(--color-green-100);
+}
+
+/* Dark Mode */
+html.dark .Pending {
+  --tag-color: var(--color-orange-400);
+  --tag-bg: oklch(0.25 0.059 95.617);
+}
+html.dark .Processing {
+  --tag-color: oklch(0.7 0.288 302.321);
+  --tag-bg: oklch(0.23 0.033 307.174);
+}
+html.dark .Shipped {
+  --tag-color: oklch(0.7 0.245 262.881);
+  --tag-bg: oklch(0.22 0.032 255.585);
+}
+html.dark .Canceled {
+  --tag-color: oklch(0.8 0.18 27.325);
+  --tag-bg: oklch(0.22 0.032 17.717);
+}
+html.dark .Delivered {
+  --tag-color: oklch(0.8 0.15 149.214);
+  --tag-bg: oklch(0.25 0.044 156.743);
+}
+
+/* Usage inside elements */
+.status-tag {
+  background-color: var(--tag-bg) !important;
+
+  span {
+    color: var(--tag-color);
+  }
+}
+
+html.dark .status-tag {
+  border-color: var(--color-gray-800);
+}
 
 @layer base {
   *,
@@ -199,8 +270,9 @@ html.dark {
   ::before,
   ::backdrop,
   ::file-selector-button {
-    border-color: var(--color-gray-200, currentColor);
+    /* border-color: var(--color-gray-200, currentColor); */
   }
+
   button:not(:disabled),
   [role="button"]:not(:disabled) {
     cursor: pointer;

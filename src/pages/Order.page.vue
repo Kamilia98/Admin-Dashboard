@@ -2,42 +2,8 @@
 import { onMounted, ref } from "vue";
 import { useRoute } from "vue-router";
 import axios from "axios";
-
-interface OrderItem {
-  name: string;
-  quantity: number;
-  price: number;
-  sku?: string;
-  image: string;
-}
-
-interface ShippingAddress {
-  address: string;
-  city: string;
-  country: string;
-  email: string;
-  phone: string;
-  zipCode: string;
-}
-
-interface User {
-  id: string;
-  username: string;
-  email: string;
-}
-
-interface Order {
-  id: string;
-  createdAt: string;
-  updatedAt: string;
-  orderNumber: string;
-  paymentMethod: string;
-  shippingAddress: ShippingAddress;
-  status: string;
-  totalAmount: string;
-  user: User;
-  orderItems: OrderItem[];
-}
+import { ElTag } from "element-plus";
+import type { Order } from "../types/order";
 
 const route = useRoute();
 const order = ref<Order | null>(null);
@@ -45,6 +11,7 @@ const loading = ref<boolean>(true);
 const error = ref<string | null>(null);
 
 const fetchOrderById = async (id: string): Promise<Order> => {
+  console.log(`[fetchOrderById] Fetching order with ID: ${id}`);
   try {
     const response = await axios.get<{ data: Order }>(
       `http://localhost:5000/orders/${id}`,
@@ -52,12 +19,20 @@ const fetchOrderById = async (id: string): Promise<Order> => {
     );
 
     if (!response.data?.data) {
+      console.error(
+        "[fetchOrderById] Invalid response structure:",
+        response.data,
+      );
       throw new Error("Invalid response structure");
     }
 
-    console.log("Order data:", response.data);
+    console.log(
+      "[fetchOrderById] Successfully fetched order data:",
+      response.data.data,
+    );
     return response.data.data;
   } catch (err: unknown) {
+    console.error("[fetchOrderById] Error occurred while fetching order:", err);
     if (axios.isAxiosError(err)) {
       const serverMessage = err.response?.data?.message;
       const statusMessage = err.response?.statusText;
@@ -80,26 +55,43 @@ const formatDate = (dateString: string): string => {
       hour: "2-digit",
       minute: "2-digit",
     };
-    return new Date(dateString).toLocaleDateString(undefined, options);
+    const formatted = new Date(dateString).toLocaleDateString(
+      undefined,
+      options,
+    );
+    console.log(
+      `[formatDate] Formatted date '${dateString}' as '${formatted}'`,
+    );
+    return formatted;
   } catch (err) {
-    console.error("Date formatting error:", err);
+    console.error("[formatDate] Error formatting date:", err);
     return "Invalid date";
   }
 };
 
 onMounted(async (): Promise<void> => {
+  console.log("[onMounted] Component mounted, starting order fetch...");
   try {
     const id = route.params.id as string;
     if (!id) {
+      console.error(
+        "[onMounted] No order ID provided in route params:",
+        route.params,
+      );
       throw new Error("No order ID provided in route parameters");
     }
 
+    console.log(`[onMounted] Found order ID: ${id}`);
     order.value = await fetchOrderById(id);
+    console.log("[onMounted] Order successfully set:", order.value);
   } catch (err: unknown) {
-    error.value =
+    const errorMessage =
       err instanceof Error ? err.message : "An unknown error occurred";
+    console.error("[onMounted] Error fetching order:", errorMessage);
+    error.value = errorMessage;
   } finally {
     loading.value = false;
+    console.log("[onMounted] Loading finished.");
   }
 });
 </script>
@@ -172,25 +164,9 @@ onMounted(async (): Promise<void> => {
               </p>
             </div>
             <div class="mt-3 sm:mt-0">
-              <span
-                :class="{
-                  'bg-green-100 text-green-600':
-                    order.status.toLowerCase() === 'delivered',
-                  'bg-purple-100 text-purple-600':
-                    order.status.toLowerCase() === 'processing',
-                  'bg-blue-100 text-blue-600':
-                    order.status.toLowerCase() === 'shipped',
-                  'bg-amber-100 text-amber-500':
-                    order.status.toLowerCase() === 'pending',
-                  'bg-red-100 text-red-500':
-                    order.status.toLowerCase() === 'canceled',
-                }"
-                class="rounded-full px-3 py-1 text-xs font-medium"
-              >
-                {{
-                  order.status.charAt(0).toUpperCase() + order.status.slice(1)
-                }}
-              </span>
+              <el-tag :class="['status-tag', order.status]">
+                {{ order.status }}
+              </el-tag>
             </div>
           </div>
         </div>
@@ -250,7 +226,13 @@ onMounted(async (): Promise<void> => {
                     scope="col"
                     class="px-6 py-3 text-left text-xs font-medium tracking-wider text-gray-500 uppercase dark:text-gray-400"
                   >
-                    Quantity
+                    Color
+                  </th>
+                  <th
+                    scope="col"
+                    class="px-6 py-3 text-left text-xs font-medium tracking-wider text-gray-500 uppercase dark:text-gray-400"
+                  >
+                    quantity
                   </th>
                   <th
                     scope="col"
@@ -274,12 +256,12 @@ onMounted(async (): Promise<void> => {
                   <td class="px-6 py-4 whitespace-nowrap">
                     <div class="flex items-center">
                       <div
-                        class="flex h-10 w-10 flex-shrink-0 items-center justify-center bg-gray-200 dark:bg-gray-700"
+                        class="flex flex-shrink-0 items-center justify-center bg-gray-200 dark:bg-gray-700"
                       >
                         <img
                           :src="item.image"
                           alt=""
-                          class="rounded-md object-cover"
+                          class="h-15 w-15 rounded-md object-cover"
                         />
                       </div>
                       <div class="ml-4">
@@ -293,6 +275,15 @@ onMounted(async (): Promise<void> => {
                         </div>
                       </div>
                     </div>
+                  </td>
+                  <td
+                    class="px-6 py-4 text-sm whitespace-nowrap text-gray-500 dark:text-gray-400"
+                  >
+                    <div
+                      class="h-8 w-8 rounded-full"
+                      :title="item.color.name"
+                      :style="{ backgroundColor: item.color.hex }"
+                    ></div>
                   </td>
                   <td
                     class="px-6 py-4 text-sm whitespace-nowrap text-gray-500 dark:text-gray-400"
@@ -316,39 +307,56 @@ onMounted(async (): Promise<void> => {
         </div>
 
         <!-- Order Summary -->
-        <div class="bg-gray-50 dark:bg-white/[0.03] px-4 py-5 sm:px-6">
-  <div class="flex justify-end">
-    <div class="w-full max-w-md space-y-4">
-      <div class="flex justify-between">
-        <span class="text-sm text-gray-600 dark:text-gray-400">Subtotal</span>
-        <span class="text-sm font-medium text-gray-900 dark:text-gray-100">
-          ${{ order.totalAmount }}
-        </span>
-      </div>
-      <div class="flex justify-between">
-        <span class="text-sm text-gray-600 dark:text-gray-400">Shipping</span>
-        <span class="text-sm font-medium text-gray-900 dark:text-gray-100">
-          $0.00
-        </span>
-      </div>
-      <div class="flex justify-between border-t border-gray-200 dark:border-gray-700 pt-4">
-        <span class="text-base font-medium text-gray-900 dark:text-gray-100">
-          Total
-        </span>
-        <span class="text-base font-bold text-gray-900 dark:text-gray-100">
-          ${{ order.totalAmount }}
-        </span>
-      </div>
-      <div class="flex justify-between">
-        <span class="text-sm text-gray-600 dark:text-gray-400">Payment Method</span>
-        <span class="text-sm font-medium text-gray-900 dark:text-gray-100 capitalize">
-          {{ order.paymentMethod }}
-        </span>
-      </div>
-    </div>
-  </div>
-</div>
-
+        <div class="bg-gray-50 px-4 py-5 sm:px-6 dark:bg-white/[0.03]">
+          <div class="flex justify-end">
+            <div class="w-full max-w-md space-y-4">
+              <div class="flex justify-between">
+                <span class="text-sm text-gray-600 dark:text-gray-400"
+                  >Subtotal</span
+                >
+                <span
+                  class="text-sm font-medium text-gray-900 dark:text-gray-100"
+                >
+                  ${{ order.totalAmount }}
+                </span>
+              </div>
+              <div class="flex justify-between">
+                <span class="text-sm text-gray-600 dark:text-gray-400"
+                  >Shipping</span
+                >
+                <span
+                  class="text-sm font-medium text-gray-900 dark:text-gray-100"
+                >
+                  $0.00
+                </span>
+              </div>
+              <div
+                class="flex justify-between border-t border-gray-200 pt-4 dark:border-gray-700"
+              >
+                <span
+                  class="text-base font-medium text-gray-900 dark:text-gray-100"
+                >
+                  Total
+                </span>
+                <span
+                  class="text-base font-bold text-gray-900 dark:text-gray-100"
+                >
+                  ${{ order.totalAmount }}
+                </span>
+              </div>
+              <div class="flex justify-between">
+                <span class="text-sm text-gray-600 dark:text-gray-400"
+                  >Payment Method</span
+                >
+                <span
+                  class="text-sm font-medium text-gray-900 capitalize dark:text-gray-100"
+                >
+                  {{ order.paymentMethod }}
+                </span>
+              </div>
+            </div>
+          </div>
+        </div>
       </div>
 
       <!-- No Order Found -->
@@ -374,7 +382,8 @@ onMounted(async (): Promise<void> => {
     </div>
   </div>
 </template>
-
 <style scoped>
-/* Custom styles can be added here */
+.status-tag {
+  justify-content: center !important;
+}
 </style>

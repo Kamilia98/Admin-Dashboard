@@ -11,10 +11,10 @@ const fetchOrderAnalytics = async () => {
     const response = await fetch(
       "http://localhost:5000/orders/analytics?range=this-month",
     );
-    const data = await response.json();
-    totalOrders.value = data.totalOrders;
-    totalRevenue.value = data.totalRevenue;
-    averageOrderValue.value = data.averageOrderValue;
+    const json = await response.json();
+    totalOrders.value = json.data.totalOrders;
+    totalRevenue.value = json.data.totalRevenue;
+    averageOrderValue.value = json.data.averageOrderValue;
   } catch (error) {
     console.error("Error fetching order analytics:", error);
   }

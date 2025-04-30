@@ -1,8 +1,8 @@
 <script setup lang="ts">
 /* ========== Imports ========== */
-import { ref, onMounted } from "vue";
-import { useRouter } from "vue-router";
-import axios from "axios";
+import { ref, onMounted } from 'vue';
+import { useRouter } from 'vue-router';
+import axios from 'axios';
 import {
   ElDatePicker,
   ElSelect,
@@ -12,16 +12,16 @@ import {
   ElInputNumber,
   ElButton,
   ElDropdown,
-} from "element-plus";
-import { View, RefreshLeft } from "@element-plus/icons-vue";
+} from 'element-plus';
+import { View, RefreshLeft } from '@element-plus/icons-vue';
 
-import Pagination from "../components/Pagination.vue";
-import Search from "../components/Search.vue";
-import Table from "../components/Table.vue";
-import OrderStatistics from "../components/OrderStatistics.vue";
-import FilterIcon from "../icons/FilterIcon.vue";
+import Pagination from '../components/Pagination.vue';
+import Search from '../components/Search.vue';
+import Table from '../components/Table.vue';
+import OrderStatistics from '../components/OrderStatistics.vue';
+import FilterIcon from '../icons/FilterIcon.vue';
 
-import { OrderStatus } from "../types/order-status";
+import { OrderStatus } from '../types/order.d';
 
 /* ========== Constants ========== */
 const ORDER_LIMIT = 8;
@@ -34,11 +34,26 @@ const ORDER_STAGES: OrderStatus[] = [
 ];
 
 const STATUS_OPTIONS = [
-  { label: OrderStatus.pending, value: OrderStatus.pending },
-  { label: OrderStatus.processing, value: OrderStatus.processing },
-  { label: OrderStatus.shipped, value: OrderStatus.shipped },
-  { label: OrderStatus.delivered, value: OrderStatus.delivered },
-  { label: OrderStatus.canceled, value: OrderStatus.canceled },
+  {
+    label: OrderStatus.pending,
+    value: OrderStatus.pending,
+  },
+  {
+    label: OrderStatus.processing,
+    value: OrderStatus.processing,
+  },
+  {
+    label: OrderStatus.shipped,
+    value: OrderStatus.shipped,
+  },
+  {
+    label: OrderStatus.delivered,
+    value: OrderStatus.delivered,
+  },
+  {
+    label: OrderStatus.canceled,
+    value: OrderStatus.canceled,
+  },
 ];
 
 /* ========== State ========== */
@@ -48,13 +63,13 @@ const totalPages = ref(1);
 const totalOrders = ref(0);
 const loading = ref(false);
 
-const searchQuery = ref("");
+const searchQuery = ref('');
 const statusFilter = ref<string[]>([]);
-const dateRange = ref<[string, string]>(["", ""]);
-const startDateFilter = ref("");
-const endDateFilter = ref("");
-const sortBy = ref("default");
-const sortOrder = ref("desc");
+const dateRange = ref<[string, string]>(['', '']);
+const startDateFilter = ref('');
+const endDateFilter = ref('');
+const sortBy = ref('default');
+const sortOrder = ref('desc');
 const minAmount = ref(0);
 const maxAmount = ref(0);
 
@@ -65,7 +80,7 @@ const capitalize = (str: string): string =>
   str.charAt(0).toUpperCase() + str.slice(1);
 
 const getNextStatusOptions = (status: OrderStatus) => {
-  if (["Canceled", "Delivered"].includes(status)) return [];
+  if (['Canceled', 'Delivered'].includes(status)) return [];
 
   const nextIndex = ORDER_STAGES.indexOf(status) + 1;
 
@@ -81,28 +96,36 @@ const getNextStatusOptions = (status: OrderStatus) => {
 
   return [
     ...options,
-    { label: OrderStatus.canceled, value: OrderStatus.canceled },
+    {
+      label: OrderStatus.canceled,
+      value: OrderStatus.canceled,
+    },
   ];
 };
 
 const viewDetails = (order: any) => {
   console.log(`[View Details] Navigating to order ID: ${order.id}`);
-  router.push({ name: "order-details", params: { id: order.id } });
+  router.push({
+    name: 'order-details',
+    params: {
+      id: order.id,
+    },
+  });
 };
 
 const handleDateChange = () => {
   const [start, end] = dateRange.value;
-  startDateFilter.value = start || "";
-  endDateFilter.value = end || "";
+  startDateFilter.value = start || '';
+  endDateFilter.value = end || '';
   console.log(
-    "[Date Change] Start Date:",
+    '[Date Change] Start Date:',
     startDateFilter.value,
-    "End Date:",
+    'End Date:',
     endDateFilter.value,
   );
 };
 
-const handleSort = (payload: { key: string; direction: "asc" | "desc" }) => {
+const handleSort = (payload: { key: string; direction: 'asc' | 'desc' }) => {
   console.log(
     `[Sorting] Sort By: ${payload.key}, Direction: ${payload.direction}`,
   );
@@ -112,11 +135,11 @@ const handleSort = (payload: { key: string; direction: "asc" | "desc" }) => {
 };
 
 const handleReset = () => {
-  console.log("[Filters Reset] Resetting all filters to default");
+  console.log('[Filters Reset] Resetting all filters to default');
   statusFilter.value = [];
-  dateRange.value = ["", ""];
-  startDateFilter.value = "";
-  endDateFilter.value = "";
+  dateRange.value = ['', ''];
+  startDateFilter.value = '';
+  endDateFilter.value = '';
   minAmount.value = 0;
   maxAmount.value = 0;
 
@@ -144,15 +167,15 @@ const fetchOrders = async (page: number) => {
 
     if (statusFilter.value.length) {
       params.status = statusFilter.value;
-      console.log("[Filter Applied] Statuses:", statusFilter.value);
+      console.log('[Filter Applied] Statuses:', statusFilter.value);
     }
 
-    if (searchQuery.value.trim() !== "") {
+    if (searchQuery.value.trim() !== '') {
       params.searchQuery = searchQuery.value.trim();
-      console.log("[Search Applied] Query:", params.searchQuery);
+      console.log('[Search Applied] Query:', params.searchQuery);
     }
 
-    const { data } = await axios.get("http://localhost:5000/orders/all", {
+    const { data } = await axios.get('http://localhost:5000/orders/all', {
       params,
     });
 
@@ -167,12 +190,12 @@ const fetchOrders = async (page: number) => {
     totalPages.value = Math.ceil(totalOrders.value / ORDER_LIMIT);
     currentPage.value = page;
   } catch (err) {
-    console.error("[Fetch Error] Failed to fetch orders:", err);
+    console.error('[Fetch Error] Failed to fetch orders:', err);
     orders.value = [];
     totalOrders.value = 0;
   } finally {
     loading.value = false;
-    console.log("[Fetch Orders] Loading completed.");
+    console.log('[Fetch Orders] Loading completed.');
   }
 };
 
@@ -193,13 +216,13 @@ const updateOrderStatus = async (orderId: string, newStatus: OrderStatus) => {
       );
     }
   } catch (err) {
-    console.error("[Update Status Error] Failed to update order status:", err);
+    console.error('[Update Status Error] Failed to update order status:', err);
   }
 };
 
 /* ========== Lifecycle ========== */
 onMounted(() => {
-  console.log("[Mounted] Component mounted. Fetching initial orders...");
+  console.log('[Mounted] Component mounted. Fetching initial orders...');
   fetchOrders(currentPage.value);
 });
 </script>
@@ -295,12 +318,36 @@ onMounted(() => {
       caption="Orders"
       :loading="loading"
       :headers="[
-        { key: 'orderNumber', label: 'Order', sortable: true },
-        { key: 'userName', label: 'Customer', sortable: false },
-        { key: 'totalAmount', label: 'Total', sortable: true },
-        { key: 'createdAt', label: 'Date', sortable: true },
-        { key: 'status', label: 'Status', sortable: false },
-        { key: 'actions', label: 'Actions', sortable: false },
+        {
+          key: 'orderNumber',
+          label: 'Order',
+          sortable: true,
+        },
+        {
+          key: 'userName',
+          label: 'Customer',
+          sortable: false,
+        },
+        {
+          key: 'totalAmount',
+          label: 'Total',
+          sortable: true,
+        },
+        {
+          key: 'createdAt',
+          label: 'Date',
+          sortable: true,
+        },
+        {
+          key: 'status',
+          label: 'Status',
+          sortable: false,
+        },
+        {
+          key: 'actions',
+          label: 'Actions',
+          sortable: false,
+        },
       ]"
       :items="orders"
       row-key="id"

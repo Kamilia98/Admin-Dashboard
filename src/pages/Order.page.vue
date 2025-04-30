@@ -3,7 +3,7 @@ import { onMounted, ref } from "vue";
 import { useRoute } from "vue-router";
 import axios from "axios";
 import { ElTag } from "element-plus";
-import type { Order } from "../types/order";
+import type { Order } from "../types/order.d";
 
 const route = useRoute();
 const order = ref<Order | null>(null);
@@ -164,7 +164,7 @@ onMounted(async (): Promise<void> => {
               </p>
             </div>
             <div class="mt-3 sm:mt-0">
-              <el-tag :class="['status-tag', order.status]">
+              <el-tag :class="['status-tag justify-center!', order.status]">
                 {{ order.status }}
               </el-tag>
             </div>
@@ -382,8 +382,3 @@ onMounted(async (): Promise<void> => {
     </div>
   </div>
 </template>
-<style scoped>
-.status-tag {
-  justify-content: center !important;
-}
-</style>

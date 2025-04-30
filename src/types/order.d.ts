@@ -30,3 +30,11 @@ export interface Order {
   user: User;
   orderItems: OrderItem[];
 }
+
+export enum OrderStatus {
+  pending = "Pending",
+  processing = "Processing",
+  shipped = "Shipped",
+  canceled = "Canceled",
+  delivered = "Delivered",
+}

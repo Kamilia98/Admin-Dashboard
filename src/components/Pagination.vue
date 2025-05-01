@@ -1,6 +1,6 @@
 <script setup lang="ts">
-import { defineProps, defineEmits } from "vue";
-import Icon from "./Icon.vue";
+import { ElIcon } from "element-plus";
+import { ArrowRight, ArrowLeft } from "@element-plus/icons-vue";
 
 const props = defineProps<{
   title: string;
@@ -28,7 +28,9 @@ const changePage = (page: number) => {
     </div>
 
     <!-- Right side: Pagination -->
-    <div class="flex self-end rounded-xl border border-[#979797]">
+    <div
+      class="flex self-end rounded-xl border border-gray-200 bg-white dark:border-gray-800 dark:bg-white/[0.03]"
+    >
       <div
         class="flex cursor-pointer items-center justify-center p-1 px-4"
         @click="changePage(currentPage - 1)"
@@ -36,12 +38,16 @@ const changePage = (page: number) => {
         <button
           @click="changePage(currentPage - 1)"
           :disabled="currentPage <= 1"
-          class="w-4 cursor-pointer disabled:text-gray-500"
+          class="flex cursor-pointer disabled:text-gray-500 dark:text-white"
         >
-          <Icon name="arrow" :flip="true" />
+          <ElIcon size="16"><ArrowLeft /></ElIcon>
         </button>
       </div>
-      <div class="border-x border-[#979797] px-4 py-2">{{ currentPage }}</div>
+      <div
+        class="border-x border-gray-200 bg-white px-4 py-2 dark:border-gray-800 dark:bg-white/[0.03] dark:text-white"
+      >
+        {{ currentPage }}
+      </div>
       <div
         class="flex cursor-pointer items-center justify-center p-1 px-4"
         @click="changePage(currentPage + 1)"
@@ -49,9 +55,9 @@ const changePage = (page: number) => {
         <button
           @click="changePage(currentPage + 1)"
           :disabled="currentPage >= totalPages"
-          class="w-4 cursor-pointer disabled:text-gray-500"
+          class="flex cursor-pointer disabled:text-gray-500 dark:text-white"
         >
-          <Icon name="arrow" />
+          <ElIcon size="16"><ArrowRight /></ElIcon>
         </button>
       </div>
     </div>

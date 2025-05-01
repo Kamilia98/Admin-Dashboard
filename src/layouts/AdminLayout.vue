@@ -7,18 +7,17 @@
       :class="[isExpanded || isHovered ? 'lg:ml-[290px]' : 'lg:ml-[90px]']"
     >
       <app-header />
-      <div class="mx-auto max-w-(--breakpoint-2xl) p-4 md:p-6">
-        <router-view></router-view>
-      </div>
+      <main class="mx-auto max-w-(--breakpoint-2xl) p-4 md:p-6">
+        <slot></slot>
+      </main>
     </div>
   </div>
 </template>
 
 <script setup lang="ts">
-import AppSidebar from "../components/AppSidebar.vue";
-import AppHeader from "../components/AppHeader.vue";
-import { useSidebar } from "../composables/useSidebar";
-import Backdrop from "../components/Backdrop.vue";
-import { RouterView } from "vue-router";
+import AppSidebar from '../components/AppSidebar.vue';
+import AppHeader from '../components/AppHeader.vue';
+import { useSidebar } from '../composables/useSidebar';
+import Backdrop from '../components/Backdrop.vue';
 const { isExpanded, isHovered } = useSidebar();
 </script>

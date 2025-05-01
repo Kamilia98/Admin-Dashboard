@@ -39,11 +39,18 @@ const routes = [
     meta: { requiresAuth: true, layout: 'admin' },
   },
   {
-    path: '/customers',
-    name: 'customers',
-    component: () => import('../pages/Customers.page.vue'),
-    meta: { requiresAuth: true, layout: 'admin' },
-  }, 
+    path: "/customers/:id",
+    name: "edit-customers",
+    component: () => import("../pages/Customer.page.vue"),
+    // props: true,
+    meta: { requiresAuth: true },
+  },
+  {
+    path: "/customers",
+    name: "customers",
+    component: () => import("../pages/Customers.page.vue"),
+    meta: { requiresAuth: true },
+  },
   {
     path: '/profile',
     name: 'user-profile',

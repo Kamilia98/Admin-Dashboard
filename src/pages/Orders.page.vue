@@ -230,7 +230,6 @@ onMounted(() => {
 <template>
   <div class="flex flex-col gap-8">
     <OrderStatistics />
-
     <!-- Search and Filter Buttons -->
     <div class="flex items-center justify-end gap-4 md:gap-6">
       <Search v-model="searchQuery" @search="fetchOrders(1)" />
@@ -353,7 +352,7 @@ onMounted(() => {
       row-key="id"
       @sort="handleSort"
     >
-      <template #column-status="{ item }">
+      <!-- <template #column-status="{ item }">
         <el-select
           v-if="getNextStatusOptions(item.status).length > 0"
           v-model="item.status"
@@ -381,7 +380,7 @@ onMounted(() => {
         >
           {{ item.status }}
         </el-tag>
-      </template>
+      </template> -->
 
       <template #column-actions="{ item }">
         <div class="flex justify-center">
@@ -393,6 +392,7 @@ onMounted(() => {
     </Table>
 
     <!-- Pagination -->
+
     <Pagination
       title="orders"
       :currentPage="currentPage"

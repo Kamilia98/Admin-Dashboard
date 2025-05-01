@@ -1,13 +1,24 @@
 <script setup lang="ts">
-import { useProductStore } from "../stores/productStore";
-import { onMounted } from "vue";
+import { useProductStore } from '../stores/productStore';
+import { onMounted, toRaw } from 'vue';
+
+import Pagination from '../components/Pagination.vue';
+import Search from '../components/Search.vue';
+import Table from '../components/Table.vue';
+
+const headers = [
+  { key: 'name', label: 'Name', sortable: false },
+  { key: 'description', label: 'Description', sortable: false },
+  { key: 'price', label: 'Price', sortable: false },
+];
 
 const productStore = useProductStore();
-
 onMounted(() => {
   productStore.getAllProducts();
-  console.log("Products page mounted");
-  console.log("[Product-page -- products]", productStore);
+  console.log('Products page mounted');
+  const rawProducts = toRaw(productStore.products);
+  console.log('[Product-page -- Raw products]', rawProducts);
+  console.log('[Product-page -- products]', productStore);
 });
 </script>
 <template>
@@ -31,9 +42,9 @@ onMounted(() => {
         :key="prod._id"
         class="rounded border p-4 shadow transition hover:shadow-lg"
       >
-        <h2 class="mb-2 text-xl font-semibold">{{ prod.name }}</h2>
-        <p class="mb-2 text-gray-700">{{ prod.description }}</p>
-        <p class="font-bold">Price: ${{ prod.price }}</p>
+        <!-- <h2 class="mb-2 text-xl font-semibold">{{ prod.name }}</h2> -->
+        <p class="mb-2 text-gray-700">{{ prod.mainColor }}</p>
+        <!-- <p class="font-bold">Price: ${{ prod.price }}</p> -->
       </div>
     </div>
   </div>

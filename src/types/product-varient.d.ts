@@ -1,10 +1,9 @@
-// types/Product.ts
 export interface productVariant {
   _id: string;
   name: string;
   price: number;
   sale: number;
-  categoryName: string;
+  categories: string;
   date: string;
   effectivePrice: number;
   salePrice: string;
@@ -17,6 +16,6 @@ export interface ProductApiResponse {
   status: string;
   data: {
     totalProducts: number;
-    products: Product[];
+    products: productVariant[];
   };
 }

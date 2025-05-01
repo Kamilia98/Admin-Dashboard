@@ -1,20 +1,25 @@
 import axios from 'axios';
 import type { Product } from '../types/product';
-
+import type {
+  productVariant,
+  ProductApiResponse,
+} from '../types/product-varient';
 const BASE_URL = 'http://localhost:5000/products';
 
 / * * * Api calls * * * /;
 
-export const fetchAllProducts = () => {
-  return axios
-    .get<{ status: string; data: { products: Product[] } }>(`${BASE_URL}`)
-    .then((response) => response.data);
+export const fetchAllProducts = async () => {
+  const response = await axios.get<ProductApiResponse>(`${BASE_URL}/color`);
+  console.log('[Product Service -- all data]', response.data);
+  return response.data;
 };
 
-export const fetchProductById = (id: string) => {
-  return axios
-    .get<{ status: string; data: { product: Product } }>(`${BASE_URL}/${id}`)
-    .then((response) => response.data);
+export const fetchProductById = async (id: string) => {
+  const response = await axios.get<{
+    status: string;
+    data: { product: Product };
+  }>(`${BASE_URL}/${id}`);
+  return response.data;
 };
 export const deleteProduct = (id: string) => axios.delete(`${BASE_URL}/${id}`);
 

@@ -1,51 +1,62 @@
 <script setup lang="ts">
 import { useProductStore } from '../stores/productStore';
 import { onMounted, toRaw } from 'vue';
-
-import Pagination from '../components/Pagination.vue';
-import Search from '../components/Search.vue';
 import Table from '../components/Table.vue';
 
 const headers = [
-  { key: 'name', label: 'Name', sortable: false },
-  { key: 'description', label: 'Description', sortable: false },
-  { key: 'price', label: 'Price', sortable: false },
+  { key: 'name', label: 'Name', sortable: true },
+  { key: 'sku', label: 'SKU', sortable: true },
+  { key: 'color', label: 'Color', sortable: false },
+  { key: 'quantity', label: 'Quantity', sortable: false },
+  { key: 'price', label: 'Original Price', sortable: true },
+  { key: 'sale', label: 'Discount', sortable: true },
+  // { key: 'effectivePrice', label: 'Final Price', sortable: true },
+  { key: 'categories', label: 'Category', sortable: false },
 ];
 
 const productStore = useProductStore();
-onMounted(() => {
-  productStore.getAllProducts();
+
+onMounted(async () => {
+  // Fetch products first
+  await productStore.getAllProducts();
   console.log('Products page mounted');
+
+  / * * * Only Log purpose * * * /;
   const rawProducts = toRaw(productStore.products);
   console.log('[Product-page -- Raw products]', rawProducts);
-  console.log('[Product-page -- products]', productStore);
+
+  console.log('[Product-page -- productStore]', productStore);
 });
 </script>
 <template>
   <div class="p-8">
     <h1 class="mb-6 text-2xl font-bold">All Products</h1>
 
-    <!-- Loading message -->
-    <div v-if="productStore.loading" class="text-gray-500">
-      Loading products...
-    </div>
-
     <!-- Error message -->
-    <div v-if="productStore.error" class="text-red-500">
+    <div v-if="productStore.error" class="mb-4 text-red-500">
       {{ productStore.error }}
     </div>
 
-    <!-- Products Grid -->
-    <div v-else class="grid grid-cols-1 gap-6 md:grid-cols-3">
-      <div
-        v-for="prod in productStore.products"
-        :key="prod._id"
-        class="rounded border p-4 shadow transition hover:shadow-lg"
-      >
-        <!-- <h2 class="mb-2 text-xl font-semibold">{{ prod.name }}</h2> -->
-        <p class="mb-2 text-gray-700">{{ prod.mainColor }}</p>
-        <!-- <p class="font-bold">Price: ${{ prod.price }}</p> -->
-      </div>
-    </div>
+    <!-- Table Component -->
+    <Table
+      caption="All Products"
+      :headers="headers"
+      :items="productStore.products"
+      :loading="productStore.loading"
+      rowKey="_id"
+    >
+      <template #column-color="{ value }">
+        <span
+          class="inline-block h-5 w-5 rounded-full border border-gray-300"
+          :style="{ backgroundColor: value }"
+          :title="value"
+        />
+      </template>
+      <template #column-sale="{ value }">
+        <span v-if="value > 0" class="text-green-500"> {{ value }}% </span>
+        <span v-else class="text-red-500"> {{ value }}% </span>
+      </template>
+      <template #column-effectivePrice="{ value }"> ${{ value }} </template>
+    </Table>
   </div>
 </template>

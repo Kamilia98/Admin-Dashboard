@@ -43,6 +43,12 @@ const routes = [
     name: 'customers',
     component: () => import('../pages/Customers.page.vue'),
     meta: { requiresAuth: true, layout: 'admin' },
+  }, 
+  {
+    path: '/profile',
+    name: 'user-profile',
+    component: () => import('../pages/UserProfile.page.vue'),
+    meta: { requiresAuth: true, layout: 'admin' },
   },
   {
     path: '/store',

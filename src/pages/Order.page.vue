@@ -1,97 +1,41 @@
 <script setup lang="ts">
-import { onMounted, ref } from "vue";
-import { useRoute } from "vue-router";
-import axios from "axios";
-import { ElTag } from "element-plus";
-import type { Order } from "../types/order.d";
+import { onMounted, ref } from 'vue';
+import { useRoute } from 'vue-router';
+import { type Order } from '../types/order.d';
+import { useOrdersStore } from '../stores/orderStore';
+import { formatDate } from '../utils/formatDate';
+import OrderStatusSelector from '../components/OrderStatusSelector.vue';
 
 const route = useRoute();
 const order = ref<Order | null>(null);
 const loading = ref<boolean>(true);
 const error = ref<string | null>(null);
 
-const fetchOrderById = async (id: string): Promise<Order> => {
-  console.log(`[fetchOrderById] Fetching order with ID: ${id}`);
-  try {
-    const response = await axios.get<{ data: Order }>(
-      `http://localhost:5000/orders/${id}`,
-      {},
-    );
-
-    if (!response.data?.data) {
-      console.error(
-        "[fetchOrderById] Invalid response structure:",
-        response.data,
-      );
-      throw new Error("Invalid response structure");
-    }
-
-    console.log(
-      "[fetchOrderById] Successfully fetched order data:",
-      response.data.data,
-    );
-    return response.data.data;
-  } catch (err: unknown) {
-    console.error("[fetchOrderById] Error occurred while fetching order:", err);
-    if (axios.isAxiosError(err)) {
-      const serverMessage = err.response?.data?.message;
-      const statusMessage = err.response?.statusText;
-      throw new Error(
-        serverMessage || statusMessage || "Failed to fetch order details",
-      );
-    } else if (err instanceof Error) {
-      throw err;
-    }
-    throw new Error("An unexpected error occurred");
-  }
-};
-
-const formatDate = (dateString: string): string => {
-  try {
-    const options: Intl.DateTimeFormatOptions = {
-      year: "numeric",
-      month: "long",
-      day: "numeric",
-      hour: "2-digit",
-      minute: "2-digit",
-    };
-    const formatted = new Date(dateString).toLocaleDateString(
-      undefined,
-      options,
-    );
-    console.log(
-      `[formatDate] Formatted date '${dateString}' as '${formatted}'`,
-    );
-    return formatted;
-  } catch (err) {
-    console.error("[formatDate] Error formatting date:", err);
-    return "Invalid date";
-  }
-};
+const store = useOrdersStore();
 
 onMounted(async (): Promise<void> => {
-  console.log("[onMounted] Component mounted, starting order fetch...");
+  console.log('[onMounted] Component mounted, starting order fetch...');
   try {
     const id = route.params.id as string;
     if (!id) {
       console.error(
-        "[onMounted] No order ID provided in route params:",
+        '[onMounted] No order ID provided in route params:',
         route.params,
       );
-      throw new Error("No order ID provided in route parameters");
+      throw new Error('No order ID provided in route parameters');
     }
 
     console.log(`[onMounted] Found order ID: ${id}`);
-    order.value = await fetchOrderById(id);
-    console.log("[onMounted] Order successfully set:", order.value);
+    order.value = await store.fetchOrderById(id);
+    console.log('[onMounted] Order successfully set:', order.value);
   } catch (err: unknown) {
     const errorMessage =
-      err instanceof Error ? err.message : "An unknown error occurred";
-    console.error("[onMounted] Error fetching order:", errorMessage);
+      err instanceof Error ? err.message : 'An unknown error occurred';
+    console.error('[onMounted] Error fetching order:', errorMessage);
     error.value = errorMessage;
   } finally {
     loading.value = false;
-    console.log("[onMounted] Loading finished.");
+    console.log('[onMounted] Loading finished.');
   }
 });
 </script>
@@ -164,9 +108,11 @@ onMounted(async (): Promise<void> => {
               </p>
             </div>
             <div class="mt-3 sm:mt-0">
-              <el-tag :class="['status-tag justify-center!', order.status]">
-                {{ order.status }}
-              </el-tag>
+              <OrderStatusSelector
+                :status="order.status"
+                :order-id="order.id"
+                @update="order.status = $event"
+              />
             </div>
           </div>
         </div>
@@ -271,7 +217,7 @@ onMounted(async (): Promise<void> => {
                           {{ item.name }}
                         </div>
                         <div class="text-sm text-gray-500 dark:text-gray-400">
-                          SKU: {{ item.sku || "N/A" }}
+                          SKU: {{ item.sku || 'N/A' }}
                         </div>
                       </div>
                     </div>

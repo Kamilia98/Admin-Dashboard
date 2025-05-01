@@ -1,4 +1,4 @@
-import type { User } from "./user";
+import type { User } from './user';
 
 export interface OrderItem {
   name: string;
@@ -25,16 +25,16 @@ export interface Order {
   orderNumber: string;
   paymentMethod: string;
   shippingAddress: ShippingAddress;
-  status: string;
+  status: OrderStatus;
   totalAmount: string;
   user: User;
   orderItems: OrderItem[];
 }
 
 export enum OrderStatus {
-  pending = "Pending",
-  processing = "Processing",
-  shipped = "Shipped",
-  canceled = "Canceled",
-  delivered = "Delivered",
+  pending = 'Pending',
+  processing = 'Processing',
+  shipped = 'Shipped',
+  canceled = 'Canceled',
+  delivered = 'Delivered',
 }

@@ -205,6 +205,7 @@ import {
   SettingsIcon,
   ProductsIcon,
   ChevronDownIcon,
+  UserCircleIcon,
 } from "../icons";
 
 import { useSidebar } from "../composables/useSidebar";
@@ -252,11 +253,16 @@ const menuGroups: MenuGroup[] = [
         icon: UserGroupIcon,
         name: "Customers",
         path: "/customers",
-      },
+      },     
       {
         icon: OrdersIcon,
         name: "Orders",
         path: "/orders",
+      },
+      {
+        icon: UserCircleIcon,
+        name: "User Profile",
+        path: "/profile",
       },
       {
         icon: SettingsIcon,

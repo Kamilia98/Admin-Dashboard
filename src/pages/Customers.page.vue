@@ -157,112 +157,101 @@ async function deleteUser(user: User) {
 }
 </script>
 <template>
-  <div class="p-6">
-    <h2 class="mb-4 text-sm font-medium">Users</h2>
+  <h2 class="mb-4 text-sm font-medium">Users</h2>
 
-    <div class="mb-4 flex items-center justify-between">
-      <el-select
-        v-model="limit"
-        placeholder="Select"
-        size="large"
-        style="width: 120px"
-        class="mr-4"
-      >
-        <el-option label="10 entries" :value="10" />
-        <el-option label="7 entries" :value="7" />
-        <el-option label="3 entries" :value="3" />
-      </el-select>
-      <el-input
-        v-model="search"
-        placeholder="Search..."
-        size="large"
-        style="width: 18rem"
-      >
-        <template #prefix
-          ><el-icon><Search /></el-icon> <SearchIcon /> </template
-      ></el-input>
-    </div>
-    <el-skeleton v-if="loading" animated class="mt-12 mb-6">
-      <template #template>
-        <div v-for="i in 10" :key="i" class="flex items-center gap-8 py-4">
-          <el-skeleton-item
-            variant="circle"
-            style="width: 32px; height: 32px"
-          />
+  <div class="mb-4 flex items-center justify-between">
+    <el-select
+      v-model="limit"
+      placeholder="Select"
+      size="large"
+      style="width: 120px"
+      class="mr-4"
+    >
+      <el-option label="10 entries" :value="10" />
+      <el-option label="7 entries" :value="7" />
+      <el-option label="3 entries" :value="3" />
+    </el-select>
+    <el-input
+      v-model="search"
+      placeholder="Search..."
+      size="large"
+      style="width: 18rem"
+    >
+      <template #prefix
+        ><el-icon><Search /></el-icon> <SearchIcon /> </template
+    ></el-input>
+  </div>
+  <el-skeleton v-if="loading" animated class="mt-12 mb-6">
+    <template #template>
+      <div v-for="i in 10" :key="i" class="flex items-center gap-8 py-4">
+        <el-skeleton-item variant="circle" style="width: 32px; height: 32px" />
 
-          <el-skeleton-item variant="text" style="width: 100px" />
+        <el-skeleton-item variant="text" style="width: 100px" />
 
-          <el-skeleton-item variant="text" style="width: 200px" />
+        <el-skeleton-item variant="text" style="width: 200px" />
 
-          <el-skeleton-item variant="text" style="width: 120px" />
+        <el-skeleton-item variant="text" style="width: 120px" />
 
-          <el-skeleton-item
-            variant="text"
-            style="width: 80px; margin-left: 250px"
-          />
+        <el-skeleton-item
+          variant="text"
+          style="width: 80px; margin-left: 250px"
+        />
 
-          <div class="flex gap-2">
-            <el-skeleton-item
-              variant="rect"
-              style="width: 50px; height: 28px"
-            />
-            <el-skeleton-item
-              variant="rect"
-              style="width: 60px; height: 28px"
-            />
-          </div>
+        <div class="flex gap-2">
+          <el-skeleton-item variant="rect" style="width: 50px; height: 28px" />
+          <el-skeleton-item variant="rect" style="width: 60px; height: 28px" />
+        </div>
+      </div>
+    </template>
+  </el-skeleton>
+
+  <el-table
+    v-else
+    :data="paginatedUsers"
+    class="w-full"
+    stripe
+    border
+    @row-click="handleRowClick"
+  >
+    <el-table-column label="User">
+      <template #default="{ row }">
+        <div class="flex items-center gap-3">
+          <img :src="row.thumbnail" class="h-8 w-8 rounded-full" />
+          <span>{{ row.username }}</span>
         </div>
       </template>
-    </el-skeleton>
+    </el-table-column>
 
-    <el-table
-      v-else
-      :data="paginatedUsers"
-      class="w-full"
-      stripe
-      border
-      @row-click="handleRowClick"
-    >
-      <el-table-column label="User">
-        <template #default="{ row }">
-          <div class="flex items-center gap-3">
-            <img :src="row.thumbnail" class="h-8 w-8 rounded-full" />
-            <span>{{ row.username }}</span>
-          </div>
-        </template>
-      </el-table-column>
+    <el-table-column label="Email" prop="email" />
+    <el-table-column label="Phone" prop="phone" />
+    <el-table-column label="Role" prop="role" />
 
-      <el-table-column label="Email" prop="email" />
-      <el-table-column label="Phone" prop="phone" />
-      <el-table-column label="Role" prop="role" />
+    <el-table-column label="Actions" width="150">
+      <template #default="{ row }">
+        <div class="flex gap-2">
+          <el-button size="small" type="primary" @click.stop="editUser(row)"
+            >Edit</el-button
+          >
+          <el-button size="small" type="danger" @click.stop="deleteUser(row)"
+            >Delete</el-button
+          >
+        </div>
+      </template>
+    </el-table-column>
+  </el-table>
 
-      <el-table-column label="Actions" width="150">
-        <template #default="{ row }">
-          <div class="flex gap-2">
-            <el-button size="small" type="primary" @click.stop="editUser(row)"
-              >Edit</el-button
-            >
-            <el-button size="small" type="danger" @click.stop="deleteUser(row)"
-              >Delete</el-button
-            >
-          </div>
-        </template>
-      </el-table-column>
-    </el-table>
-
-    <div class="mt-4 flex items-center justify-between">
-      <span class="text-sm text-gray-500">
-        Showing {{ (currentPage - 1) * limit + 1 }} to
-        {{ Math.min(currentPage * limit, totalUsers) }} of
-        {{ totalUsers }} entries
-      </span>
-      <el-pagination
-        background
-        layout="prev, pager, next"
-        :page-size="limit"
-        :total="totalUsers"
-        @current-change="handlePageChange"
-      />
-    </div>
+  <div class="mt-4 flex items-center justify-between">
+    <span class="text-sm text-gray-500">
+      Showing {{ (currentPage - 1) * limit + 1 }} to
+      {{ Math.min(currentPage * limit, totalUsers) }} of
+      {{ totalUsers }} entries
+    </span>
+    <el-pagination
+      background
+      layout="prev, pager, next"
+      :page-size="limit"
+      :total="totalUsers"
+      @current-change="handlePageChange"
+    />
   </div>
 </template>

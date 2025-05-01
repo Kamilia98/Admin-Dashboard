@@ -60,7 +60,7 @@
 
 <script lang="ts" setup>
 import { ElTag, ElButton } from 'element-plus';
-import Table from '../components/Table.vue';
+import Table from '../components/common/Table.vue';
 import FilterIcon from '../icons/FilterIcon.vue';
 import { onMounted, ref } from 'vue';
 import { useRoute } from 'vue-router';

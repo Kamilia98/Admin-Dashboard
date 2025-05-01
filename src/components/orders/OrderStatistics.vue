@@ -1,27 +1,12 @@
 <script setup lang="ts">
-import { ref, onMounted } from "vue";
-import { BoxCubeIcon } from "../icons";
+import { onMounted } from 'vue';
+import { BoxCubeIcon } from '../../icons';
+import { useOrdersStore } from '../../stores/orderStore';
 
-const totalOrders = ref(0);
-const totalRevenue = ref(0);
-const averageOrderValue = ref(0);
-
-const fetchOrderAnalytics = async () => {
-  try {
-    const response = await fetch(
-      "http://localhost:5000/orders/analytics?range=this-month",
-    );
-    const json = await response.json();
-    totalOrders.value = json.data.totalOrders;
-    totalRevenue.value = json.data.totalRevenue;
-    averageOrderValue.value = json.data.averageOrderValue;
-  } catch (error) {
-    console.error("Error fetching order analytics:", error);
-  }
-};
+const store = useOrdersStore();
 
 onMounted(() => {
-  fetchOrderAnalytics();
+  store.fetchOrderAnalytics();
 });
 </script>
 
@@ -43,7 +28,7 @@ onMounted(() => {
           <h4
             class="mt-2 text-title-sm font-bold text-gray-800 dark:text-white/90"
           >
-            {{ totalOrders }}
+            {{ store.totalOrders }}
           </h4>
         </div>
         <!-- <span
@@ -72,7 +57,7 @@ onMounted(() => {
           <h4
             class="mt-2 text-title-sm font-bold text-gray-800 dark:text-white/90"
           >
-            ${{ totalRevenue.toFixed(2) }}
+            ${{ store.totalRevenue.toFixed(2) }}
           </h4>
         </div>
       </div>
@@ -96,7 +81,7 @@ onMounted(() => {
           <h4
             class="mt-2 text-title-sm font-bold text-gray-800 dark:text-white/90"
           >
-            ${{ averageOrderValue.toFixed(2) }}
+            ${{ store.averageOrderValue.toFixed(2) }}
           </h4>
         </div>
       </div>

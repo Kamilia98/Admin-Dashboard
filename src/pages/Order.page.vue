@@ -4,7 +4,7 @@ import { useRoute } from 'vue-router';
 import { type Order } from '../types/order.d';
 import { useOrdersStore } from '../stores/orderStore';
 import { formatDate } from '../utils/formatDate';
-import OrderStatusSelector from '../components/OrderStatusSelector.vue';
+import OrderStatusSelector from '../components/orders/OrderStatusSelector.vue';
 
 const route = useRoute();
 const order = ref<Order | null>(null);

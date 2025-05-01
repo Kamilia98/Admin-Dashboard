@@ -20,3 +20,10 @@ export const updateOrderStatus = async (
 ) => {
   return axios.patch(`${API_BASE}/${orderId}/status`, { status: newStatus });
 };
+
+export const fetchOrderAnalytics = async () => {
+  const response = await fetch(`${API_BASE}/analytics?range=this-month`);
+  if (!response.ok) throw new Error('Failed to fetch order analytics');
+  const json = await response.json();
+  return json.data;
+};

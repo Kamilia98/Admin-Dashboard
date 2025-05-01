@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { computed, ref, watch } from 'vue';
-import { OrderStatus } from '../types/order';
-import { useOrdersStore } from '../stores/orderStore';
+import { OrderStatus } from '../../types/order';
+import { useOrdersStore } from '../../stores/orderStore';
 import { ElSelect, ElOption, ElTag } from 'element-plus';
 
 const props = defineProps<{

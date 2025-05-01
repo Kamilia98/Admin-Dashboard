@@ -1,14 +1,14 @@
 <script setup lang="ts">
-import { ref, watch } from "vue";
-import { SearchIcon } from "../icons";
+import { ref, watch } from 'vue';
+import { SearchIcon } from '../../icons';
 
 const props = defineProps<{
   modelValue: string;
 }>();
 
 const emit = defineEmits<{
-  (e: "update:modelValue", value: string): void;
-  (e: "search", value: string): void;
+  (e: 'update:modelValue', value: string): void;
+  (e: 'search', value: string): void;
 }>();
 
 const searchQuery = ref(props.modelValue);
@@ -22,12 +22,12 @@ watch(
 
 function updateInput(value: string) {
   searchQuery.value = value;
-  emit("update:modelValue", value);
+  emit('update:modelValue', value);
   handleSubmit();
 }
 
 function handleSubmit() {
-  emit("search", searchQuery.value.trim());
+  emit('search', searchQuery.value.trim());
 }
 </script>
 

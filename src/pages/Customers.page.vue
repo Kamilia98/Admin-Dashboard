@@ -1,5 +1,5 @@
 <script lang="ts" setup>
-import { ref, computed, onMounted, watch } from "vue";
+import { ref, computed, onMounted, watch } from 'vue';
 import {
   ElTable,
   ElTableColumn,
@@ -12,11 +12,11 @@ import {
   ElMessageBox,
   ElSelect,
   ElOption,
-} from "element-plus";
-import axios from "axios";
-import debounce from "lodash/debounce";
-import { SearchIcon } from "../icons";
-import { useRouter } from "vue-router";
+} from 'element-plus';
+import axios from 'axios';
+import debounce from 'lodash/debounce';
+import { SearchIcon } from '../icons';
+import { useRouter } from 'vue-router';
 
 interface User {
   username: string;
@@ -32,16 +32,18 @@ const allUsers = ref<User[]>([]);
 const currentPage = ref(1);
 const limit = ref(10);
 const totalUsers = ref(0);
-const search = ref("");
+const search = ref('');
+const Orders = ref([]);
+const totalOrders = ref(0);
 
 const fetchUsers = async (page: number) => {
-  const token = localStorage.getItem("token");
+  const token = localStorage.getItem('token');
   loading.value = true;
   try {
-    const { data } = await axios.get("http://localhost:5000/users", {
+    const { data } = await axios.get('http://localhost:5000/users', {
       headers: {
         Authorization: `Bearer ${token}`,
-        "Content-Type": "application/json",
+        'Content-Type': 'application/json',
       },
       params: {
         page,
@@ -52,7 +54,7 @@ const fetchUsers = async (page: number) => {
     allUsers.value = data.data.users;
     totalUsers.value = data.data.totalUsers;
   } catch (error) {
-    console.error("Error fetching users:", error);
+    console.error('Error fetching users:', error);
   } finally {
     loading.value = false;
   }
@@ -60,7 +62,9 @@ const fetchUsers = async (page: number) => {
 const debouncedFetch = debounce((page: number) => {
   fetchUsers(page);
 }, 600);
-onMounted(async () => fetchUsers(currentPage.value));
+onMounted(async () => {
+  fetchUsers(currentPage.value);
+});
 watch(currentPage, (newPage) => {
   fetchUsers(newPage);
 });
@@ -78,13 +82,33 @@ function handlePageChange(page: number) {
 }
 
 function handleRowClick(row: User) {
-  console.log("Row clicked:", row);
+  console.log('Row clicked:', row);
+  fetchOrders(row._id);
+  router.push({ name: 'customer-details', params: { id: row._id } });
 }
 
 function editUser(user: User) {
-  console.log("Edit user:", user);
-  router.push({ name: "edit-customers", params: { id: user._id } });
+  console.log('Edit user:', user);
+  router.push({ name: 'edit-customers', params: { id: user._id } });
 }
+
+const fetchOrders = async (userId: string) => {
+  try {
+    const { data } = await axios.get(`http://localhost:5000/orders/`, {
+      headers: {
+        Authorization: `Bearer ${localStorage.getItem('token')}`,
+        'Content-Type': 'application/json',
+      },
+      params: {
+        userId,
+      },
+    });
+    Orders.value = data.data.orders;
+    totalOrders.value = data.data.totalOrders;
+  } catch (error) {
+    console.error('Error fetching orders:', error);
+  }
+};
 
 async function deleteUser(user: User) {
   // const tmpAll = allUsers.value;
@@ -92,44 +116,44 @@ async function deleteUser(user: User) {
   try {
     await ElMessageBox.confirm(
       `Are you sure you want to delete <b>${user.username}</b>?`,
-      "Confirm Deletion",
+      'Confirm Deletion',
       {
-        confirmButtonText: "Delete",
-        cancelButtonText: "Cancel",
-        type: "warning",
+        confirmButtonText: 'Delete',
+        cancelButtonText: 'Cancel',
+        type: 'warning',
         dangerouslyUseHTMLString: true,
       },
     );
     await axios.delete(`http://localhost:5000/users/${user._id}`, {
       headers: {
-        Authorization: `Bearer ${localStorage.getItem("token")}`,
-        "Content-Type": "application/json",
+        Authorization: `Bearer ${localStorage.getItem('token')}`,
+        'Content-Type': 'application/json',
       },
     });
     ElNotification({
-      title: "Success",
+      title: 'Success',
       message: `User ${user.username} has been deleted.`,
-      type: "success",
+      type: 'success',
       duration: 3000,
-      position: "bottom-right",
+      position: 'bottom-right',
     });
     fetchUsers(currentPage.value);
   } catch (error) {
     console.log(error);
-    if (error === "cancel") {
+    if (error === 'cancel') {
       return;
     }
     ElNotification({
-      title: "Error",
-      message: "An unknown error occurred",
-      type: "error",
+      title: 'Error',
+      message: 'An unknown error occurred',
+      type: 'error',
       duration: 3000,
-      position: "bottom-right",
+      position: 'bottom-right',
     });
     // allUsers.value = tmpAll;
   }
 
-  console.log("Delete user:", user);
+  console.log('Delete user:', user);
 }
 </script>
 <template>

@@ -194,12 +194,12 @@ html.dark {
 /* status-colors.css */
 
 .status-tag {
-  width: 98px;
+  width: 120px;
   padding: 4px 12px !important;
   text-align: start !important;
   display: flex !important;
   justify-content: start !important;
-  box-sizing: content-box !important;
+  height: max-content !important;
 
   span {
     font-size: 14px;

@@ -1,6 +1,5 @@
 <script setup lang="ts">
 import { ArrowUp, ArrowDown } from "@element-plus/icons-vue";
-import { defineEmits } from "vue";
 import { ElIcon, ElSkeleton } from "element-plus";
 
 defineProps<{

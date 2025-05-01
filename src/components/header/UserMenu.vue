@@ -49,7 +49,7 @@
         </li>
       </ul>
       <router-link
-        to="/signin"
+        :to="{ name: 'signout' }"
         @click="signOut"
         class="group mt-3 flex items-center gap-3 rounded-lg px-3 py-2 text-theme-sm font-medium text-gray-700 hover:bg-gray-100 hover:text-gray-700 dark:text-gray-400 dark:hover:bg-white/5 dark:hover:text-gray-300"
       >
@@ -71,23 +71,27 @@ import {
   SettingsIcon,
   InfoCircleIcon,
   UserIcon,
-} from "../../icons";
-import { RouterLink } from "vue-router";
-import { ref, onMounted, onUnmounted } from "vue";
+} from '../../icons';
+import { RouterLink, useRouter } from 'vue-router';
+import { ref, onMounted, onUnmounted } from 'vue';
+import { useAuth } from '../../composables/useAuth';
+
+const router = useRouter();
+const { logout } = useAuth();
 
 const dropdownOpen = ref(false);
 const dropdownRef = ref<HTMLElement | null>(null);
 
 const user = {
-  fname: "Kamilia",
-  fullName: "kamilia ahmed",
-  email: "kamiliaahmed01@gmail.com",
+  fname: 'Kamilia',
+  fullName: 'kamilia ahmed',
+  email: 'kamiliaahmed01@gmail.com',
 };
 
 const menuItems = [
-  { href: "/profile", icon: UserCircleIcon, text: "Edit profile" },
-  { href: "/chat", icon: SettingsIcon, text: "Account settings" },
-  { href: "/profile", icon: InfoCircleIcon, text: "Support" },
+  { href: '/profile', icon: UserCircleIcon, text: 'Edit profile' },
+  { href: '/chat', icon: SettingsIcon, text: 'Account settings' },
+  { href: '/profile', icon: InfoCircleIcon, text: 'Support' },
 ];
 
 const toggleDropdown = () => {
@@ -99,8 +103,8 @@ const closeDropdown = () => {
 };
 
 const signOut = () => {
-  console.log("Signing out...");
-  closeDropdown();
+  logout();
+  router.push({ name: 'login' });
 };
 
 const handleClickOutside = (event: MouseEvent) => {
@@ -110,10 +114,10 @@ const handleClickOutside = (event: MouseEvent) => {
 };
 
 onMounted(() => {
-  document.addEventListener("click", handleClickOutside);
+  document.addEventListener('click', handleClickOutside);
 });
 
 onUnmounted(() => {
-  document.removeEventListener("click", handleClickOutside);
+  document.removeEventListener('click', handleClickOutside);
 });
 </script>

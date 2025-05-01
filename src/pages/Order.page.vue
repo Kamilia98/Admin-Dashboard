@@ -226,7 +226,7 @@ onMounted(async (): Promise<void> => {
                     class="px-6 py-4 text-sm whitespace-nowrap text-gray-500 dark:text-gray-400"
                   >
                     <div
-                      class="h-8 w-8 rounded-full"
+                      class="h-8 w-8 rounded-full border border-gray-200 shadow"
                       :title="item.color.name"
                       :style="{ backgroundColor: item.color.hex }"
                     ></div>

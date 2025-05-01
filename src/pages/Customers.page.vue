@@ -8,10 +8,15 @@ import {
   ElInput,
   ElSkeleton,
   ElSkeletonItem,
+  ElNotification,
+  ElMessageBox,
+  ElSelect,
+  ElOption,
 } from "element-plus";
 import axios from "axios";
 import debounce from "lodash/debounce";
 import { SearchIcon } from "../icons";
+import { useRouter } from "vue-router";
 
 interface User {
   username: string;
@@ -19,11 +24,13 @@ interface User {
   thumbnail: string;
   phone: number;
   role: string;
+  _id: string;
 }
+const router = useRouter();
 const loading = ref(false);
 const allUsers = ref<User[]>([]);
 const currentPage = ref(1);
-const pageSize = 10;
+const limit = ref(10);
 const totalUsers = ref(0);
 const search = ref("");
 
@@ -38,7 +45,7 @@ const fetchUsers = async (page: number) => {
       },
       params: {
         page,
-        limit: pageSize,
+        limit: limit.value,
         search: search.value,
       },
     });
@@ -61,6 +68,10 @@ watch(search, () => {
   currentPage.value = 1;
   debouncedFetch(1);
 });
+watch(limit, () => {
+  currentPage.value = 1;
+  fetchUsers(1);
+});
 const paginatedUsers = computed(() => allUsers.value);
 function handlePageChange(page: number) {
   currentPage.value = page;
@@ -72,9 +83,52 @@ function handleRowClick(row: User) {
 
 function editUser(user: User) {
   console.log("Edit user:", user);
+  router.push({ name: "edit-customers", params: { id: user._id } });
 }
 
-function deleteUser(user: User) {
+async function deleteUser(user: User) {
+  // const tmpAll = allUsers.value;
+  // allUsers.value = allUsers.value.filter((u) => u._id !== user._id);
+  try {
+    await ElMessageBox.confirm(
+      `Are you sure you want to delete <b>${user.username}</b>?`,
+      "Confirm Deletion",
+      {
+        confirmButtonText: "Delete",
+        cancelButtonText: "Cancel",
+        type: "warning",
+        dangerouslyUseHTMLString: true,
+      },
+    );
+    await axios.delete(`http://localhost:5000/users/${user._id}`, {
+      headers: {
+        Authorization: `Bearer ${localStorage.getItem("token")}`,
+        "Content-Type": "application/json",
+      },
+    });
+    ElNotification({
+      title: "Success",
+      message: `User ${user.username} has been deleted.`,
+      type: "success",
+      duration: 3000,
+      position: "bottom-right",
+    });
+    fetchUsers(currentPage.value);
+  } catch (error) {
+    console.log(error);
+    if (error === "cancel") {
+      return;
+    }
+    ElNotification({
+      title: "Error",
+      message: "An unknown error occurred",
+      type: "error",
+      duration: 3000,
+      position: "bottom-right",
+    });
+    // allUsers.value = tmpAll;
+  }
+
   console.log("Delete user:", user);
 }
 </script>
@@ -82,7 +136,18 @@ function deleteUser(user: User) {
   <div class="p-6">
     <h2 class="mb-4 text-sm font-medium">Users</h2>
 
-    <div class="mb-4 flex items-center justify-end">
+    <div class="mb-4 flex items-center justify-between">
+      <el-select
+        v-model="limit"
+        placeholder="Select"
+        size="large"
+        style="width: 120px"
+        class="mr-4"
+      >
+        <el-option label="10 entries" :value="10" />
+        <el-option label="7 entries" :value="7" />
+        <el-option label="3 entries" :value="3" />
+      </el-select>
       <el-input
         v-model="search"
         placeholder="Search..."
@@ -162,14 +227,14 @@ function deleteUser(user: User) {
 
     <div class="mt-4 flex items-center justify-between">
       <span class="text-sm text-gray-500">
-        Showing {{ (currentPage - 1) * pageSize + 1 }} to
-        {{ Math.min(currentPage * pageSize, totalUsers) }} of
+        Showing {{ (currentPage - 1) * limit + 1 }} to
+        {{ Math.min(currentPage * limit, totalUsers) }} of
         {{ totalUsers }} entries
       </span>
       <el-pagination
         background
         layout="prev, pager, next"
-        :page-size="pageSize"
+        :page-size="limit"
         :total="totalUsers"
         @current-change="handlePageChange"
       />

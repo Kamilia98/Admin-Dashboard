@@ -10,6 +10,7 @@
   },
   "dependencies": {
     "@tailwindcss/vite": "^4.1.4",
+    "admin-dashboard": "file:",
     "axios": "^1.8.4",
     "element-plus": "^2.9.8",
     "lodash": "^4.17.21",

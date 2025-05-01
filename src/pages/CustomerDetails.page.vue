@@ -34,35 +34,48 @@
         </div>
       </div>
 
-      <!-- Orders Table -->
+      <!-- Custom Orders Table -->
       <div class="rounded-xl border bg-white p-6 shadow">
         <div class="mb-4 flex items-center justify-between">
           <h3 class="text-lg font-semibold">All Orders</h3>
-          <el-button :icon="FilterIcon"> Filter</el-button>
+          <el-button :icon="FilterIcon">Filter</el-button>
         </div>
-        <el-table :data="orders" border stripe>
-          <el-table-column prop="id" label="Order ID" width="100" />
-          <el-table-column prop="date" label="Date & Time" />
-          <el-table-column prop="country" label="Country" />
-          <el-table-column prop="payment" label="Payment Method" />
-          <el-table-column prop="amount" label="Amount" />
-          <el-table-column label="Status">
-            <template #default="{ row }">
-              <el-tag :type="statusTag(row.status)">
-                {{ row.status }}
-              </el-tag>
-            </template>
-          </el-table-column>
-        </el-table>
+        <Table
+          caption="Order List"
+          :headers="tableHeaders"
+          :items="orders"
+          row-key="id"
+          :loading="loading"
+        >
+          <template #column-status="{ value }">
+            <el-tag :type="statusTag(value)">
+              {{ value }}
+            </el-tag>
+          </template>
+        </Table>
       </div>
     </div>
   </div>
 </template>
 
 <script lang="ts" setup>
-import { ElTable, ElTableColumn, ElTag, ElButton } from 'element-plus';
+import { ElTag, ElButton } from 'element-plus';
+import Table from '../components/Table.vue';
 import FilterIcon from '../icons/FilterIcon.vue';
-const orders = [
+import { onMounted, ref } from 'vue';
+import { useRoute } from 'vue-router';
+import axios from 'axios';
+
+const tableHeaders = [
+  { key: 'orderNumber', label: 'Order ID', sortable: false },
+  { key: 'createdAt', label: 'Date & Time', sortable: false },
+  { key: 'country', label: 'Country', sortable: false },
+  { key: 'paymentMethod', label: 'Payment Method', sortable: false },
+  { key: 'total', label: 'Amount', sortable: false },
+  { key: 'status', label: 'Status', sortable: false },
+];
+
+const orderss = [
   {
     id: '#00745',
     date: 'Fri, 04-30-21',
@@ -96,7 +109,56 @@ const orders = [
     status: 'Canceled',
   },
 ];
-
+const loading = ref(false);
+// const router = useRouter();
+const route = useRoute();
+const orders = ref([]);
+const totalOrders = ref(0);
+// const fetchOrders = async () => {
+//   const token = localStorage.getItem('token');
+//   loading.value = true;
+//   try {
+//     const { data } = await axios.get('http://localhost:5000/orders', {
+//       headers: {
+//         Authorization: `Bearer ${token}`,
+//         'Content-Type': 'application/json',
+//       },
+//     });
+//     orders.value = data.data.orders;
+//     totalOrders.value = data.data.totalOrders;
+//   } catch (error) {
+//     console.error('Error fetching orders:', error);
+//   } finally {
+//     loading.value = false;
+//   }
+// };
+const fetchOrders = async (userId: string) => {
+  try {
+    loading.value = true;
+    const { data } = await axios.get(`http://localhost:5000/orders/`, {
+      headers: {
+        Authorization: `Bearer ${localStorage.getItem('token')}`,
+        'Content-Type': 'application/json',
+      },
+      params: {
+        userId,
+      },
+    });
+    loading.value = false;
+    // orders.value = data.data.orders;
+    orders.value = data.data.orders.map((order: any) => ({
+      ...order,
+    }));
+    console.log('🚀 ~ fetchOrders ~ orders:', orders.value);
+    totalOrders.value = data.data.totalOrders;
+  } catch (error) {
+    console.error('Error fetching orders:', error);
+    loading.value = false;
+  }
+};
+onMounted(() => {
+  fetchOrders(route.params.userId as string);
+});
 function statusTag(status: string) {
   switch (status) {
     case 'Delivered':
@@ -110,7 +172,3 @@ function statusTag(status: string) {
   }
 }
 </script>
-
-<style scoped>
-/* Optional: Style overrides if needed */
-</style>

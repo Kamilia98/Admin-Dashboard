@@ -84,7 +84,7 @@ function handlePageChange(page: number) {
 function handleRowClick(row: User) {
   console.log('Row clicked:', row);
   fetchOrders(row._id);
-  router.push({ name: 'customer-details', params: { id: row._id } });
+  router.push({ name: 'customer-details', params: { userId: row._id } });
 }
 
 function editUser(user: User) {
@@ -178,7 +178,8 @@ async function deleteUser(user: User) {
         size="large"
         style="width: 18rem"
       >
-        <template #prefix> <SearchIcon /> </template
+        <template #prefix
+          ><el-icon><Search /></el-icon> <SearchIcon /> </template
       ></el-input>
     </div>
     <el-skeleton v-if="loading" animated class="mt-12 mb-6">

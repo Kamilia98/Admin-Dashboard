@@ -1,6 +1,6 @@
 <script setup lang="ts">
-import { ArrowUp, ArrowDown } from "@element-plus/icons-vue";
-import { ElIcon, ElSkeleton } from "element-plus";
+import { ArrowUp, ArrowDown } from '@element-plus/icons-vue';
+import { ElIcon, ElSkeleton } from 'element-plus';
 
 defineProps<{
   caption: string;
@@ -11,7 +11,7 @@ defineProps<{
 }>();
 
 const emit = defineEmits<{
-  (e: "sort", payload: { key: string; direction: "asc" | "desc" }): void;
+  (e: 'sort', payload: { key: string; direction: 'asc' | 'desc' }): void;
 }>();
 </script>
 

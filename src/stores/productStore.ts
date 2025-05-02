@@ -16,6 +16,8 @@ export const useProductStore = defineStore('productStore', () => {
   const error = ref<string | null>(null);
   const currentPage = ref(1);
   const pageSize = ref(10);
+  const sortBy = ref('');
+  const sortOrder = ref<'asc' | 'desc'>('asc');
 
   // Actions
 
@@ -23,10 +25,16 @@ export const useProductStore = defineStore('productStore', () => {
     loading.value = true;
     try {
       const { data }: ProductApiResponse =
-        await productService.fetchAllProducts(page, pageSize.value);
+        await productService.fetchAllProducts(
+          page,
+          pageSize.value,
+          sortBy.value,
+          sortOrder.value,
+        );
       products.value = data.products;
       totalProducts.value = data.totalProducts;
       currentPage.value = page;
+      console.log('[product-Store -- Sorting]', sortBy.value, sortOrder.value);
       console.log('[Product store -- totalProducts]', data.totalProducts);
       console.log('[Product store -- all variants]', products.value);
     } catch (err: any) {
@@ -100,6 +108,8 @@ export const useProductStore = defineStore('productStore', () => {
     error,
     currentPage,
     pageSize,
+    sortBy,
+    sortOrder,
     getAllProducts,
     getProductById,
     removeProduct,

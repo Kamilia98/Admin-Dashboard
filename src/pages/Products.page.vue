@@ -7,7 +7,7 @@ import Search from '../components/Search.vue';
 
 const headers = [
   { key: 'name', label: 'Name', sortable: true },
-  { key: 'sku', label: 'SKU', sortable: true },
+  { key: 'sku', label: 'SKU', sortable: false },
   { key: 'color', label: 'Color', sortable: false },
   { key: 'quantity', label: 'Quantity', sortable: false },
   { key: 'price', label: 'Original Price', sortable: true },
@@ -17,6 +17,26 @@ const headers = [
 
 const productStore = useProductStore();
 
+const handleSort = ({
+  key,
+  direction,
+}: {
+  key: string;
+  direction: 'asc' | 'desc';
+}) => {
+  productStore.sortBy = key;
+  productStore.sortOrder = direction;
+
+  console.log(
+    'Sorting by:',
+    productStore.sortBy,
+    'in',
+    productStore.sortOrder,
+    'order',
+  );
+
+  productStore.getAllProducts();
+};
 onMounted(async () => {
   await productStore.getAllProducts();
   console.log('Products page mounted');
@@ -29,7 +49,7 @@ onMounted(async () => {
 });
 </script>
 <template>
-  <div class="p-8">
+  <div class="flex flex-col gap-8">
     <h1 class="mb-6 text-2xl font-bold">All Products</h1>
 
     <!-- Error message -->
@@ -43,6 +63,7 @@ onMounted(async () => {
       :items="productStore.products"
       :loading="productStore.loading"
       rowKey="_id"
+      @sort="handleSort"
     >
       <template #column-color="{ value }">
         <span

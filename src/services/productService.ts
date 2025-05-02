@@ -8,9 +8,14 @@ const BASE_URL = 'http://localhost:5000/products';
 
 / * * * Api calls * * * /;
 
-export const fetchAllProducts = async (page = 1, limit = 10) => {
+export const fetchAllProducts = async (
+  page = 1,
+  limit = 10,
+  sortBy = '',
+  order: 'asc' | 'desc' = 'asc',
+) => {
   const response = await axios.get<ProductApiResponse>(
-    `${BASE_URL}/color?page=${page}&limit=${limit}`,
+    `${BASE_URL}/color?page=${page}&limit=${limit}&sortBy=${sortBy}&order=${order}`,
   );
   console.log('[Product Service -- all data]', response.data);
   return response.data;

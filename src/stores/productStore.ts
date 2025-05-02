@@ -9,18 +9,25 @@ import { ref } from 'vue';
 
 export const useProductStore = defineStore('productStore', () => {
   // States
-  const products = ref<productVariant[]>([]); // Update to productVariant[]
+  const products = ref<productVariant[]>([]);
+  const totalProducts = ref(0);
   const product = ref<Product | null>(null);
   const loading = ref(false);
   const error = ref<string | null>(null);
+  const currentPage = ref(1);
+  const pageSize = ref(10);
 
   // Actions
-  const getAllProducts = async () => {
+
+  const getAllProducts = async (page = currentPage.value) => {
     loading.value = true;
     try {
       const { data }: ProductApiResponse =
-        await productService.fetchAllProducts();
+        await productService.fetchAllProducts(page, pageSize.value);
       products.value = data.products;
+      totalProducts.value = data.totalProducts;
+      currentPage.value = page;
+      console.log('[Product store -- totalProducts]', data.totalProducts);
       console.log('[Product store -- all variants]', products.value);
     } catch (err: any) {
       error.value = err.message || 'Failed to fetch products';
@@ -91,9 +98,12 @@ export const useProductStore = defineStore('productStore', () => {
     product,
     loading,
     error,
+    currentPage,
+    pageSize,
     getAllProducts,
     getProductById,
     removeProduct,
+    totalProducts,
     addProduct,
     updateProduct,
   };

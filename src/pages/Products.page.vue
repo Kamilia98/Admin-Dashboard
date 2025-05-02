@@ -2,6 +2,8 @@
 import { useProductStore } from '../stores/productStore';
 import { onMounted, toRaw } from 'vue';
 import Table from '../components/Table.vue';
+import Pagination from '../components/Pagination.vue';
+import Search from '../components/Search.vue';
 
 const headers = [
   { key: 'name', label: 'Name', sortable: true },
@@ -10,21 +12,19 @@ const headers = [
   { key: 'quantity', label: 'Quantity', sortable: false },
   { key: 'price', label: 'Original Price', sortable: true },
   { key: 'sale', label: 'Discount', sortable: true },
-  // { key: 'effectivePrice', label: 'Final Price', sortable: true },
   { key: 'categories', label: 'Category', sortable: false },
 ];
 
 const productStore = useProductStore();
 
 onMounted(async () => {
-  // Fetch products first
   await productStore.getAllProducts();
   console.log('Products page mounted');
-
   / * * * Only Log purpose * * * /;
+  console.log('Total Products:', productStore.totalProducts);
   const rawProducts = toRaw(productStore.products);
+  console.log('[Product-page -- productStore]', productStore);
   console.log('[Product-page -- Raw products]', rawProducts);
-
   console.log('[Product-page -- productStore]', productStore);
 });
 </script>
@@ -37,7 +37,6 @@ onMounted(async () => {
       {{ productStore.error }}
     </div>
 
-    <!-- Table Component -->
     <Table
       caption="All Products"
       :headers="headers"
@@ -58,5 +57,15 @@ onMounted(async () => {
       </template>
       <template #column-effectivePrice="{ value }"> ${{ value }} </template>
     </Table>
+    <Pagination
+      title="Product Pagination"
+      :current-page="productStore.currentPage"
+      :total-pages="
+        Math.ceil(productStore.totalProducts / productStore.pageSize)
+      "
+      :total-items="productStore.totalProducts"
+      :limit="productStore.pageSize"
+      @changePage="productStore.getAllProducts"
+    />
   </div>
 </template>

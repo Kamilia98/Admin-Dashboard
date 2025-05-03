@@ -1,7 +1,7 @@
 <template>
-  <div class="flex flex-row gap-6 p-6">
+  <div class="grid grid-cols-3 gap-2">
     <!-- Left Profile Section -->
-    <div class="w-full max-w-sm rounded-xl border bg-white p-6 shadow">
+    <div class="rounded-xl border bg-white p-6 shadow">
       <div class="flex flex-col items-center text-center">
         <img
           :src="user?.thumbnail"
@@ -28,7 +28,7 @@
     </div>
 
     <!-- Right Orders Section -->
-    <div class="flex-1 space-y-6">
+    <div class="col-span-2 space-y-6">
       <!-- Order Stats Card -->
       <div class="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
         <div class="rounded-xl border bg-white p-6 text-center shadow">

@@ -17,12 +17,12 @@ const emit = defineEmits<{
 
 <template>
   <div
-    class="overflow-hidden rounded-xl border border-gray-200 bg-white dark:border-gray-800 dark:bg-white/[0.03]"
+    class="overflow-hidden rounded-xl border custom-border bg-white dark:bg-white/[0.03]"
   >
     <div class="custom-scrollbar max-w-full overflow-x-auto">
       <table class="min-w-full">
         <caption
-          class="border-b border-gray-200 px-5 py-3 text-left text-theme-xl text-gray-800 sm:px-6 dark:border-gray-800 dark:text-white/90"
+          class="border-b custom-border px-5 py-3 text-left text-theme-xl text-gray-800 sm:px-6 dark:text-white/90"
         >
           {{
             caption
@@ -30,7 +30,7 @@ const emit = defineEmits<{
         </caption>
 
         <thead>
-          <tr class="border-b border-gray-200 dark:border-gray-700">
+          <tr class="border-b custom-border">
             <th
               v-for="(header, index) in headers"
               :key="index"
@@ -101,11 +101,7 @@ const emit = defineEmits<{
 
         <!-- Skeleton loader for rows only, shows when loading is true -->
         <tbody v-else class="divide-y divide-gray-200 dark:divide-gray-700">
-          <tr
-            v-for="i in 5"
-            :key="i"
-            class="border-t border-gray-100 dark:border-gray-800"
-          >
+          <tr v-for="i in 5" :key="i" class="border-t custom-border">
             <td
               v-for="(_, index) in headers"
               :key="index"

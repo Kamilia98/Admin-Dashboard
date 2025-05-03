@@ -35,6 +35,7 @@ export const useOrdersStore = defineStore('orders', () => {
   const totalOrders = ref(0);
   const loading = ref(false);
 
+  const userId = ref<string>('');
   const searchQuery = ref('');
   const statusFilter = ref<string[]>([]);
   const dateRange = ref<[string, string]>(['', '']);
@@ -139,7 +140,7 @@ export const useOrdersStore = defineStore('orders', () => {
   }) => {
     sortBy.value = key;
     sortOrder.value = direction;
-    fetchOrders(1);
+    fetchOrders(1, userId.value);
   };
 
   const handleReset = () => {
@@ -152,7 +153,7 @@ export const useOrdersStore = defineStore('orders', () => {
     maxAmount.value = 0;
     sortBy.value = 'createdAt';
     sortOrder.value = 'desc';
-    fetchOrders(1);
+    fetchOrders(1, userId.value);
   };
 
   const getNextStatusOptions = (status: OrderStatus) => {
@@ -206,6 +207,7 @@ export const useOrdersStore = defineStore('orders', () => {
     sortOrder,
     minAmount,
     maxAmount,
+    userId,
 
     // Actions
     fetchOrders,

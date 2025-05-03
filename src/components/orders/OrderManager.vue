@@ -31,13 +31,14 @@ onMounted(() => {
     '[Mounted] Component mounted. Fetching initial orders...',
     props.userId,
   );
+  if (props.userId) store.userId = props.userId;
   store.fetchOrders(1, props.userId);
-  console.log(props.userId);
 });
 watch(
   () => props.userId,
   (newUserId) => {
     console.log('[Watch] User ID changed:', newUserId);
+    if (newUserId) store.userId = newUserId;
     store.fetchOrders(1, newUserId);
   },
 );

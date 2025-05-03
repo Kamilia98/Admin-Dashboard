@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { onMounted } from 'vue';
+import { onMounted, watch } from 'vue';
 
 import {
   ElDatePicker,
@@ -27,8 +27,20 @@ const props = defineProps<{
 
 /* ========== Lifecycle ========== */
 onMounted(() => {
+  console.log(
+    '[Mounted] Component mounted. Fetching initial orders...',
+    props.userId,
+  );
   store.fetchOrders(1, props.userId);
+  console.log(props.userId);
 });
+watch(
+  () => props.userId,
+  (newUserId) => {
+    console.log('[Watch] User ID changed:', newUserId);
+    store.fetchOrders(1, newUserId);
+  },
+);
 </script>
 
 <template>

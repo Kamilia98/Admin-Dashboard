@@ -1,7 +1,7 @@
 <script setup lang="ts">
 /* ========== Imports ========== */
 import OrderStatistics from '../components/orders/OrderStatistics.vue';
-import OrdersTable from '../components/orders/OrderManager.vue';
+import OrdersManager from '../components/orders/OrderManager.vue';
 import Pagination from '../components/common/Pagination.vue';
 
 import { useOrdersStore } from '../stores/orderStore';
@@ -13,7 +13,7 @@ const store = useOrdersStore();
 <template>
   <div class="flex flex-col gap-8">
     <OrderStatistics />
-    <OrdersTable />
+    <OrdersManager />
     <Pagination
       title="orders"
       :currentPage="store.currentPage"

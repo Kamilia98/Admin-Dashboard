@@ -44,8 +44,6 @@ watch(
 </script>
 
 <template>
-  <!-- Search and Filter Buttons -->
-
   <!-- Orders Table -->
   <Table
     caption="Orders"

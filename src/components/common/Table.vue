@@ -17,16 +17,17 @@ const emit = defineEmits<{
 
 <template>
   <div
-    class="overflow-hidden rounded-xl border custom-border bg-white dark:bg-white/[0.03]"
+    class="overflow-hidden rounded-xl border custom-border bg-white px-[24px] py-[16px] dark:bg-white/[0.03]"
   >
     <div class="custom-scrollbar max-w-full overflow-x-auto">
-      <table class="min-w-full">
+      <table class="min-w-full px-[24px] py-[16px]">
         <caption
-          class="border-b custom-border px-5 py-3 text-left text-theme-xl text-gray-800 sm:px-6 dark:text-white/90"
+          class="border-b custom-border text-left text-gray-800 dark:text-white/90"
         >
-          {{
-            caption
-          }}
+          <div class="mb-4 flex items-center justify-between">
+            <span class="text-theme-xl font-semibold">{{ caption }}</span>
+            <slot name="actions"></slot>
+          </div>
         </caption>
 
         <thead>

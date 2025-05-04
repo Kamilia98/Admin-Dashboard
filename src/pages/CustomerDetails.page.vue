@@ -1,7 +1,9 @@
 <template>
-  <div class="flex flex-row gap-6 p-6">
+  <div class="flex flex-row gap-6">
     <!-- Left Profile Section -->
-    <div class="w-full max-w-sm rounded-xl border bg-white p-6 shadow">
+    <div
+      class="w-full max-w-sm rounded-xl border custom-border bg-white p-6 shadow"
+    >
       <div class="flex flex-col items-center text-center">
         <img
           :src="user?.thumbnail"
@@ -31,14 +33,18 @@
     <div class="flex-1 space-y-6">
       <!-- Order Stats Card -->
       <div class="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
-        <div class="rounded-xl border bg-white p-6 text-center shadow">
+        <div
+          class="rounded-xl border custom-border bg-white p-6 text-center shadow"
+        >
           <h4 class="text-sm text-gray-500">Total Order</h4>
           <div class="mt-2 text-3xl font-bold">
             {{ orderStore.orders.length }}
           </div>
           <!-- <p class="mt-1 text-xs text-gray-400">Avg Order Value: $200</p> -->
         </div>
-        <div class="rounded-xl border bg-white p-6 text-center shadow">
+        <div
+          class="rounded-xl border custom-border bg-white p-6 text-center shadow"
+        >
           <h4 class="text-sm text-gray-500">Total Amount</h4>
           <div class="mt-2 text-3xl font-bold">{{ 5138 }}</div>
           <!-- <p class="mt-1 text-xs text-gray-400">Avg Order Value: $200</p> -->
@@ -66,7 +72,11 @@
         </Table>
       </div> -->
       <!-- Reusable Order Table Component -->
-      <OrderManager :userId="user?._id" />
+      <div
+        class="flex flex-col gap-4 rounded-xl border custom-border bg-white p-6 shadow"
+      >
+        <OrderManager :userId="user?._id" />
+      </div>
     </div>
   </div>
 </template>

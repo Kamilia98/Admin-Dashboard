@@ -50,6 +50,9 @@ import OrdersIcon from "./OrdersIcon.vue";
 import FilterIcon from "./FilterIcon.vue";
 import SearchIcon from "./SearchIcon.vue";
 import UserIcon from "./UserIcon.vue";
+import MoneyIcon from "./MoneyIcon.vue";
+import LanguageIcon from "./LanguageIcon.vue";
+import ShippingIcon from "./ShippingIcon.vue";
 export {
   BellIcon,
   BarChartIcon,
@@ -103,4 +106,7 @@ export {
   FilterIcon,
   SearchIcon,
   UserIcon,
+  MoneyIcon,
+  LanguageIcon,
+  ShippingIcon,
 };

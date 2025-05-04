@@ -1,8 +1,8 @@
 <script setup lang="ts">
 import { computed, ref, onMounted } from 'vue';
-import { BoxCubeIcon, MoneyIcon, OrdersIcon, UserGroupIcon } from '../../icons';
+import { OrdersIcon, UserGroupIcon } from '../../icons';
 import { ElIcon } from 'element-plus';
-import { Top, Bottom } from '@element-plus/icons-vue';
+import { Top, Bottom, Minus } from '@element-plus/icons-vue';
 import type { AnalyticsData } from '../../types/analytics-data';
 import axios from 'axios';
 
@@ -57,44 +57,29 @@ const cardList = computed(() => [
     percentageChange: analyticsData.value.trends?.orders?.percentageChange ?? 0,
     icon: OrdersIcon,
   },
-  {
-    label: 'Sales',
-    value: analyticsData.value.totalSales,
-    trend: analyticsData.value.trends?.sales?.trend,
-    percentageChange: analyticsData.value.trends?.sales?.percentageChange ?? 0,
-    icon: MoneyIcon,
-  },
-  {
-    label: 'Products Sold',
-    value: analyticsData.value.totalProducts,
-    trend: analyticsData.value.trends?.products?.trend,
-    percentageChange:
-      analyticsData.value.trends?.products?.percentageChange ?? 0,
-    icon: BoxCubeIcon,
-  },
 ]);
 </script>
 
 <template>
-  <div
-    class="grid grid-cols-1 gap-[1px] overflow-hidden rounded-2xl border custom-border bg-gray-200 sm:grid-cols-2 dark:bg-gray-800"
-  >
+  <div class="grid grid-cols-1 gap-4 sm:grid-cols-2 md:gap-6">
     <!-- Card Template -->
     <template v-for="(card, index) in cardList" :key="index">
-      <div class="bg-white p-5 md:p-6 dark:bg-white/[0.03]">
+      <div
+        class="rounded-2xl border border-gray-200 bg-white p-5 md:p-6 dark:border-gray-800 dark:bg-white/[0.03]"
+      >
         <div
-          class="flex h-12 w-12 items-center justify-center rounded-xl bg-gray-100 dark:bg-gray-800"
+          class="flex h-12 w-12 items-center justify-center rounded-xl bg-gray-100 dark:bg-gray-800 dark:text-gray-400"
         >
           <component :is="card.icon" />
         </div>
 
-        <div class="mt-4 flex items-end justify-between">
+        <div class="mt-5 flex items-end justify-between">
           <div>
             <span class="text-sm text-gray-500 dark:text-gray-400">
               {{ card.label }}
             </span>
             <h4
-              class="mt-1 text-title-sm font-bold text-gray-800 dark:text-white/90"
+              class="mt-2 text-title-sm font-bold text-gray-800 dark:text-white/90"
             >
               {{ card.value }}
             </h4>
@@ -107,12 +92,16 @@ const cardList = computed(() => [
                 card.trend === 'increasing',
               'bg-error-50 text-error-600 dark:bg-error-500/15 dark:text-error-500':
                 card.trend === 'decreasing',
+              'bg-gray-100 text-gray-500 dark:bg-white/10 dark:text-gray-400':
+                card.trend === 'stable',
             }"
             :title="`${card.percentageChange}% ${card.trend}`"
           >
             <ElIcon>
               <Top v-if="card.trend === 'increasing'" />
               <Bottom v-else-if="card.trend === 'decreasing'" />
+              <Minus v-else />
+              <!-- You can use a horizontal line icon here -->
             </ElIcon>
             {{ Number(card.percentageChange) > 0 ? '+' : ''
             }}{{ card.percentageChange }}%

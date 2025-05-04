@@ -22,7 +22,8 @@ interface User {
   username: string;
   email: string;
   thumbnail: string;
-  phone: number;
+  createdAt: string;
+  phone: number | string;
   role: string;
   _id: string;
 }
@@ -40,7 +41,8 @@ const headers = [
   { key: 'username', label: 'User', sortable: false },
   { key: 'email', label: 'Email', sortable: false },
   { key: 'phone', label: 'Phone', sortable: false },
-  { key: 'role', label: 'Role', sortable: false },
+  { key: 'gender', label: 'Gender', sortable: false },
+  { key: 'createdAt', label: 'Date & Time', sortable: false },
   { key: 'actions', label: 'Actions', sortable: false },
 ];
 // const tableHeaders = [
@@ -64,10 +66,23 @@ const fetchUsers = async (page: number) => {
         page,
         limit: limit.value,
         search: search.value,
+        role: 'USER',
       },
     });
     allUsers.value = data.data.users;
+    allUsers.value.forEach((user: User) => {
+      user.phone = String(user.phone || 'N/A'); // Set default value for phone if undefined
+    });
+    allUsers.value.forEach((user: User) => {
+      const formatted = new Date(user.createdAt).toLocaleString('en-US', {
+        year: 'numeric',
+        month: 'long',
+        day: 'numeric',
+      });
+      user.createdAt = formatted;
+    });
     totalUsers.value = data.data.totalUsers;
+    console.log('Fetched users:', allUsers.value);
   } catch (error) {
     console.error('Error fetching users:', error);
   } finally {
@@ -192,7 +207,7 @@ async function deleteUser(user: User) {
     ></el-input>
   </div>
   <Table
-    caption="Users"
+    caption="Customers"
     :headers="headers"
     :items="paginatedUsers"
     :loading="loading"

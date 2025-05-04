@@ -1,19 +1,19 @@
 <script lang="ts" setup>
 import { ref, computed, onMounted, watch } from 'vue';
 import {
-  ElTable,
-  ElTableColumn,
-  ElPagination,
+  ElIcon,
   ElButton,
   ElInput,
-  ElSkeleton,
-  ElSkeletonItem,
   ElNotification,
   ElMessageBox,
   ElSelect,
   ElOption,
 } from 'element-plus';
 import axios from 'axios';
+import { Delete } from '@element-plus/icons-vue';
+import { View } from '@element-plus/icons-vue';
+import Table from '../components/common/Table.vue';
+import Pagination from '../components/common/Pagination.vue';
 import debounce from 'lodash/debounce';
 import { SearchIcon } from '../icons';
 import { useRouter } from 'vue-router';
@@ -36,6 +36,21 @@ const search = ref('');
 const Orders = ref([]);
 const totalOrders = ref(0);
 
+const headers = [
+  { key: 'username', label: 'User', sortable: false },
+  { key: 'email', label: 'Email', sortable: false },
+  { key: 'phone', label: 'Phone', sortable: false },
+  { key: 'role', label: 'Role', sortable: false },
+  { key: 'actions', label: 'Actions', sortable: false },
+];
+// const tableHeaders = [
+//   { key: 'username', label: 'User', sortable: false },
+//   { key: 'email', label: 'Email', sortable: false },
+//   { key: 'createdAt', label: 'Date & Time', sortable: false },
+//   { key: 'phone', label: 'Phone', sortable: false },
+//   { key: 'role', label: 'Role', sortable: false },
+//   { key: 'status', label: 'Status', sortable: false },
+// ];
 const fetchUsers = async (page: number) => {
   const token = localStorage.getItem('token');
   loading.value = true;
@@ -87,10 +102,10 @@ function handleRowClick(row: User) {
   router.push({ name: 'customer-details', params: { userId: row._id } });
 }
 
-function editUser(user: User) {
-  console.log('Edit user:', user);
-  router.push({ name: 'edit-customers', params: { id: user._id } });
-}
+// function editUser(user: User) {
+//   console.log('Edit user:', user);
+//   router.push({ name: 'edit-customers', params: { id: user._id } });
+// }
 
 const fetchOrders = async (userId: string) => {
   try {
@@ -111,8 +126,6 @@ const fetchOrders = async (userId: string) => {
 };
 
 async function deleteUser(user: User) {
-  // const tmpAll = allUsers.value;
-  // allUsers.value = allUsers.value.filter((u) => u._id !== user._id);
   try {
     await ElMessageBox.confirm(
       `Are you sure you want to delete <b>${user.username}</b>?`,
@@ -150,15 +163,12 @@ async function deleteUser(user: User) {
       duration: 3000,
       position: 'bottom-right',
     });
-    // allUsers.value = tmpAll;
   }
 
   console.log('Delete user:', user);
 }
 </script>
 <template>
-  <h2 class="mb-4 text-sm font-medium">Users</h2>
-
   <div class="mb-4 flex items-center justify-between">
     <el-select
       v-model="limit"
@@ -181,7 +191,46 @@ async function deleteUser(user: User) {
         ><el-icon><Search /></el-icon> <SearchIcon /> </template
     ></el-input>
   </div>
-  <el-skeleton v-if="loading" animated class="mt-12 mb-6">
+  <Table
+    caption="Users"
+    :headers="headers"
+    :items="paginatedUsers"
+    :loading="loading"
+    row-key="_id"
+  >
+    <!-- User column -->
+    <template #column-username="{ item }">
+      <div class="flex items-center gap-3">
+        <img :src="item.thumbnail" class="h-8 w-8 rounded-full" />
+        <span>{{ item.username }}</span>
+      </div>
+    </template>
+    <!-- Actions column -->
+    <template #column-actions="{ item }">
+      <div class="flex gap-4">
+        <el-button
+          size="small"
+          type="danger"
+          @click.stop="deleteUser(item as User)"
+        >
+          <el-icon><Delete /></el-icon>
+        </el-button>
+        <el-button size="small" @click.stop="handleRowClick(item as User)">
+          <el-icon class="cursor-pointer" size="16"><View /></el-icon>
+        </el-button>
+      </div>
+    </template>
+  </Table>
+  <Pagination
+    title="User Pagination"
+    :current-page="currentPage"
+    :total-pages="Math.ceil(totalUsers / limit)"
+    :total-items="totalUsers"
+    :limit="limit"
+    @changePage="handlePageChange"
+  ></Pagination>
+
+  <!-- <el-skeleton v-if="loading" animated class="mt-12 mb-6">
     <template #template>
       <div v-for="i in 10" :key="i" class="flex items-center gap-8 py-4">
         <el-skeleton-item variant="circle" style="width: 32px; height: 32px" />
@@ -203,8 +252,8 @@ async function deleteUser(user: User) {
         </div>
       </div>
     </template>
-  </el-skeleton>
-
+  </el-skeleton> -->
+  <!-- 
   <el-table
     v-else
     :data="paginatedUsers"
@@ -238,9 +287,9 @@ async function deleteUser(user: User) {
         </div>
       </template>
     </el-table-column>
-  </el-table>
+  </el-table> -->
 
-  <div class="mt-4 flex items-center justify-between">
+  <!-- <div class="mt-4 flex items-center justify-between">
     <span class="text-sm text-gray-500">
       Showing {{ (currentPage - 1) * limit + 1 }} to
       {{ Math.min(currentPage * limit, totalUsers) }} of
@@ -253,5 +302,5 @@ async function deleteUser(user: User) {
       :total="totalUsers"
       @current-change="handlePageChange"
     />
-  </div>
+  </div> -->
 </template>

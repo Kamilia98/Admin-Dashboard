@@ -1,6 +1,6 @@
 <script setup lang="ts">
-import { ref, onMounted } from "vue";
-import { useRoute, useRouter } from "vue-router";
+import { ref, onMounted } from 'vue';
+import { useRoute, useRouter } from 'vue-router';
 import {
   ElForm,
   ElInput,
@@ -10,8 +10,8 @@ import {
   ElButton,
   ElSkeleton,
   ElNotification,
-} from "element-plus";
-import axios from "axios";
+} from 'element-plus';
+import axios from 'axios';
 
 const route = useRoute();
 const router = useRouter();
@@ -22,8 +22,8 @@ onMounted(async () => {
     `http://localhost:5000/users/${route.params.id}`,
     {
       headers: {
-        Authorization: `Bearer ${localStorage.getItem("token")}`,
-        "Content-Type": "application/json",
+        Authorization: `Bearer ${localStorage.getItem('token')}`,
+        'Content-Type': 'application/json',
       },
     },
   );
@@ -31,29 +31,29 @@ onMounted(async () => {
 });
 
 const saveChanges = async () => {
-  console.log("user.value", user.value);
+  console.log('user.value', user.value);
   try {
     await axios.patch(
       `http://localhost:5000/users/${route.params.id}`,
       user.value,
     );
     ElNotification({
-      title: "Success",
+      title: 'Success',
       message: `User ${user.value.username} has Edited Successfully.`,
-      type: "success",
+      type: 'success',
       duration: 3000,
-      position: "bottom-right",
+      position: 'bottom-right',
     });
     router.back();
   } catch (error) {
     ElNotification({
-      title: "Error",
-      message: "An unknown error occurred",
-      type: "error",
+      title: 'Error',
+      message: 'An unknown error occurred',
+      type: 'error',
       duration: 3000,
-      position: "bottom-right",
+      position: 'bottom-right',
     });
-    console.error("Error saving changes:", error);
+    console.error('Error saving changes:', error);
   }
 };
 

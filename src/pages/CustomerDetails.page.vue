@@ -1,7 +1,7 @@
 <template>
   <div class="grid grid-cols-3 gap-2">
     <!-- Left Profile Section -->
-    <div class="rounded-xl border bg-white p-6 shadow">
+    <div class="rounded-xl border custom-border bg-white p-6 shadow">
       <div class="flex flex-col items-center text-center">
         <img
           :src="user?.thumbnail"

@@ -47,7 +47,13 @@ export const useOrdersStore = defineStore('orders', () => {
   const maxAmount = ref(0);
 
   const totalRevenue = ref(0);
-  const averageOrderValue = ref(0);
+  const statusCounts = ref<Record<OrderStatus, number>>({
+    [OrderStatus.pending]: 0,
+    [OrderStatus.processing]: 0,
+    [OrderStatus.shipped]: 0,
+    [OrderStatus.delivered]: 0,
+    [OrderStatus.canceled]: 0,
+  });
 
   // --- Actions ---
   const fetchOrderAnalytics = async () => {
@@ -55,21 +61,32 @@ export const useOrdersStore = defineStore('orders', () => {
       const data = await fetchOrderAnalyticsService();
       totalOrders.value = data.totalOrders;
       totalRevenue.value = data.totalRevenue;
-      averageOrderValue.value = data.averageOrderValue;
+      statusCounts.value = { ...data.statusCounts };
+      console.log(data);
     } catch (error) {
       console.error('Error loading order analytics:', error);
     }
   };
 
-  const fetchOrders = async (page = 1, userId?: string) => {
+  const fetchOrders = async ({
+    page = 1,
+    limit = ORDER_LIMIT,
+    sortByParam = sortBy.value,
+    userId,
+  }: {
+    page?: number;
+    limit?: number;
+    sortByParam?: string;
+    userId?: string;
+  } = {}) => {
     loading.value = true;
     try {
       const params: Record<string, any> = {
-        limit: ORDER_LIMIT,
+        limit,
         page,
         startDate: startDateFilter.value,
         endDate: endDateFilter.value,
-        sortBy: sortBy.value,
+        sortBy: sortByParam,
         sortOrder: sortOrder.value,
         minAmount: minAmount.value,
         maxAmount: maxAmount.value,
@@ -140,7 +157,7 @@ export const useOrdersStore = defineStore('orders', () => {
   }) => {
     sortBy.value = key;
     sortOrder.value = direction;
-    fetchOrders(1, userId.value);
+    fetchOrders({ page: 1, userId: userId.value });
   };
 
   const handleReset = () => {
@@ -153,7 +170,7 @@ export const useOrdersStore = defineStore('orders', () => {
     maxAmount.value = 0;
     sortBy.value = 'createdAt';
     sortOrder.value = 'desc';
-    fetchOrders(1, userId.value);
+    fetchOrders({ page: 1, userId: userId.value });
   };
 
   const getNextStatusOptions = (status: OrderStatus) => {
@@ -192,7 +209,7 @@ export const useOrdersStore = defineStore('orders', () => {
 
     // State
     totalRevenue,
-    averageOrderValue,
+    statusCounts,
     orders,
     currentPage,
     totalPages,

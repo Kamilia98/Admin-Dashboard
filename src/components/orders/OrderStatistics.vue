@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { onMounted } from 'vue';
+import { computed, onMounted } from 'vue';
 import { BoxCubeIcon } from '../../icons';
 import { useOrdersStore } from '../../stores/orderStore';
 
@@ -7,6 +7,10 @@ const store = useOrdersStore();
 
 onMounted(() => {
   store.fetchOrderAnalytics();
+});
+
+const averageOrderValue = computed(() => {
+  return store.totalOrders > 0 ? store.totalRevenue / store.totalOrders : 0;
 });
 </script>
 
@@ -81,7 +85,7 @@ onMounted(() => {
           <h4
             class="mt-2 text-title-sm font-bold text-gray-800 dark:text-white/90"
           >
-            ${{ store.averageOrderValue.toFixed(2) }}
+            ${{ averageOrderValue }}
           </h4>
         </div>
       </div>

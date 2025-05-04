@@ -51,10 +51,9 @@ import FilterIcon from './FilterIcon.vue';
 import SearchIcon from './SearchIcon.vue';
 import UserIcon from './UserIcon.vue';
 import OpenSidebarIcon from './OpenSidebarIcon.vue';
-
 import CloseSidebarIcon from './CloseSidebarIcon.vue';
-
 import DotsIcons from './DotsIcons.vue';
+
 export {
   BellIcon,
   BarChartIcon,

@@ -3,11 +3,13 @@
     <app-sidebar />
     <Backdrop />
     <div
-      class="flex-1 transition-all duration-300 ease-in-out"
-      :class="[isExpanded || isHovered ? 'lg:ml-[290px]' : 'lg:ml-[90px]']"
+      :class="[
+        'flex-1 transition-all duration-300 ease-in-out',
+        isExpanded || isHovered ? 'lg:ml-[290px]' : 'lg:ml-[90px]',
+      ]"
     >
       <app-header />
-      <main class="mx-auto max-w-(--breakpoint-2xl) p-4 md:p-6">
+      <main class="mx-auto h-full max-w-(--breakpoint-2xl) p-4 md:p-6">
         <slot></slot>
       </main>
     </div>

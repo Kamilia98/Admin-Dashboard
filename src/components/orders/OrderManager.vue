@@ -26,6 +26,7 @@ const props = defineProps<{
 }>();
 
 /* ========== Lifecycle ========== */
+
 onMounted(() => {
   console.log(
     '[Mounted] Component mounted. Fetching initial orders...',

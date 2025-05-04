@@ -1,6 +1,6 @@
 <script setup lang="ts">
-import { ArrowUp, ArrowDown } from "@element-plus/icons-vue";
-import { ElIcon, ElSkeleton } from "element-plus";
+import { ArrowUp, ArrowDown } from '@element-plus/icons-vue';
+import { ElIcon, ElSkeleton } from 'element-plus';
 
 defineProps<{
   caption: string;
@@ -11,26 +11,27 @@ defineProps<{
 }>();
 
 const emit = defineEmits<{
-  (e: "sort", payload: { key: string; direction: "asc" | "desc" }): void;
+  (e: 'sort', payload: { key: string; direction: 'asc' | 'desc' }): void;
 }>();
 </script>
 
 <template>
   <div
-    class="overflow-hidden rounded-xl border border-gray-200 bg-white dark:border-gray-800 dark:bg-white/[0.03]"
+    class="overflow-hidden rounded-xl border custom-border bg-white px-[24px] py-[16px] dark:bg-white/[0.03]"
   >
     <div class="custom-scrollbar max-w-full overflow-x-auto">
-      <table class="min-w-full">
+      <table class="min-w-full px-[24px] py-[16px]">
         <caption
-          class="border-b border-gray-200 px-5 py-3 text-left text-theme-xl text-gray-800 sm:px-6 dark:border-gray-800 dark:text-white/90"
+          class="border-b custom-border text-left text-gray-800 dark:text-white/90"
         >
-          {{
-            caption
-          }}
+          <div class="mb-4 flex items-center justify-between">
+            <span class="text-theme-xl font-semibold">{{ caption }}</span>
+            <slot name="actions"></slot>
+          </div>
         </caption>
 
         <thead>
-          <tr class="border-b border-gray-200 dark:border-gray-700">
+          <tr class="border-b custom-border">
             <th
               v-for="(header, index) in headers"
               :key="index"
@@ -101,11 +102,7 @@ const emit = defineEmits<{
 
         <!-- Skeleton loader for rows only, shows when loading is true -->
         <tbody v-else class="divide-y divide-gray-200 dark:divide-gray-700">
-          <tr
-            v-for="i in 5"
-            :key="i"
-            class="border-t border-gray-100 dark:border-gray-800"
-          >
+          <tr v-for="i in 5" :key="i" class="border-t custom-border">
             <td
               v-for="(_, index) in headers"
               :key="index"

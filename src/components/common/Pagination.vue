@@ -1,6 +1,6 @@
 <script setup lang="ts">
-import { ElIcon } from "element-plus";
-import { ArrowRight, ArrowLeft } from "@element-plus/icons-vue";
+import { ElIcon } from 'element-plus';
+import { ArrowRight, ArrowLeft } from '@element-plus/icons-vue';
 
 const props = defineProps<{
   title: string;
@@ -10,11 +10,11 @@ const props = defineProps<{
   limit: number;
 }>();
 
-const emit = defineEmits(["changePage"]);
+const emit = defineEmits(['changePage']);
 
 const changePage = (page: number) => {
   if (page >= 1 && page <= props.totalPages) {
-    emit("changePage", page);
+    emit('changePage', page);
   }
 };
 </script>

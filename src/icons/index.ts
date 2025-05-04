@@ -53,6 +53,10 @@ import UserIcon from "./UserIcon.vue";
 import MoneyIcon from "./MoneyIcon.vue";
 import LanguageIcon from "./LanguageIcon.vue";
 import ShippingIcon from "./ShippingIcon.vue";
+import OpenSidebarIcon from './OpenSidebarIcon.vue';
+import CloseSidebarIcon from './CloseSidebarIcon.vue';
+import DotsIcons from './DotsIcons.vue';
+
 export {
   BellIcon,
   BarChartIcon,
@@ -109,4 +113,8 @@ export {
   MoneyIcon,
   LanguageIcon,
   ShippingIcon,
+  OpenSidebarIcon,
+  CloseSidebarIcon,
+  DotsIcons,
+
 };

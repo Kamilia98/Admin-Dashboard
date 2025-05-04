@@ -1,7 +1,7 @@
-@import url("https://fonts.googleapis.com/css2?family=Outfit:wght@100..900&display=swap")
+@import url('https://fonts.googleapis.com/css2?family=Outfit:wght@100..900&display=swap')
 layer(base);
 
-@import "tailwindcss";
+@import 'tailwindcss';
 
 @custom-variant dark (&:is(.dark *));
 .el-button--danger.is-plain {
@@ -194,12 +194,12 @@ html.dark {
 /* status-colors.css */
 
 .status-tag {
-  width: 98px;
+  width: 120px;
   padding: 4px 12px !important;
   text-align: start !important;
   display: flex !important;
   justify-content: start !important;
-  box-sizing: content-box !important;
+  height: max-content !important;
 
   span {
     font-size: 14px;
@@ -274,14 +274,16 @@ html.dark .status-tag {
   }
 
   button:not(:disabled),
-  [role="button"]:not(:disabled) {
+  [role='button']:not(:disabled) {
     cursor: pointer;
   }
   body {
     @apply relative z-1 bg-gray-50 font-outfit font-normal;
   }
 }
-
+@utility custom-border {
+  @apply border-gray-200 dark:border-gray-800;
+}
 @utility menu-item {
   @apply relative flex w-full items-center gap-3 rounded-lg px-3 py-2 text-theme-sm font-medium;
 }
@@ -371,10 +373,10 @@ html.dark .status-tag {
 
 @layer utilities {
   /* For Remove Date Icon */
-  input[type="date"]::-webkit-inner-spin-button,
-  input[type="time"]::-webkit-inner-spin-button,
-  input[type="date"]::-webkit-calendar-picker-indicator,
-  input[type="time"]::-webkit-calendar-picker-indicator {
+  input[type='date']::-webkit-inner-spin-button,
+  input[type='time']::-webkit-inner-spin-button,
+  input[type='date']::-webkit-calendar-picker-indicator,
+  input[type='time']::-webkit-calendar-picker-indicator {
     display: none;
     -webkit-appearance: none;
   }

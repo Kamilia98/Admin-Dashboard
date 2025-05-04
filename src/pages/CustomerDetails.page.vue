@@ -3,11 +3,19 @@
     <!-- Left Profile Section -->
     <div class="rounded-xl border custom-border bg-white p-6 shadow">
       <div class="flex flex-col items-center text-center">
-        <img
-          :src="user?.thumbnail"
-          alt="User"
-          class="mb-4 h-20 w-20 rounded-full"
-        />
+        <div class="relative inline-block">
+          <img
+            :src="user?.thumbnail"
+            alt="User"
+            class="mb-4 h-20 w-20 rounded-full"
+          />
+          <el-icon
+            v-if="user?.isEstablished"
+            class="absolute -top-7 -right-6 rounded-full bg-transparent ring-2 ring-transparent"
+          >
+            <CircleCheckFilled class="text-green-600" />
+          </el-icon>
+        </div>
         <h2 class="text-lg font-semibold">{{ user?.username }}</h2>
         <p class="text-sm text-gray-500">{{ user?.email }}</p>
         <p class="text-sm text-gray-500">{{ user?.phone }}</p>
@@ -38,14 +46,22 @@
           <div class="mt-2 text-3xl font-bold">
             {{ orderStore.orders.length }}
           </div>
-          <!-- <p class="mt-1 text-xs text-gray-400">Avg Order Value: $200</p> -->
         </div>
         <div
           class="rounded-xl border custom-border bg-white p-6 text-center shadow"
         >
           <h4 class="text-sm text-gray-500">Total Amount</h4>
-          <div class="mt-2 text-3xl font-bold">{{ 5138 }}</div>
-          <!-- <p class="mt-1 text-xs text-gray-400">Avg Order Value: $200</p> -->
+          <div class="mt-2 text-3xl font-bold">
+            {{ totalAmount.toFixed(2) }}
+          </div>
+        </div>
+        <div
+          class="rounded-xl border custom-border bg-white p-6 text-center shadow"
+        >
+          <h4 class="text-sm text-gray-500">Average Order Value</h4>
+          <div class="mt-2 text-3xl font-bold">
+            {{ (totalAmount / (orderStore.orders.length || 1)).toFixed(2) }}
+          </div>
         </div>
       </div>
 
@@ -80,23 +96,25 @@
 </template>
 
 <script lang="ts" setup>
-import { ElTag, ElButton } from 'element-plus';
-import Table from '../components/common/Table.vue';
+// import { ElTag, ElButton } from 'element-plus';
+// import Table from '../components/common/Table.vue';
+// import FilterIcon from '../icons/FilterIcon.vue';
+import { CircleCheckFilled } from '@element-plus/icons-vue';
+import { ElIcon } from 'element-plus';
 import OrderManager from '../components/orders/OrderManager.vue';
-import FilterIcon from '../icons/FilterIcon.vue';
-import { onMounted, ref } from 'vue';
+import { computed, onMounted, ref } from 'vue';
 import { useRoute } from 'vue-router';
 import axios from 'axios';
 import { useOrdersStore } from '../stores/orderStore';
 
-const tableHeaders = [
-  { key: 'orderNumber', label: 'Order ID', sortable: false },
-  { key: 'createdAt', label: 'Date & Time', sortable: false },
-  { key: 'country', label: 'Country', sortable: false },
-  { key: 'paymentMethod', label: 'Payment Method', sortable: false },
-  { key: 'total', label: 'Amount', sortable: false },
-  { key: 'status', label: 'Status', sortable: false },
-];
+// const tableHeaders = [
+//   { key: 'orderNumber', label: 'Order ID', sortable: false },
+//   { key: 'createdAt', label: 'Date & Time', sortable: false },
+//   { key: 'country', label: 'Country', sortable: false },
+//   { key: 'paymentMethod', label: 'Payment Method', sortable: false },
+//   { key: 'total', label: 'Amount', sortable: false },
+//   { key: 'status', label: 'Status', sortable: false },
+// ];
 interface User {
   username: string;
   email: string;
@@ -106,15 +124,25 @@ interface User {
   _id: string;
   createdAt: string;
   favourites: [];
+  isEstablished: boolean;
 }
 
+// const orders = ref([]);
+// const totalOrders = ref(0);
 const orderStore = useOrdersStore();
 const loading = ref(false);
 const route = useRoute();
 const user = ref<User | null>(null);
-let totalAmount = ref(0);
-const orders = ref([]);
-const totalOrders = ref(0);
+const totalAmount = computed(() => {
+  return orderStore.orders.reduce((acc: number, order: any) => {
+    return acc + Number(order.totalAmount || 0);
+  }, 0);
+});
+// const isEstablished = computed(() => {
+//   return new Date(user.value?.createdAt) < new Date('2025-04-20')
+//     ? true
+//     : false;
+// });
 
 const fetchUser = async (userId: string) => {
   try {
@@ -135,6 +163,8 @@ const fetchUser = async (userId: string) => {
         day: 'numeric',
       },
     );
+    user.value!.isEstablished =
+      new Date(user.value!.createdAt) < new Date('2025-04-20');
     user.value!.createdAt = formatted;
     console.log('🚀 ~ fetchUser ~ user:', data.data.user);
     console.log(
@@ -170,49 +200,59 @@ const fetchUser = async (userId: string) => {
 //   }
 // };
 
-const fetchOrders = async (userId: string) => {
-  try {
-    loading.value = true;
-    const { data } = await axios.get(`http://localhost:5000/orders/`, {
-      headers: {
-        Authorization: `Bearer ${localStorage.getItem('token')}`,
-        'Content-Type': 'application/json',
-      },
-      params: {
-        userId,
-      },
-    });
-    loading.value = false;
-    orders.value = data.data.orders;
-    // orders.value = data.data.orders.map((order: any) => ({
-    //   ...order,
-    // }));
-    console.log('🚀 ~ fetchOrders ~ orders:', orders.value);
-    totalOrders.value = data.data.totalOrders;
-    totalAmount.value = orders.value.reduce((acc: number, order: any) => {
-      return acc + Number(order.total || 0);
-    }, 0);
-    console.log('🚀 ~ fetchOrders ~ totalAmount:', totalAmount.value);
-  } catch (error) {
-    console.error('Error fetching orders:', error);
-    loading.value = false;
-  }
-};
+// const fetchOrders = async (userId: string) => {
+//   try {
+//     loading.value = true;
+//     const { data } = await axios.get(`http://localhost:5000/orders/`, {
+//       headers: {
+//         Authorization: `Bearer ${localStorage.getItem('token')}`,
+//         'Content-Type': 'application/json',
+//       },
+//       params: {
+//         userId,
+//       },
+//     });
+//     loading.value = false;
+//     orders.value = data.data.orders;
+//     // orders.value = data.data.orders.map((order: any) => ({
+//     //   ...order,
+//     // }));
+//     console.log('🚀 ~ fetchOrders ~ orders:', orders.value);
+//     totalOrders.value = data.data.totalOrders;
+//     // totalAmount.value = orders.value.reduce((acc: number, order: any) => {
+//     //   return acc + Number(order.total || 0);
+//     // }, 0);
+//     console.log('🚀 ~ fetchOrders ~ totalAmount:', totalAmount.value);
+//   } catch (error) {
+//     console.error('Error fetching orders:', error);
+//     loading.value = false;
+//   }
+// };
 onMounted(() => {
   fetchUser(route.params.userId as string);
-  fetchOrders(route.params.userId as string);
+  // fetchOrders(route.params.userId as string);
   // fetchProducts(pId.value);
 });
-function statusTag(status: string) {
-  switch (status) {
-    case 'Delivered':
-      return 'success';
-    case 'On way':
-      return 'warning';
-    case 'Canceled':
-      return 'danger';
-    default:
-      return 'info';
-  }
-}
+// function statusTag(status: string) {
+//   switch (status) {
+//     case 'Delivered':
+//       return 'success';
+//     case 'On way':
+//       return 'warning';
+//     case 'Canceled':
+//       return 'danger';
+//     default:
+//       return 'info';
+//   }
+// }
 </script>
+<style scoped>
+.el-icon {
+  width: 24px;
+}
+.el-icon svg {
+  width: 2em;
+  height: 2em;
+  /* color: #4caf50; */
+}
+</style>

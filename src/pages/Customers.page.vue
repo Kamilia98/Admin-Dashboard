@@ -12,6 +12,7 @@ import {
 import axios from 'axios';
 import { Delete } from '@element-plus/icons-vue';
 import { View } from '@element-plus/icons-vue';
+import { CircleCheckFilled } from '@element-plus/icons-vue';
 import Table from '../components/common/Table.vue';
 import Pagination from '../components/common/Pagination.vue';
 import debounce from 'lodash/debounce';
@@ -26,6 +27,7 @@ interface User {
   phone: number | string;
   role: string;
   _id: string;
+  isEstablished: boolean;
 }
 const router = useRouter();
 const loading = ref(false);
@@ -81,6 +83,9 @@ const fetchUsers = async (page: number) => {
       });
       user.createdAt = formatted;
     });
+    allUsers.value.forEach((user: User) => {
+      user.isEstablished = new Date(user.createdAt) < new Date('2025-04-20');
+    });
     totalUsers.value = data.data.totalUsers;
     console.log('Fetched users:', allUsers.value);
   } catch (error) {
@@ -110,6 +115,9 @@ const paginatedUsers = computed(() => allUsers.value);
 function handlePageChange(page: number) {
   currentPage.value = page;
 }
+// const isEstablished = computed(() => {
+//   return new Date(user.createdAt) < new Date('2025-04-01');
+// });
 
 function handleRowClick(row: User) {
   console.log('Row clicked:', row);
@@ -216,7 +224,16 @@ async function deleteUser(user: User) {
     <!-- User column -->
     <template #column-username="{ item }">
       <div class="flex items-center gap-3">
-        <img :src="item.thumbnail" class="h-8 w-8 rounded-full" />
+        <div class="relative inline-block">
+          <img :src="item.thumbnail" class="h-8 w-8 rounded-full" />
+          <el-icon
+            v-if="item.isEstablished"
+            class="absolute -top-2 -right-5 h-4 w-4 rounded-full bg-transparent ring-2 ring-transparent"
+          >
+            <CircleCheckFilled class="text-green-600" />
+          </el-icon>
+        </div>
+
         <span>{{ item.username }}</span>
       </div>
     </template>

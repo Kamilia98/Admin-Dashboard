@@ -1,4 +1,4 @@
-import { ref } from 'vue';
+import { capitalize, ref } from 'vue';
 import { defineStore } from 'pinia';
 import { OrderStatus, type Order } from '../types/order.d';
 import {
@@ -193,9 +193,6 @@ export const useOrdersStore = defineStore('orders', () => {
       { label: OrderStatus.canceled, value: OrderStatus.canceled },
     ];
   };
-
-  const capitalize = (str: string): string =>
-    str.charAt(0).toUpperCase() + str.slice(1);
 
   // Initialize channel listener once
   handleChannelMessage();

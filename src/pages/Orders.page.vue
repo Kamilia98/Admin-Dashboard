@@ -8,6 +8,7 @@ import { useOrdersStore } from '../stores/orderStore';
 
 /* ========== Store ========== */
 const store = useOrdersStore();
+
 </script>
 
 <template>

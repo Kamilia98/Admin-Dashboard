@@ -76,6 +76,12 @@ const routes = [
     component: () => import('../pages/Products.page.vue'),
     meta: { requiresAuth: true, layout: 'admin' },
   },
+  {
+    path: '/categories/:id',
+    name: 'category-details',
+    component: () => import('../pages/CategoryDetails.page.vue'),
+    meta: { requiresAuth: true, layout: 'admin' },
+  },
 ];
 
 export const router = createRouter({

@@ -7,7 +7,6 @@ import {
   ElOption,
   ElIcon,
   ElInputNumber,
-  ElButton,
   ElDropdown,
 } from 'element-plus';
 import { View, RefreshLeft } from '@element-plus/icons-vue';
@@ -18,6 +17,8 @@ import FilterIcon from '../../icons/FilterIcon.vue';
 import OrderStatusSelector from './OrderStatusSelector.vue';
 
 import { useOrdersStore } from '../../stores/orderStore';
+import Button from '../common/Button.vue';
+import { router } from '../../router';
 
 const store = useOrdersStore();
 
@@ -96,9 +97,16 @@ watch(
 
     <template #column-actions="{ item }">
       <div class="flex justify-center">
-        <router-link :to="`/orders/${item.id}`">
-          <el-icon class="cursor-pointer" size="16"><View /></el-icon>
-        </router-link>
+        <Button
+          tag="a"
+          @click="
+            router.push({ name: 'order-details', params: { id: item.id } })
+          "
+        >
+          <template #icon>
+            <el-icon><View /></el-icon>
+          </template>
+        </Button>
       </div>
     </template>
 
@@ -116,12 +124,12 @@ watch(
           trigger="click"
           :hide-on-click="false"
         >
-          <button
-            class="inline-flex items-center gap-2 rounded-lg border border-gray-300 bg-white px-4 py-2.5 text-theme-sm font-medium text-gray-700 shadow-theme-xs hover:bg-gray-50 hover:text-gray-800 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-400 dark:hover:bg-white/[0.03] dark:hover:text-gray-200"
-          >
-            <FilterIcon />
+          <Button>
             Filter
-          </button>
+            <template #icon>
+              <FilterIcon />
+            </template>
+          </Button>
           <template #dropdown>
             <!-- Filters -->
             <div class="rounded-md bg-white dark:bg-gray-900">
@@ -173,23 +181,21 @@ watch(
                     :precision="2"
                   />
                 </div>
-                <div class="self-center">
-                  <el-button
-                    plain
+                <div class="flex gap-2 self-center">
+                  <Button
                     @click="store.fetchOrders({ page: 1, userId })"
-                    size="large"
+                    variant="primary"
                   >
                     Apply Filters
-                  </el-button>
-                  <el-button
-                    plain
-                    @click="store.handleReset"
-                    size="large"
-                    type="danger"
-                    :icon="RefreshLeft"
-                  >
+                  </Button>
+                  <Button @click="store.handleReset" variant="danger">
                     Reset Filters
-                  </el-button>
+                    <template #icon>
+                      <el-icon>
+                        <RefreshLeft />
+                      </el-icon>
+                    </template>
+                  </Button>
                 </div>
               </div>
             </div>

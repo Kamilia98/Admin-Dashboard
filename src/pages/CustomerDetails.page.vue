@@ -1,7 +1,7 @@
 <template>
-  <div class="grid grid-cols-3 gap-2">
+  <div class="grid grid-cols-4 gap-4">
     <!-- Left Profile Section -->
-    <div class="rounded-xl border custom-border bg-white p-6 shadow">
+    <div class="col-span-1 rounded-xl border custom-border bg-white p-6 shadow">
       <div class="flex items-center gap-10 text-center">
         <div class="relative inline-block">
           <img
@@ -64,7 +64,7 @@
     </div>
 
     <!-- Right Orders Section -->
-    <div class="col-span-2 space-y-6">
+    <div class="col-span-3 space-y-6">
       <!-- Order Stats Card -->
       <div class="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
         <div

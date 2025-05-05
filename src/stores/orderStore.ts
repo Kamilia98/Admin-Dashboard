@@ -29,11 +29,17 @@ const channel = new BroadcastChannel('orders-sync');
 
 export const useOrdersStore = defineStore('orders', () => {
   // --- State ---
+
   const orders = ref<Order[]>([]);
   const currentPage = ref(1);
   const totalPages = ref(1);
+  const limits = ref(8);
   const totalOrders = ref(0);
+  const totalAmount = ref(0);
+  const averageAmount = ref(0);
+  const totalOrdersWithUser = ref(0);
   const loading = ref(false);
+  const initial = ref(true);
 
   const userId = ref<string>('');
   const searchQuery = ref('');
@@ -45,7 +51,6 @@ export const useOrdersStore = defineStore('orders', () => {
   const sortOrder = ref<'asc' | 'desc'>('desc');
   const minAmount = ref(0);
   const maxAmount = ref(0);
-
   const totalRevenue = ref(0);
   const statusCounts = ref<Record<OrderStatus, number>>({
     [OrderStatus.pending]: 0,
@@ -62,7 +67,6 @@ export const useOrdersStore = defineStore('orders', () => {
       totalOrders.value = data.totalOrders;
       totalRevenue.value = data.totalRevenue;
       statusCounts.value = { ...data.statusCounts };
-      console.log(data);
     } catch (error) {
       console.error('Error loading order analytics:', error);
     }
@@ -91,7 +95,11 @@ export const useOrdersStore = defineStore('orders', () => {
         minAmount: minAmount.value,
         maxAmount: maxAmount.value,
       };
-      // if (limit) params.limit = limit;
+      if (limit && initial.value) {
+        params.limit = limit;
+        limits.value = limit;
+        initial.value = false;
+      }
       if (userId) params.userId = userId;
       if (statusFilter.value.length) params.status = statusFilter.value;
       if (searchQuery.value.trim())
@@ -103,6 +111,9 @@ export const useOrdersStore = defineStore('orders', () => {
       totalOrders.value = data.totalOrders;
       totalPages.value = Math.ceil(data.totalOrders / ORDER_LIMIT);
       currentPage.value = page;
+      totalAmount.value = data.totalAmountOrders;
+      averageAmount.value = data.averageOrderValue;
+      totalOrdersWithUser.value = data.totalOrdersWithUser;
     } catch (err) {
       console.error('[Fetch Orders Error]:', err);
       orders.value = [];
@@ -170,7 +181,13 @@ export const useOrdersStore = defineStore('orders', () => {
     maxAmount.value = 0;
     sortBy.value = 'createdAt';
     sortOrder.value = 'desc';
-    fetchOrders({ page: 1, userId: userId.value });
+    console.log('Limit:', limits.value);
+    fetchOrders({
+      page: 1,
+      userId: userId.value,
+      limit: limits.value,
+    });
+    console.log('Limit:', limits.value);
   };
 
   const getNextStatusOptions = (status: OrderStatus) => {
@@ -208,6 +225,9 @@ export const useOrdersStore = defineStore('orders', () => {
     STATUS_OPTIONS,
 
     // State
+    totalOrdersWithUser,
+    totalAmount,
+    averageAmount,
     totalRevenue,
     statusCounts,
     orders,

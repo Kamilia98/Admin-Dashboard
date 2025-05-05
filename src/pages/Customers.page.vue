@@ -55,14 +55,6 @@ const headers = [
   { key: 'createdAt', label: 'Date & Time', sortable: false },
   { key: 'actions', label: 'Actions', sortable: false },
 ];
-// const tableHeaders = [
-//   { key: 'username', label: 'User', sortable: false },
-//   { key: 'email', label: 'Email', sortable: false },
-//   { key: 'createdAt', label: 'Date & Time', sortable: false },
-//   { key: 'phone', label: 'Phone', sortable: false },
-//   { key: 'role', label: 'Role', sortable: false },
-//   { key: 'status', label: 'Status', sortable: false },
-// ];
 const fetchUsers = async (page: number) => {
   const token = localStorage.getItem('token');
   loading.value = true;
@@ -126,20 +118,11 @@ function handlePageChange(page: number) {
   currentPage.value = page;
 }
 
-// const isEstablished = computed(() => {
-//   return new Date(user.createdAt) < new Date('2025-04-01');
-// });
-
 function handleRowClick(row: User) {
   console.log('Row clicked:', row);
   fetchOrders(row._id);
   router.push({ name: 'customer-details', params: { userId: row._id } });
 }
-
-// function editUser(user: User) {
-//   console.log('Edit user:', user);
-//   router.push({ name: 'edit-customers', params: { id: user._id } });
-// }
 
 const fetchOrders = async (userId: string) => {
   try {
@@ -317,80 +300,6 @@ async function deleteUser(user: User) {
     :limit="limit"
     @changePage="handlePageChange"
   ></Pagination>
-
-  <!-- <el-skeleton v-if="loading" animated class="mt-12 mb-6">
-    <template #template>
-      <div v-for="i in 10" :key="i" class="flex items-center gap-8 py-4">
-        <el-skeleton-item variant="circle" style="width: 32px; height: 32px" />
-
-        <el-skeleton-item variant="text" style="width: 100px" />
-
-        <el-skeleton-item variant="text" style="width: 200px" />
-
-        <el-skeleton-item variant="text" style="width: 120px" />
-
-        <el-skeleton-item
-          variant="text"
-          style="width: 80px; margin-left: 250px"
-        />
-
-        <div class="flex gap-2">
-          <el-skeleton-item variant="rect" style="width: 50px; height: 28px" />
-          <el-skeleton-item variant="rect" style="width: 60px; height: 28px" />
-        </div>
-      </div>
-    </template>
-  </el-skeleton> -->
-  <!-- 
-  <el-table
-    v-else
-    :data="paginatedUsers"
-    class="w-full"
-    stripe
-    border
-    @row-click="handleRowClick"
-  >
-    <el-table-column label="User">
-      <template #default="{ row }">
-        <div class="flex items-center gap-3">
-          <img :src="row.thumbnail" class="h-8 w-8 rounded-full" />
-          <span>{{ row.username }}</span>
-        </div>
-      </template>
-    </el-table-column>
-
-    <el-table-column label="Email" prop="email" />
-    <el-table-column label="Phone" prop="phone" />
-    <el-table-column label="Role" prop="role" />
-
-    <el-table-column label="Actions" width="150">
-      <template #default="{ row }">
-        <div class="flex gap-2">
-          <el-button size="small" type="primary" @click.stop="editUser(row)"
-            >Edit</el-button
-          >
-          <el-button size="small" type="danger" @click.stop="deleteUser(row)"
-            >Delete</el-button
-          >
-        </div>
-      </template>
-    </el-table-column>
-  </el-table> -->
-
-  <!-- <div class="mt-4 flex items-center justify-between">
-    <span class="text-sm text-gray-500">
-      Showing {{ (currentPage - 1) * limit + 1 }} to
-      {{ Math.min(currentPage * limit, totalUsers) }} of
-      {{ totalUsers }} entries
-    </span>
-    <el-pagination
-      background
-      layout="prev, pager, next"
-      :page-size="limit"
-      :total="totalUsers"
-      @current-change="handlePageChange"
-    />
-  </div> -->
 </template>
 <style scoped>
 .el-icon {

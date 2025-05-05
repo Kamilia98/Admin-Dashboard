@@ -241,7 +241,7 @@ async function deleteUser(user: User) {
             {{ returningCustomers }}
           </p>
         </div>
-        <el-icon class="-top-1 -left-9 pt-8 text-3xl text-purple-500"
+        <el-icon class="-top-1 -left-12 pt-8 text-3xl text-purple-500"
           ><Refresh
         /></el-icon>
       </div>

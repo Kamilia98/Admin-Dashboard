@@ -10,7 +10,9 @@ onMounted(() => {
 });
 
 const averageOrderValue = computed(() => {
-  return store.totalOrders > 0 ? store.totalRevenue / store.totalOrders : 0;
+  return (
+    store.totalOrders > 0 ? store.totalRevenue / store.totalOrders : 0
+  ).toFixed(2);
 });
 </script>
 

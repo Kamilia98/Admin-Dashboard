@@ -1,29 +1,72 @@
-// services/ordersService.ts
 import axios from 'axios';
 import type { Order, OrderStatus } from '../types/order';
 
 const API_BASE = 'http://localhost:5000/orders';
 
-export const fetchAllOrders = async (params: any) => {
-  const { data } = await axios.get(`${API_BASE}/all`, { params });
-  return data;
+// Utility to get headers with the current token
+const getAuthHeaders = () => {
+  const token = localStorage.getItem('token');
+  return {
+    Authorization: `Bearer ${token}`,
+    'Content-Type': 'application/json',
+  };
 };
 
+// Fetch all orders with optional filters/pagination
+export const fetchAllOrders = async (params: Record<string, any>) => {
+  try {
+    const { data } = await axios.get(`${API_BASE}/all`, {
+      headers: getAuthHeaders(),
+      params,
+    });
+    return data;
+  } catch (error) {
+    console.error('Failed to fetch orders:', error);
+    throw error;
+  }
+};
+
+// Fetch a single order by its ID
 export const fetchOrderById = async (id: string): Promise<Order> => {
-  const { data } = await axios.get(`${API_BASE}/${id}`);
-  return data.data;
+  try {
+    const { data } = await axios.get(`${API_BASE}/${id}`, {
+      headers: getAuthHeaders(),
+    });
+    return data.data;
+  } catch (error) {
+    console.error(`Failed to fetch order with ID ${id}:`, error);
+    throw error;
+  }
 };
 
+// Update the status of a specific order
 export const updateOrderStatus = async (
   orderId: string,
   newStatus: OrderStatus,
 ) => {
-  return axios.patch(`${API_BASE}/${orderId}/status`, { status: newStatus });
+  try {
+    const response = await axios.patch(
+      `${API_BASE}/${orderId}/status`,
+      { status: newStatus },
+      { headers: getAuthHeaders() },
+    );
+    return response.data;
+  } catch (error) {
+    console.error(`Failed to update order status for ID ${orderId}:`, error);
+    throw error;
+  }
 };
 
+// Fetch analytics for orders
 export const fetchOrderAnalytics = async () => {
-  const response = await fetch(`${API_BASE}/analytics?range=this-month`);
-  if (!response.ok) throw new Error('Failed to fetch order analytics');
-  const json = await response.json();
-  return json.data;
+  try {
+    const { data } = await axios.get(`${API_BASE}/analytics`, {
+      headers: getAuthHeaders(),
+      params: { range: 'this-month' },
+    });
+    return data.data;
+  } catch (error) {
+    console.error('Failed to fetch order analytics:', error);
+    throw error;
+  }
 };

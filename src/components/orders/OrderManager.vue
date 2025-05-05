@@ -23,6 +23,7 @@ const store = useOrdersStore();
 
 const props = defineProps<{
   userId?: string;
+  // limit?: number;
 }>();
 
 /* ========== Lifecycle ========== */
@@ -33,6 +34,7 @@ onMounted(() => {
     props.userId,
   );
   if (props.userId) store.userId = props.userId;
+  // if(props.limit) store.limit = props.limit;
   store.fetchOrders(1, props.userId);
 });
 watch(
@@ -43,6 +45,14 @@ watch(
     store.fetchOrders(1, newUserId);
   },
 );
+// watch(
+//   () => props.limit,
+//   (newLimit) => {
+//     console.log('[Watch] Limit changed:', newLimit);
+//     // if (newLimit) store.limit = newLimit;
+//     store.fetchOrders(1, props.userId, newLimit);
+//   },
+// );
 </script>
 
 <template>

@@ -8,11 +8,15 @@ import {
   ElMessageBox,
   ElSelect,
   ElOption,
+  ElCard,
 } from 'element-plus';
 import axios from 'axios';
 import { Delete } from '@element-plus/icons-vue';
 import { View } from '@element-plus/icons-vue';
 import { CircleCheckFilled } from '@element-plus/icons-vue';
+import { UserFilled } from '@element-plus/icons-vue';
+import { Calendar } from '@element-plus/icons-vue';
+import { Refresh } from '@element-plus/icons-vue';
 import Table from '../components/common/Table.vue';
 import Pagination from '../components/common/Pagination.vue';
 import debounce from 'lodash/debounce';
@@ -28,6 +32,8 @@ interface User {
   role: string;
   _id: string;
   isEstablished: boolean;
+  isNew: boolean;
+  returned: boolean;
 }
 const router = useRouter();
 const loading = ref(false);
@@ -37,7 +43,9 @@ const limit = ref(10);
 const totalUsers = ref(0);
 const search = ref('');
 const Orders = ref([]);
+const newCustomers = ref(0);
 const totalOrders = ref(0);
+const returningCustomers = ref(0);
 
 const headers = [
   { key: 'username', label: 'User', sortable: false },
@@ -71,9 +79,10 @@ const fetchUsers = async (page: number) => {
         role: 'USER',
       },
     });
+    newCustomers.value = data.data.newCustomers;
     allUsers.value = data.data.users;
     allUsers.value.forEach((user: User) => {
-      user.phone = String(user.phone || 'N/A'); // Set default value for phone if undefined
+      user.phone = String(user.phone || 'N/A');
     });
     allUsers.value.forEach((user: User) => {
       const formatted = new Date(user.createdAt).toLocaleString('en-US', {
@@ -86,6 +95,7 @@ const fetchUsers = async (page: number) => {
     allUsers.value.forEach((user: User) => {
       user.isEstablished = new Date(user.createdAt) < new Date('2025-04-20');
     });
+    returningCustomers.value = data.data.totalUsersWithOrders;
     totalUsers.value = data.data.totalUsers;
     console.log('Fetched users:', allUsers.value);
   } catch (error) {
@@ -115,6 +125,7 @@ const paginatedUsers = computed(() => allUsers.value);
 function handlePageChange(page: number) {
   currentPage.value = page;
 }
+
 // const isEstablished = computed(() => {
 //   return new Date(user.createdAt) < new Date('2025-04-01');
 // });
@@ -192,6 +203,50 @@ async function deleteUser(user: User) {
 }
 </script>
 <template>
+  <!-- Customer Cards -->
+  <div
+    class="mb-6 grid grid-cols-1 gap-4 text-center sm:grid-cols-2 lg:grid-cols-3"
+  >
+    <el-card shadow="hover" class="rounded-2xl">
+      <div class="relative flex items-center justify-center">
+        <div>
+          <p class="text-sm text-gray-500">Total Customers</p>
+          <p class="pt-2 text-2xl font-semibold text-gray-800 dark:text-white">
+            {{ totalUsers }}
+          </p>
+        </div>
+        <el-icon class="-top-1 -left-7 pt-8 text-3xl text-blue-500"
+          ><UserFilled
+        /></el-icon>
+      </div>
+    </el-card>
+    <el-card shadow="hover" class="rounded-2xl">
+      <div class="relative flex items-center justify-center">
+        <div>
+          <p class="text-sm text-gray-500">New This Month</p>
+          <p class="pt-2 text-2xl font-semibold text-gray-800 dark:text-white">
+            {{ newCustomers }}
+          </p>
+        </div>
+        <el-icon class="-top-1 -left-7 pt-8 text-3xl text-green-500"
+          ><Calendar
+        /></el-icon>
+      </div>
+    </el-card>
+    <el-card shadow="hover" class="rounded-2xl">
+      <div class="relative flex items-center justify-center">
+        <div>
+          <p class="text-sm text-gray-500">Returning Customers</p>
+          <p class="pt-2 text-2xl font-semibold text-gray-800 dark:text-white">
+            {{ returningCustomers }}
+          </p>
+        </div>
+        <el-icon class="-top-1 -left-12 pt-8 text-3xl text-purple-500"
+          ><Refresh
+        /></el-icon>
+      </div>
+    </el-card>
+  </div>
   <div class="mb-4 flex items-center justify-between">
     <el-select
       v-model="limit"
@@ -241,11 +296,12 @@ async function deleteUser(user: User) {
     <template #column-actions="{ item }">
       <div class="flex gap-4">
         <el-button
-          size="small"
-          type="danger"
+          size="large"
+          type="default"
+          link
           @click.stop="deleteUser(item as User)"
         >
-          <el-icon><Delete /></el-icon>
+          <el-icon><Delete class="text-red-600" /></el-icon>
         </el-button>
         <el-button size="small" @click.stop="handleRowClick(item as User)">
           <el-icon class="cursor-pointer" size="16"><View /></el-icon>
@@ -336,3 +392,12 @@ async function deleteUser(user: User) {
     />
   </div> -->
 </template>
+<style scoped>
+.el-icon {
+  font-size: 20px;
+}
+.el-icon svg {
+  width: 20px;
+  height: 20px;
+}
+</style>

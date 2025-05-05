@@ -4,9 +4,7 @@ layer(base);
 @import 'tailwindcss';
 
 @custom-variant dark (&:is(.dark *));
-.el-button--danger.is-plain {
-  --el-button-bg-color: var(--el-fill-color-blank) !important;
-}
+
 html.dark {
   --el-bg-color-overlay: var(--color-gray-dark);
   --el-fill-color-light: var(--color-gray-800);

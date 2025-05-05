@@ -6,6 +6,7 @@ import StatisticsChart from '../components/ecommerce/StatisticsChart.vue';
 import CustomerDemographic from '../components/ecommerce/CustomerDemographic.vue';
 import RecentOrders from '../components/ecommerce/RecentOrders.vue';
 </script>
+
 <template>
   <div class="grid grid-cols-12 gap-4 md:gap-6">
     <div class="col-span-12 space-y-6 xl:col-span-7">

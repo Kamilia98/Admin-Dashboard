@@ -34,15 +34,14 @@ onMounted(() => {
     props.userId,
   );
   if (props.userId) store.userId = props.userId;
-  // if(props.limit) store.limit = props.limit;
-  store.fetchOrders(1, props.userId);
+  store.fetchOrders({ page: 1, userId: props.userId });
 });
 watch(
   () => props.userId,
   (newUserId) => {
     console.log('[Watch] User ID changed:', newUserId);
     if (newUserId) store.userId = newUserId;
-    store.fetchOrders(1, newUserId);
+    store.fetchOrders({ page: 1, userId: newUserId });
   },
 );
 // watch(
@@ -116,7 +115,7 @@ watch(
       <div class="flex items-center justify-end gap-4 md:gap-6">
         <Search
           v-model="store.searchQuery"
-          @search="store.fetchOrders(1, userId)"
+          @search="store.fetchOrders({ page: 1, userId })"
         />
 
         <!-- Filter Button -->
@@ -186,7 +185,7 @@ watch(
                 <div class="self-center">
                   <el-button
                     plain
-                    @click="store.fetchOrders(1, userId)"
+                    @click="store.fetchOrders({ page: 1, userId })"
                     size="large"
                   >
                     Apply Filters

@@ -1,7 +1,7 @@
 <template>
-  <div class="grid grid-cols-3 gap-2">
+  <div class="grid grid-cols-4 gap-4">
     <!-- Left Profile Section -->
-    <div class="rounded-xl border custom-border bg-white p-6 shadow">
+    <div class="col-span-1 rounded-xl border custom-border bg-white p-6 shadow">
       <div class="flex items-center gap-10 text-center">
         <div class="relative inline-block">
           <img
@@ -64,7 +64,7 @@
     </div>
 
     <!-- Right Orders Section -->
-    <div class="col-span-2 space-y-6">
+    <div class="col-span-3 space-y-6">
       <!-- Order Stats Card -->
       <div class="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
         <div
@@ -72,7 +72,7 @@
         >
           <h4 class="text-sm text-gray-500">Total Order</h4>
           <div class="mt-2 text-3xl font-bold">
-            {{ orderStore.orders.length }}
+            {{ orderStore.totalOrders }}
           </div>
         </div>
         <div
@@ -88,7 +88,7 @@
         >
           <h4 class="text-sm text-gray-500">Average Order Value</h4>
           <div class="mt-2 text-3xl font-bold">
-            {{ (totalAmount / (orderStore.orders.length || 1)).toFixed(2) }}
+            {{ averageAmount.toFixed(2) }}
           </div>
         </div>
       </div>
@@ -97,8 +97,21 @@
       <div
         class="flex flex-col gap-4 rounded-xl border custom-border bg-white p-6 shadow"
       >
-        <OrderManager :userId="user?._id" />
+        <!-- <OrderManager :userId="user?._id" /> -->
+        <OrderManager
+          :userId="user?._id"
+          :limit="2"
+          :currentPage="orderStore.currentPage"
+        />
       </div>
+      <Pagination
+        title="Order Pagination"
+        :currentPage="orderStore.currentPage"
+        :totalPages="Math.ceil(orderStore.totalPages / 2)"
+        :totalItems="orderStore.totalOrdersWithUser"
+        :limit="2"
+        @changePage="orderStore.fetchOrders"
+      />
     </div>
   </div>
 </template>
@@ -107,6 +120,7 @@
 import { useProductStore } from '../stores/productStore';
 import { CircleCheckFilled, User } from '@element-plus/icons-vue';
 import { ElIcon } from 'element-plus';
+import Pagination from '../components/common/Pagination.vue';
 import OrderManager from '../components/orders/OrderManager.vue';
 import { computed, onMounted, ref } from 'vue';
 import { useRoute } from 'vue-router';
@@ -131,12 +145,15 @@ const loading = ref(false);
 const favouriteProducts = ref<string[]>([]);
 const route = useRoute();
 const user = ref<User | null>(null);
-const totalAmount = computed(() => {
-  return orderStore.orders.reduce((acc: number, order: any) => {
-    return acc + Number(order.totalAmount || 0);
-  }, 0);
-});
-
+// const currentPage = ref(1);
+const totalAmount = computed(() => orderStore.totalAmount);
+const averageAmount = computed(() => orderStore.averageAmount);
+// const totalOrdersWithUser = computed(() => orderStore.totalOrdersWithUser);
+// function handlePageChange(page: number) {
+//   console.log(page);
+//   console.log(555555555555555555555);
+//   currentPage.value = page;
+// }
 const fetchUser = async (userId: string) => {
   try {
     loading.value = true;
@@ -168,7 +185,6 @@ const fetchUser = async (userId: string) => {
           });
       }),
     );
-    console.log('🚀 ~ fetchUser ~ favouriteProducts:', favouriteProducts);
   } catch (error) {
     console.error('Error fetching user:', error);
     loading.value = false;

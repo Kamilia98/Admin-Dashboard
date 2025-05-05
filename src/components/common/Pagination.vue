@@ -13,6 +13,7 @@ const props = defineProps<{
 const emit = defineEmits(['changePage']);
 
 const changePage = (page: number) => {
+  console.log('Page changed to:', page);
   if (page >= 1 && page <= props.totalPages) {
     emit('changePage', page);
   }

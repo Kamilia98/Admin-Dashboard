@@ -8,6 +8,7 @@ import Table from '../components/common/Table.vue';
 import Button from '../components/common/Button.vue';
 import { router } from '../router';
 import Modal from '../components/common/Modal.vue';
+import Dropzone from './common/Dropzone.vue';
 const loading = ref(false);
 
 const categories = ref<{ _id: string }[]>([]);
@@ -69,15 +70,13 @@ onMounted(() => {
     <template #column-actions="{ item }">
       <div class="flex gap-2">
         <Button
-          tag="a"
-          @click="
-            router.push({
-              name: 'category-details',
-              params: {
-                id: item._id,
-              },
-            })
-          "
+          tag="router-link"
+          :to="{
+            name: 'category-details',
+            params: {
+              id: item._id,
+            },
+          }"
         >
           <template #icon>
             <el-icon>

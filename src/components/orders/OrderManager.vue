@@ -122,10 +122,8 @@ watch(
     <template #column-actions="{ item }">
       <div class="flex justify-center">
         <Button
-          tag="a"
-          @click="
-            router.push({ name: 'order-details', params: { id: item.id } })
-          "
+          tag="router-link"
+          :to="{ name: 'order-details', params: { id: item.id } }"
         >
           <template #icon>
             <el-icon><View /></el-icon>

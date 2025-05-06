@@ -6,7 +6,7 @@
       variantClasses,
     ]"
     @click="$emit('click')"
-    v-bind="tag === 'a' ? { href } : {}"
+    v-bind="tag === 'router-link' ? { to } : {}"
   >
     <!-- Icon Slot -->
     <slot name="icon" />
@@ -18,29 +18,32 @@
 <script setup lang="ts">
 import { computed } from 'vue';
 
-// Props for the button
 const props = defineProps({
   tag: {
     type: String,
-    default: 'button', // 'button' or 'a'
-    validator: (value: string) => ['button', 'a'].includes(value),
+    default: 'button',
+    validator: (value: string) => ['button', 'router-link'].includes(value),
   },
-  href: {
-    type: String,
-    default: '', // Only used when tag is 'a'
+  to: {
+    type: Object,
+    default: '',
+    validator: (value: unknown) => {
+      try {
+        return typeof value === 'string' || typeof value === 'object';
+      } catch {
+        return false;
+      }
+    },
   },
   variant: {
     type: String,
-    default: 'default', // default, primary, danger
+    default: 'default',
     validator: (value: string) =>
       ['default', 'primary', 'danger'].includes(value),
   },
 });
 
-// Emit click event
 defineEmits(['click']);
-
-// Computed classes based on the variant
 
 const variantClasses = computed(() => {
   switch (props.variant) {

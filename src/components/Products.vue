@@ -58,9 +58,6 @@ onMounted(async () => {
   console.log('Products page mounted');
   const rawProducts = toRaw(productStore.products);
   console.log('Products:', rawProducts);
-  productStore.products.forEach((product) => {
-    selectedVariantIndex.value[product._id] = 0;
-  });
 });
 
 const productStore = useProductStore();

@@ -124,8 +124,8 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted, onUnmounted } from "vue";
-import { RouterLink } from "vue-router";
+import { ref, onMounted, onUnmounted } from 'vue';
+import { RouterLink } from 'vue-router';
 
 const dropdownOpen = ref(false);
 const notifying = ref(true);
@@ -134,83 +134,83 @@ const dropdownRef = ref<HTMLElement | null>(null);
 const notifications = ref([
   {
     id: 1,
-    userName: "Terry Franci",
-    userImage: "/images/user/user-02.jpg",
-    action: "requests permission to change",
-    project: "Project - Nganter App",
-    type: "Project",
-    time: "5 min ago",
-    status: "online",
+    userName: 'Terry Franci',
+    userImage: '/images/user/user-02.jpg',
+    action: 'requests permission to change',
+    project: 'Project - Nganter App',
+    type: 'Project',
+    time: '5 min ago',
+    status: 'online',
   },
   {
     id: 2,
-    userName: "Terry Franci",
-    userImage: "/images/user/user-03.jpg",
-    action: "requests permission to change",
-    project: "Project - Nganter App",
-    type: "Project",
-    time: "5 min ago",
-    status: "offline",
+    userName: 'Terry Franci',
+    userImage: '/images/user/user-03.jpg',
+    action: 'requests permission to change',
+    project: 'Project - Nganter App',
+    type: 'Project',
+    time: '5 min ago',
+    status: 'offline',
   },
   {
     id: 3,
-    userName: "Terry Franci",
-    userImage: "/images/user/user-04.jpg",
-    action: "requests permission to change",
-    project: "Project - Nganter App",
-    type: "Project",
-    time: "5 min ago",
-    status: "online",
+    userName: 'Terry Franci',
+    userImage: '/images/user/user-04.jpg',
+    action: 'requests permission to change',
+    project: 'Project - Nganter App',
+    type: 'Project',
+    time: '5 min ago',
+    status: 'online',
   },
   {
     id: 4,
-    userName: "Terry Franci",
-    userImage: "/images/user/user-05.jpg",
-    action: "requests permission to change",
-    project: "Project - Nganter App",
-    type: "Project",
-    time: "5 min ago",
-    status: "online",
+    userName: 'Terry Franci',
+    userImage: '/images/user/user-05.jpg',
+    action: 'requests permission to change',
+    project: 'Project - Nganter App',
+    type: 'Project',
+    time: '5 min ago',
+    status: 'online',
   },
   {
     id: 5,
-    userName: "Terry Franci",
-    userImage: "/images/user/user-06.jpg",
-    action: "requests permission to change",
-    project: "Project - Nganter App",
-    type: "Project",
-    time: "5 min ago",
-    status: "offline",
+    userName: 'Terry Franci',
+    userImage: '/images/user/user-06.jpg',
+    action: 'requests permission to change',
+    project: 'Project - Nganter App',
+    type: 'Project',
+    time: '5 min ago',
+    status: 'offline',
   },
   {
     id: 6,
-    userName: "Terry Franci",
-    userImage: "/images/user/user-07.jpg",
-    action: "requests permission to change",
-    project: "Project - Nganter App",
-    type: "Project",
-    time: "5 min ago",
-    status: "online",
+    userName: 'Terry Franci',
+    userImage: '/images/user/user-07.jpg',
+    action: 'requests permission to change',
+    project: 'Project - Nganter App',
+    type: 'Project',
+    time: '5 min ago',
+    status: 'online',
   },
   {
     id: 7,
-    userName: "Terry Franci",
-    userImage: "/images/user/user-08.jpg",
-    action: "requests permission to change",
-    project: "Project - Nganter App",
-    type: "Project",
-    time: "5 min ago",
-    status: "online",
+    userName: 'Terry Franci',
+    userImage: '/images/user/user-08.jpg',
+    action: 'requests permission to change',
+    project: 'Project - Nganter App',
+    type: 'Project',
+    time: '5 min ago',
+    status: 'online',
   },
   {
     id: 7,
-    userName: "Terry Franci",
-    userImage: "/images/user/user-09.jpg",
-    action: "requests permission to change",
-    project: "Project - Nganter App",
-    type: "Project",
-    time: "5 min ago",
-    status: "online",
+    userName: 'Terry Franci',
+    userImage: '/images/user/user-09.jpg',
+    action: 'requests permission to change',
+    project: 'Project - Nganter App',
+    type: 'Project',
+    time: '5 min ago',
+    status: 'online',
   },
   // Add more notifications here...
 ]);
@@ -232,21 +232,21 @@ const handleClickOutside = (event: MouseEvent) => {
 
 const handleItemClick = (event: MouseEvent) => {
   event.preventDefault();
-  console.log("Notification item clicked");
+  console.log('Notification item clicked');
   closeDropdown();
 };
 
 const handleViewAllClick = (event: MouseEvent) => {
   event.preventDefault();
-  console.log("View All Notifications clicked");
+  console.log('View All Notifications clicked');
   closeDropdown();
 };
 
 onMounted(() => {
-  document.addEventListener("click", handleClickOutside);
+  document.addEventListener('click', handleClickOutside);
 });
 
 onUnmounted(() => {
-  document.removeEventListener("click", handleClickOutside);
+  document.removeEventListener('click', handleClickOutside);
 });
 </script>

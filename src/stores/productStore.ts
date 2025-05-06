@@ -9,6 +9,7 @@ import { ref } from 'vue';
 
 export const useProductStore = defineStore('productStore', () => {
   // States
+  // States
   const products = ref<productVariant[]>([]);
   const totalProducts = ref(0);
   const product = ref<Product | null>(null);
@@ -19,8 +20,12 @@ export const useProductStore = defineStore('productStore', () => {
   const sortBy = ref('');
   const sortOrder = ref<'asc' | 'desc'>('asc');
 
-  // Actions
+  // 💡 New Filter States
+  const selectedCategories = ref<string[]>([]);
+  const minPrice = ref<number | null>(null);
+  const maxPrice = ref<number | null>(null);
 
+  // Actions
   const getAllProducts = async (page = currentPage.value) => {
     loading.value = true;
     try {
@@ -30,17 +35,22 @@ export const useProductStore = defineStore('productStore', () => {
           pageSize.value,
           sortBy.value,
           sortOrder.value,
+          {
+            categories: selectedCategories.value,
+            minPrice: minPrice.value,
+            maxPrice: maxPrice.value,
+          },
         );
 
       products.value = response.data.products;
       totalProducts.value = response.data.totalProducts;
       currentPage.value = page;
-      console.log('[product-Store -- Sorting]', sortBy.value, sortOrder.value);
-      console.log(
-        '[Product store -- totalProducts]',
-        response.data.totalProducts,
-      );
-      console.log('[Product store -- all variants]', response.data.products);
+
+      console.log('[Product store -- filters]', {
+        categories: selectedCategories.value,
+        minPrice: minPrice.value,
+        maxPrice: maxPrice.value,
+      });
     } catch (err: any) {
       error.value = err.message || 'Failed to fetch products';
     } finally {
@@ -107,6 +117,7 @@ export const useProductStore = defineStore('productStore', () => {
 
   return {
     products,
+    totalProducts,
     product,
     loading,
     error,
@@ -114,10 +125,12 @@ export const useProductStore = defineStore('productStore', () => {
     pageSize,
     sortBy,
     sortOrder,
+    selectedCategories,
+    minPrice,
+    maxPrice,
     getAllProducts,
     getProductById,
     removeProduct,
-    totalProducts,
     addProduct,
     updateProduct,
   };

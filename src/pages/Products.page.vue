@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { onMounted, ref, toRaw } from 'vue';
 import { ElTabs, ElTabPane } from 'element-plus';
+import { ElIcon } from 'element-plus';
 
 import { useProductStore } from '../stores/productStore';
 // Components
@@ -8,6 +9,10 @@ import Table from '../components/common/Table.vue';
 import Pagination from '../components/common/Pagination.vue';
 import Button from '../components/common/Button.vue';
 import Categories from '../components/Categories.vue';
+import FilterIcon from '../icons/FilterIcon.vue';
+import { Edit, Delete, Plus, View } from '@element-plus/icons-vue';
+import { ElDropdown, ElDropdownItem, ElDropdownMenu } from 'element-plus';
+import PlusIcon from '../icons/PlusIcon.vue';
 
 const headers = [
   { key: 'name', label: 'Name', sortable: true },
@@ -16,6 +21,7 @@ const headers = [
   { key: 'price', label: 'Original Price', sortable: true },
   { key: 'sale', label: 'Discount', sortable: true },
   { key: 'categories', label: 'Category', sortable: false },
+  { key: 'actions', label: 'Actions', sortable: false },
 ];
 
 const selectedVariantIndex = ref<Record<string, number>>({});
@@ -39,6 +45,13 @@ const handleSort = ({
   productStore.getAllProducts();
 };
 
+const handleResetFilters = () => {
+  productStore.selectedCategories = [];
+  productStore.minPrice = null;
+  productStore.maxPrice = null;
+  productStore.getAllProducts(1);
+};
+
 onMounted(async () => {
   await productStore.getAllProducts();
   console.log('Products page mounted');
@@ -55,18 +68,26 @@ const selectVariant = (productId: string, index: number) => {
 
 const productStore = useProductStore();
 </script>
-
 <template>
   <div class="">
     <el-tabs type="border-card">
       <el-tab-pane label="Products">
         <div class="flex flex-col gap-8">
-          <h1 class="mb-6 text-2xl font-bold">All Products</h1>
+          <!-- <h1 class="mb-6 text-2xl font-bold">All Products</h1> -->
 
           <!-- Error message -->
           <div v-if="productStore.error" class="mb-4 text-red-500">
             {{ productStore.error }}
           </div>
+          <button
+            class="inline-flex w-[200px] items-center gap-2 rounded-lg border border-gray-300 bg-white px-4 py-2.5 text-theme-sm font-medium text-gray-700 shadow-theme-xs hover:bg-gray-50 hover:text-gray-800 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-400 dark:hover:bg-white/[0.03] dark:hover:text-gray-200"
+          >
+            <el-icon>
+              <Plus />
+            </el-icon>
+
+            Add Product
+          </button>
 
           <Table
             caption="All Products"
@@ -101,8 +122,6 @@ const productStore = useProductStore();
                     </span>
                   </button>
                 </div>
-
-                <!-- Selected info: Dynamically shows the selected variant -->
               </div>
             </template>
 
@@ -128,6 +147,140 @@ const productStore = useProductStore();
 
             <template #column-effectivePrice="{ value }">
               ${{ value }}
+            </template>
+            <template #column-actions="{ item }">
+              <div class="flex gap-2">
+                <Button
+                  tag="router-link"
+                  :to="{
+                    name: 'category-details',
+                    params: {
+                      id: item._id,
+                    },
+                  }"
+                >
+                  <template #icon>
+                    <el-icon>
+                      <View />
+                    </el-icon>
+                  </template>
+                </Button>
+                <Button variant="primary">
+                  <template #icon>
+                    <el-icon>
+                      <Edit />
+                    </el-icon>
+                  </template>
+                </Button>
+                <Button variant="danger">
+                  <template #icon>
+                    <el-icon>
+                      <Delete />
+                    </el-icon>
+                  </template>
+                </Button>
+              </div>
+            </template>
+
+            <template #actions>
+              <div class="flex items-center justify-end gap-4 md:gap-6">
+                <!-- Search Input -->
+                <!-- <Search
+                  v-model="productStore.searchQuery"
+                  @search="productStore.getAllProducts(1)"
+                /> -->
+
+                <!-- Filter Dropdown -->
+                <el-dropdown
+                  placement="top-start"
+                  trigger="click"
+                  :hide-on-click="false"
+                >
+                  <Button>
+                    Filter
+                    <template #icon>
+                      <FilterIcon />
+                    </template>
+                  </Button>
+
+                  <template #dropdown>
+                    <el-dropdown-menu>
+                      <el-dropdown-item disabled>
+                        <div class="rounded-md bg-white dark:bg-gray-900">
+                          <div
+                            class="flex max-w-[450px] flex-col gap-4 bg-white/[0.03] p-4"
+                          >
+                            <!-- Category Filter -->
+                            <div class="flex items-center gap-1">
+                              <label class="w-16 dark:text-white/90"
+                                >Category:</label
+                              >
+                              <el-select
+                                v-model="productStore.selectedCategories"
+                                multiple
+                                style="width: 240px"
+                                :teleported="false"
+                                class="bg-white/[0.03]"
+                              >
+                                <el-option
+                                  v-for="cat in [
+                                    'Electronics',
+                                    'Furniture',
+                                    'Clothing',
+                                    'Books',
+                                  ]"
+                                  :key="cat"
+                                  :label="cat"
+                                  :value="cat"
+                                />
+                              </el-select>
+                            </div>
+
+                            <!-- Price Range Filter -->
+                            <div class="flex items-center gap-2">
+                              <label class="w-16 dark:text-white/90"
+                                >Price:</label
+                              >
+                              <el-input-number
+                                v-model="productStore.minPrice"
+                                placeholder="Min"
+                                :precision="2"
+                              />
+                              <span class="dark:text-white/90">to</span>
+                              <el-input-number
+                                v-model="productStore.maxPrice"
+                                placeholder="Max"
+                                :precision="2"
+                              />
+                            </div>
+
+                            <!-- Buttons -->
+                            <div class="flex gap-2 self-center">
+                              <Button
+                                @click="productStore.getAllProducts(1)"
+                                variant="primary"
+                              >
+                                Apply Filters
+                              </Button>
+                              <Button
+                                @click="handleResetFilters"
+                                variant="danger"
+                              >
+                                Reset Filters
+                                <template #icon>
+                                  <el-icon>
+                                    <RefreshLeft />
+                                  </el-icon>
+                                </template>
+                              </Button>
+                            </div>
+                          </div>
+                        </div>
+                      </el-dropdown-item>
+                    </el-dropdown-menu>
+                  </template>
+                </el-dropdown>
+              </div>
             </template>
           </Table>
 

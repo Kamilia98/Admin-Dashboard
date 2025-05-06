@@ -13,11 +13,39 @@ export const fetchAllProducts = async (
   limit = 10,
   sortBy = '',
   order: 'asc' | 'desc' = 'asc',
+  filters?: {
+    categories?: string[];
+    minPrice?: number | null;
+    maxPrice?: number | null;
+  },
 ) => {
-  const response = await axios.get<ProductApiResponse>(
-    `${BASE_URL}/color?page=${page}&limit=${limit}&sortBy=${sortBy}&order=${order}`,
-  );
+  const params: Record<string, any> = {
+    page,
+    limit,
+    sortBy,
+    order,
+  };
+
+  if (filters?.categories?.length) {
+    params.categories = filters.categories.join(',');
+  }
+
+  if (filters?.minPrice != null) {
+    params.minPrice = filters.minPrice;
+  }
+
+  if (filters?.maxPrice != null) {
+    params.maxPrice = filters.maxPrice;
+  }
+
+  const response = await axios.get<ProductApiResponse>(`${BASE_URL}/color`, {
+    params,
+  });
+
+  console.log('[Product Service -- URL]', response.config.url);
+  console.log('[Product Service -- Params]', params);
   console.log('[Product Service -- all data]', response.data);
+
   return response.data;
 };
 

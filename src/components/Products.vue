@@ -13,6 +13,7 @@ import FilterIcon from '../icons/FilterIcon.vue';
 import { Edit, Delete, Plus, View } from '@element-plus/icons-vue';
 import { ElDropdown, ElDropdownItem, ElDropdownMenu } from 'element-plus';
 import PlusIcon from '../icons/PlusIcon.vue';
+import Search from './common/Search.vue';
 
 const headers = [
   { key: 'name', label: 'Name', sortable: true },
@@ -176,10 +177,7 @@ const productStore = useProductStore();
       <template #actions>
         <div class="flex items-center justify-end gap-4 md:gap-6">
           <!-- Search Input -->
-          <!-- <Search
-                  v-model="productStore.searchQuery"
-                  @search="productStore.getAllProducts(1)"
-                /> -->
+          <Search @search="productStore.getAllProducts(1)" />
 
           <!-- Filter Dropdown -->
           <el-dropdown

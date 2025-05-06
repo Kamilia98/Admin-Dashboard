@@ -7,9 +7,13 @@ export interface productVariant {
   date: string;
   effectivePrice: number;
   salePrice: string;
-  sku: string;
-  color: string;
-  quantity: number;
+  varients: {
+    color: {
+      hex: string;
+      name: string;
+    };
+    quantity: number;
+  }[];
 }
 
 export interface ProductApiResponse {

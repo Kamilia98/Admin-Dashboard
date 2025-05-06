@@ -1,22 +1,24 @@
 <script setup lang="ts">
-import { useProductStore } from '../stores/productStore';
-import { onMounted, toRaw } from 'vue';
-import Pagination from '../components/common/Pagination.vue';
+import { onMounted, ref, toRaw } from 'vue';
 import { ElTabs, ElTabPane } from 'element-plus';
 
+import { useProductStore } from '../stores/productStore';
+// Components
 import Table from '../components/common/Table.vue';
+import Pagination from '../components/common/Pagination.vue';
 import Button from '../components/common/Button.vue';
 import Categories from '../components/Categories.vue';
 
 const headers = [
   { key: 'name', label: 'Name', sortable: true },
-  { key: 'sku', label: 'SKU', sortable: true },
-  { key: 'color', label: 'Color', sortable: false },
+  { key: 'colors', label: 'Colors', sortable: false },
   { key: 'quantity', label: 'Quantity', sortable: false },
   { key: 'price', label: 'Original Price', sortable: true },
   { key: 'sale', label: 'Discount', sortable: true },
   { key: 'categories', label: 'Category', sortable: false },
 ];
+
+const selectedVariantIndex = ref<Record<string, number>>({});
 
 const handleSort = ({
   key,
@@ -27,7 +29,6 @@ const handleSort = ({
 }) => {
   productStore.sortBy = key;
   productStore.sortOrder = direction;
-
   console.log(
     'Sorting by:',
     productStore.sortBy,
@@ -35,25 +36,26 @@ const handleSort = ({
     productStore.sortOrder,
     'order',
   );
-
   productStore.getAllProducts();
 };
 
 onMounted(async () => {
   await productStore.getAllProducts();
   console.log('Products page mounted');
-  / * * * Only Log purpose * * * /;
-  console.log('Total Products:', productStore.totalProducts);
   const rawProducts = toRaw(productStore.products);
-  console.log('Products page mounted');
-  console.log('[Product-page -- products]', productStore);
-  console.log('[Product-page -- productStore]', productStore);
-  console.log('[Product-page -- Raw products]', rawProducts);
-  console.log('[Product-page -- productStore]', productStore);
+  console.log('Products:', rawProducts);
+  productStore.products.forEach((product) => {
+    selectedVariantIndex.value[product._id] = 0; // Default to the first variant
+  });
 });
+
+const selectVariant = (productId: string, index: number) => {
+  selectedVariantIndex.value[productId] = index;
+};
 
 const productStore = useProductStore();
 </script>
+
 <template>
   <div class="">
     <el-tabs type="border-card">
@@ -74,23 +76,71 @@ const productStore = useProductStore();
             rowKey="_id"
             @sort="handleSort"
           >
-            <template #column-color="{ value }">
-              <span
-                class="inline-block h-5 w-5 rounded-full border border-gray-300"
-                :style="{ backgroundColor: value }"
-                :title="value"
-              />
+            <template #column-colors="{ item }">
+              <div class="flex flex-col gap-1">
+                <div class="flex items-center gap-2">
+                  <button
+                    v-for="(variant, index) in item.varients"
+                    :key="index"
+                    :aria-label="variant.color.name"
+                    class="relative h-6 w-6 rounded-full transition-all duration-200 focus:outline-none"
+                    :style="{ backgroundColor: variant.color.hex }"
+                    :class="{
+                      'ring-2 ring-black':
+                        selectedVariantIndex[item._id] === index,
+                      'border border-gray-300':
+                        selectedVariantIndex[item._id] !== index,
+                    }"
+                    @click="selectVariant(item._id, index)"
+                  >
+                    <span
+                      v-if="selectedVariantIndex[item._id] === index"
+                      class="absolute inset-0 flex items-center justify-center text-xs font-bold text-white"
+                    >
+                      ✓
+                    </span>
+                  </button>
+                </div>
+
+                <!-- Selected info: Dynamically shows the selected variant -->
+                <div
+                  v-if="item.varients[selectedVariantIndex[item._id]]"
+                  class="text-xs text-gray-600"
+                >
+                  {{
+                    item.varients[selectedVariantIndex[item._id]].color.name
+                  }}:
+                  {{
+                    item.varients[selectedVariantIndex[item._id]].quantity
+                  }}
+                  in stock
+                </div>
+              </div>
             </template>
+
+            <template #column-quantity="{ item }">
+              <span>
+                {{
+                  selectedVariantIndex[item._id] !== undefined &&
+                  item.varients[selectedVariantIndex[item._id]]
+                    ? item.varients[selectedVariantIndex[item._id]].quantity
+                    : 'N/A'
+                }}
+              </span>
+            </template>
+
             <template #column-sale="{ value }">
               <span v-if="value > 0" class="text-green-500">
                 {{ value }}%
               </span>
-              <span v-else class="text-red-500"> {{ value }}% </span>
+              <span v-else class="text-red-500">{{ value }}%</span>
             </template>
+
             <template #column-effectivePrice="{ value }">
               ${{ value }}
             </template>
           </Table>
+
           <Pagination
             title="Product Pagination"
             :current-page="productStore.currentPage"

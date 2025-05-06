@@ -24,19 +24,23 @@ export const useProductStore = defineStore('productStore', () => {
   const getAllProducts = async (page = currentPage.value) => {
     loading.value = true;
     try {
-      const { data }: ProductApiResponse =
+      const response: ProductApiResponse =
         await productService.fetchAllProducts(
           page,
           pageSize.value,
           sortBy.value,
           sortOrder.value,
         );
-      products.value = data.products;
-      totalProducts.value = data.totalProducts;
+
+      products.value = response.data.products;
+      totalProducts.value = response.data.totalProducts;
       currentPage.value = page;
       console.log('[product-Store -- Sorting]', sortBy.value, sortOrder.value);
-      console.log('[Product store -- totalProducts]', data.totalProducts);
-      console.log('[Product store -- all variants]', products.value);
+      console.log(
+        '[Product store -- totalProducts]',
+        response.data.totalProducts,
+      );
+      console.log('[Product store -- all variants]', response.data.products);
     } catch (err: any) {
       error.value = err.message || 'Failed to fetch products';
     } finally {

@@ -69,6 +69,7 @@ onMounted(() => {
     <template #column-actions="{ item }">
       <div class="flex gap-2">
         <Button
+          tag="a"
           @click="
             router.push({
               name: 'category-details',

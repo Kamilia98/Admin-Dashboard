@@ -2,7 +2,6 @@
 import { onMounted, ref, toRaw } from 'vue';
 import { ElTabs, ElTabPane } from 'element-plus';
 import { ElIcon } from 'element-plus';
-
 import { useProductStore } from '../stores/productStore';
 // Components
 import Table from '../components/common/Table.vue';
@@ -14,6 +13,7 @@ import { Edit, Delete, Plus, View } from '@element-plus/icons-vue';
 import { ElDropdown, ElDropdownItem, ElDropdownMenu } from 'element-plus';
 import PlusIcon from '../icons/PlusIcon.vue';
 import Search from './common/Search.vue';
+import { watch } from 'vue';
 
 const headers = [
   { key: 'name', label: 'Name', sortable: true },
@@ -63,11 +63,21 @@ onMounted(async () => {
   });
 });
 
+const productStore = useProductStore();
+watch(
+  () => productStore.products,
+  (newProducts) => {
+    newProducts.forEach((product) => {
+      if (!(product._id in selectedVariantIndex.value)) {
+        selectedVariantIndex.value[product._id] = 0;
+      }
+    });
+  },
+  { immediate: true },
+);
 const selectVariant = (productId: string, index: number) => {
   selectedVariantIndex.value[productId] = index;
 };
-
-const productStore = useProductStore();
 </script>
 <template>
   <div class="flex flex-col gap-8">

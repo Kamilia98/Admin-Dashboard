@@ -21,7 +21,7 @@ import Table from '../components/common/Table.vue';
 import Pagination from '../components/common/Pagination.vue';
 import debounce from 'lodash/debounce';
 import { SearchIcon } from '../icons';
-import { useRouter } from 'vue-router';
+import { RouterLink } from 'vue-router';
 
 interface User {
   username: string;
@@ -35,16 +35,13 @@ interface User {
   isNew: boolean;
   returned: boolean;
 }
-const router = useRouter();
 const loading = ref(false);
 const allUsers = ref<User[]>([]);
 const currentPage = ref(1);
 const limit = ref(10);
 const totalUsers = ref(0);
 const search = ref('');
-const Orders = ref([]);
 const newCustomers = ref(0);
-const totalOrders = ref(0);
 const returningCustomers = ref(0);
 
 const headers = [
@@ -118,30 +115,6 @@ function handlePageChange(page: number) {
   currentPage.value = page;
 }
 
-function handleRowClick(row: User) {
-  console.log('Row clicked:', row);
-  fetchOrders(row._id);
-  router.push({ name: 'customer-details', params: { userId: row._id } });
-}
-
-const fetchOrders = async (userId: string) => {
-  try {
-    const { data } = await axios.get(`http://localhost:5000/orders/`, {
-      headers: {
-        Authorization: `Bearer ${localStorage.getItem('token')}`,
-        'Content-Type': 'application/json',
-      },
-      params: {
-        userId,
-      },
-    });
-    Orders.value = data.data.orders;
-    totalOrders.value = data.data.totalOrders;
-  } catch (error) {
-    console.error('Error fetching orders:', error);
-  }
-};
-
 async function deleteUser(user: User) {
   try {
     await ElMessageBox.confirm(
@@ -193,39 +166,41 @@ async function deleteUser(user: User) {
     <el-card shadow="hover" class="rounded-2xl">
       <div class="relative flex items-center justify-center">
         <div>
-          <p class="text-sm text-gray-500">Total Customers</p>
+          <p class="text-sm text-gray-500 dark:text-white">Total Customers</p>
           <p class="pt-2 text-2xl font-semibold text-gray-800 dark:text-white">
             {{ totalUsers }}
           </p>
         </div>
         <el-icon class="-top-1 -left-7 pt-8 text-3xl text-blue-500"
-          ><UserFilled
+          ><UserFilled class="dark:text-white"
         /></el-icon>
       </div>
     </el-card>
     <el-card shadow="hover" class="rounded-2xl">
       <div class="relative flex items-center justify-center">
         <div>
-          <p class="text-sm text-gray-500">New This Month</p>
+          <p class="text-sm text-gray-500 dark:text-white">New This Month</p>
           <p class="pt-2 text-2xl font-semibold text-gray-800 dark:text-white">
             {{ newCustomers }}
           </p>
         </div>
         <el-icon class="-top-1 -left-7 pt-8 text-3xl text-green-500"
-          ><Calendar
+          ><Calendar class="dark:text-white"
         /></el-icon>
       </div>
     </el-card>
     <el-card shadow="hover" class="rounded-2xl">
       <div class="relative flex items-center justify-center">
         <div>
-          <p class="text-sm text-gray-500">Returning Customers</p>
+          <p class="text-sm text-gray-500 dark:text-white">
+            Returning Customers
+          </p>
           <p class="pt-2 text-2xl font-semibold text-gray-800 dark:text-white">
             {{ returningCustomers }}
           </p>
         </div>
         <el-icon class="-top-1 -left-12 pt-8 text-3xl text-purple-500"
-          ><Refresh
+          ><Refresh class="dark:text-white"
         /></el-icon>
       </div>
     </el-card>
@@ -263,7 +238,9 @@ async function deleteUser(user: User) {
     <template #column-username="{ item }">
       <div class="flex items-center gap-3">
         <div class="relative inline-block">
-          <img :src="item.thumbnail" class="h-8 w-8 rounded-full" />
+          <div class="h-8 w-8 rounded-full bg-white">
+            <img :src="item.thumbnail" class="rounded-full" />
+          </div>
           <el-icon
             v-if="item.isEstablished"
             class="absolute -top-2 -right-5 h-4 w-4 rounded-full bg-transparent ring-2 ring-transparent"
@@ -277,7 +254,7 @@ async function deleteUser(user: User) {
     </template>
     <!-- Actions column -->
     <template #column-actions="{ item }">
-      <div class="flex gap-4">
+      <div class="flex items-center justify-center gap-4">
         <el-button
           size="large"
           type="default"
@@ -286,9 +263,11 @@ async function deleteUser(user: User) {
         >
           <el-icon><Delete class="text-red-600" /></el-icon>
         </el-button>
-        <el-button size="small" @click.stop="handleRowClick(item as User)">
-          <el-icon class="cursor-pointer" size="16"><View /></el-icon>
-        </el-button>
+        <RouterLink
+          :to="{ name: 'customer-details', params: { userId: item._id } }"
+        >
+          <el-icon class="cursor-pointer pt-2" size="16"><View /></el-icon>
+        </RouterLink>
       </div>
     </template>
   </Table>

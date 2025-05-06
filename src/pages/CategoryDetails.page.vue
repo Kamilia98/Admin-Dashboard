@@ -3,10 +3,14 @@ import axios from 'axios';
 import { onMounted, ref } from 'vue';
 import { useRoute } from 'vue-router';
 import Button from '../components/common/Button.vue';
+import Dropzone from '../components/common/Dropzone.vue';
 
 import { ElIcon } from 'element-plus';
 
 import { Edit, Delete } from '@element-plus/icons-vue';
+import { BoxCubeIcon } from '../icons';
+import Card from '../components/common/Card.vue';
+import Modal from '../components/common/Modal.vue';
 
 interface Color {
   name: string;
@@ -61,6 +65,12 @@ const category = ref<Category | null>(null);
 const loading = ref(true);
 const error = ref<string | null>(null);
 
+const editedCategoryName = ref('');
+const editedCategoryDescription = ref('');
+const editedCategoryImage = ref('');
+
+const isCategoryEditModalOpen = ref(false);
+
 onMounted(async () => {
   const id = route.params.id as string;
   await fetchCategoryDetails(id);
@@ -80,8 +90,38 @@ const fetchCategoryDetails = async (id: string) => {
 };
 
 const onEdit = () => {
-  console.log('Edit clicked', category.value?._id);
-  // Navigate or show modal for editing
+  if (category.value) {
+    editedCategoryName.value = category.value.name;
+    editedCategoryDescription.value = category.value.description;
+    editedCategoryImage.value = category.value.image;
+    isCategoryEditModalOpen.value = true;
+  }
+};
+
+const handleModalClose = () => {
+  isCategoryEditModalOpen.value = false;
+};
+
+const handleModalSave = async () => {
+  if (!category.value) return;
+
+  try {
+    const updatedCategory = {
+      name: editedCategoryName.value,
+      description: editedCategoryDescription.value,
+      image: editedCategoryImage.value,
+    };
+
+    const { data } = await axios.patch(
+      `http://localhost:5000/categories/${category.value._id}`,
+      updatedCategory,
+    );
+
+    category.value = data.data.category;
+    isCategoryEditModalOpen.value = false;
+  } catch (err) {
+    console.error('Failed to update category:', err);
+  }
 };
 
 const onDelete = async () => {
@@ -125,26 +165,9 @@ const onDelete = async () => {
       class="space-y-8 rounded-lg bg-white dark:bg-white/[0.03]"
     >
       <!-- Category Header -->
-      <div class="relative p-6">
+      <div class="p-6">
         <!-- Edit/Delete Buttons -->
-        <div class="absolute top-6 right-6 flex gap-2">
-          <Button variant="primary" @click="onEdit">
-            Edit
-            <template #icon>
-              <el-icon>
-                <Edit />
-              </el-icon>
-            </template>
-          </Button>
-          <Button variant="danger" @click="onDelete">
-            Delete
-            <template #icon>
-              <el-icon>
-                <Delete />
-              </el-icon>
-            </template>
-          </Button>
-        </div>
+
         <div class="flex flex-col gap-6 md:flex-row">
           <div class="md:w-1/3">
             <img
@@ -158,69 +181,41 @@ const onDelete = async () => {
           </div>
           <div class="flex flex-col justify-between gap-4 md:w-2/3">
             <div>
-              <h1
-                class="mb-2 text-3xl font-bold text-gray-900 capitalize dark:text-gray-100"
-              >
-                {{ category.name }}
-              </h1>
+              <div class="mb-2 flex justify-between">
+                <h1
+                  class="text-3xl font-bold text-gray-900 capitalize dark:text-gray-100"
+                >
+                  {{ category.name }}
+                </h1>
+
+                <div class="flex gap-2">
+                  <Button variant="primary" @click="onEdit">
+                    Edit
+                    <template #icon>
+                      <el-icon>
+                        <Edit />
+                      </el-icon>
+                    </template>
+                  </Button>
+                  <Button variant="danger" @click="onDelete">
+                    Delete
+                    <template #icon>
+                      <el-icon>
+                        <Delete />
+                      </el-icon>
+                    </template>
+                  </Button>
+                </div>
+              </div>
               <p class="max-w-lg text-gray-700 dark:text-gray-300">
                 {{ category.description }}
               </p>
             </div>
 
             <!-- Summary Cards -->
-            <div class="grid grid-cols-1 gap-6 sm:grid-cols-2">
-              <!-- Total Products -->
-              <div
-                class="flex items-center gap-4 rounded-lg bg-indigo-100 p-6 shadow-sm dark:bg-indigo-900/30"
-              >
-                <div class="text-3xl text-indigo-600 dark:text-indigo-300">
-                  📦
-                </div>
-                <div>
-                  <p
-                    class="text-lg font-semibold text-gray-800 dark:text-gray-100"
-                  >
-                    Total Products
-                  </p>
-                  <p
-                    class="text-2xl font-bold text-indigo-800 dark:text-indigo-200"
-                  >
-                    {{ category.products.length }}
-                  </p>
-                </div>
-              </div>
-
-              <!-- Total Sales -->
-              <div
-                class="flex items-center gap-4 rounded-lg bg-green-100 p-6 shadow-sm dark:bg-green-900/30"
-              >
-                <div class="text-3xl text-green-600 dark:text-green-300">
-                  💰
-                </div>
-                <div>
-                  <p
-                    class="text-lg font-semibold text-gray-800 dark:text-gray-100"
-                  >
-                    Total Sales
-                  </p>
-                  <p
-                    class="text-2xl font-bold text-green-800 dark:text-green-200"
-                  >
-                    {{
-                      category.products.reduce(
-                        (total, p) =>
-                          total +
-                          (p.colors?.reduce(
-                            (cSum, c) => cSum + c.quantity,
-                            0,
-                          ) || 0),
-                        0,
-                      )
-                    }}
-                  </p>
-                </div>
-              </div>
+            <div class="grid grid-cols-1 gap-4 sm:grid-cols-2 md:gap-6">
+              <Card title="Products" value="5" :icon="BoxCubeIcon" />
+              <Card title="Sales" value="5" :icon="BoxCubeIcon" />
             </div>
           </div>
         </div>
@@ -229,6 +224,66 @@ const onDelete = async () => {
       ProductsManager
     </div>
   </div>
+
+  <template v-if="isCategoryEditModalOpen">
+    <Modal @close="handleModalClose">
+      <template #body>
+        <!-- close btn -->
+
+        <div class="flex flex-col gap-4">
+          <h4 class="text-2xl font-semibold text-gray-800 dark:text-white/90">
+            Edit Category
+          </h4>
+          <form class="flex flex-col gap-4">
+            <div class="flex custom-scrollbar flex-col gap-4 overflow-y-auto">
+              <div>
+                <label
+                  class="mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-400"
+                >
+                  Name
+                </label>
+                <input
+                  type="text"
+                  v-model="editedCategoryName"
+                  class="custom-input"
+                />
+              </div>
+
+              <div>
+                <label
+                  class="mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-400"
+                >
+                  Description
+                </label>
+                <textarea
+                  placeholder="Enter a description..."
+                  v-model="editedCategoryDescription"
+                  rows="6"
+                  class="custom-input custom-scrollbar h-auto"
+                ></textarea>
+              </div>
+
+              <div>
+                <label
+                  class="mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-400"
+                >
+                  Image
+                </label>
+                <Dropzone
+                  :initialImage="category?.image"
+                  uploadUrl="https://api.cloudinary.com/v1_1/dddhappm3/image/upload"
+                ></Dropzone>
+              </div>
+            </div>
+            <div class="flex items-center gap-3 lg:justify-end">
+              <Button @click="handleModalClose">Close</Button>
+              <Button @click="handleModalSave">Save Changes</Button>
+            </div>
+          </form>
+        </div>
+      </template>
+    </Modal>
+  </template>
 </template>
 
 <style scoped>

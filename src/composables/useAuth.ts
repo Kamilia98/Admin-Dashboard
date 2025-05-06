@@ -15,12 +15,18 @@ export const useAuth = () => {
   const isAuthenticated = computed(() => !!token.value);
 
   const initAuth = () => {
-    const savedToken = localStorage.getItem('token') || sessionStorage.getItem('token');
+    const savedToken = getToken();
     if (savedToken) {
       token.value = savedToken;
       axios.defaults.headers.common['Authorization'] = `Bearer ${savedToken}`;
       rememberMe.value = localStorage.getItem('rememberMe') === 'true';
     }
+  };
+
+  const getToken = () => {
+    const savedToken =
+      localStorage.getItem('token') || sessionStorage.getItem('token');
+    return savedToken;
   };
 
   const login = async (email: string, password: string, remember: boolean) => {
@@ -35,7 +41,7 @@ export const useAuth = () => {
 
       if (response.data.status === 'success') {
         token.value = response.data.data.token;
-        
+
         // Handle remember me functionality
         if (remember) {
           localStorage.setItem('token', response.data.data.token);
@@ -45,7 +51,8 @@ export const useAuth = () => {
           localStorage.removeItem('rememberMe');
         }
 
-        axios.defaults.headers.common['Authorization'] = `Bearer ${response.data.data.token}`;
+        axios.defaults.headers.common['Authorization'] =
+          `Bearer ${response.data.data.token}`;
         await router.push('/dashboard');
       }
     } catch (err: any) {
@@ -83,9 +90,11 @@ export const useAuth = () => {
     try {
       isLoading.value = true;
       error.value = null;
-      
-      const response = await axios.post(`${API_URL}/forgot-password`, { email });
-      
+
+      const response = await axios.post(`${API_URL}/forgot-password`, {
+        email,
+      });
+
       if (response.data.status === 'success') {
         return true;
       }
@@ -105,12 +114,12 @@ export const useAuth = () => {
     try {
       isLoading.value = true;
       error.value = null;
-      
+
       const response = await axios.post(`${API_URL}/reset-password`, {
         token,
         password,
       });
-      
+
       if (response.data.status === 'success') {
         return true;
       }
@@ -138,5 +147,6 @@ export const useAuth = () => {
     isAuthenticated,
     token,
     rememberMe,
+    getToken,
   };
 };

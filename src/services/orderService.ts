@@ -1,11 +1,13 @@
 import axios from 'axios';
 import type { Order, OrderStatus } from '../types/order';
+import { useAuth } from '../composables/useAuth';
 
 const API_BASE = 'http://localhost:5000/orders';
 
 // Utility to get headers with the current token
 const getAuthHeaders = () => {
-  const token = localStorage.getItem('token');
+  const { getToken } = useAuth();
+  const token = getToken();
   return {
     Authorization: `Bearer ${token}`,
     'Content-Type': 'application/json',

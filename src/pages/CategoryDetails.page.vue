@@ -1,66 +1,22 @@
 <script setup lang="ts">
-import axios from 'axios';
 import { onMounted, ref } from 'vue';
-import { useRoute } from 'vue-router';
+import { useRoute, useRouter } from 'vue-router';
 import Button from '../components/common/Button.vue';
 import Dropzone from '../components/common/Dropzone.vue';
-
 import { ElIcon } from 'element-plus';
-
 import { Edit, Delete } from '@element-plus/icons-vue';
 import { BoxCubeIcon } from '../icons';
 import Card from '../components/common/Card.vue';
 import Modal from '../components/common/Modal.vue';
-
-interface Color {
-  name: string;
-  hex: string;
-  images: Array<{
-    url: string;
-    public_id: string;
-    _id: string;
-  }>;
-  quantity: number;
-  sku?: string;
-  _id: string;
-}
-
-interface Product {
-  _id: string;
-  name: string;
-  brand: string;
-  colors: Color[];
-  description: string;
-  price: number;
-  sale: number;
-  subtitle: string;
-  additionalInformation: {
-    general: {
-      salesPackage: string;
-      modelNumber: string;
-      configuration: string;
-      upholsteryMaterial: string;
-      upholsteryColor: string;
-    };
-    dimensions: {
-      width: number;
-      height: number;
-      depth: number;
-      seatHeight: number;
-      legHeight: number;
-    };
-  };
-}
-
-interface Category {
-  _id: string;
-  name: string;
-  description: string;
-  image: string;
-  products: Product[];
-}
+import {
+  getCategoryById,
+  updateCategory,
+  deleteCategory,
+} from '../services/categoryService';
+import type { Category } from '../types/category.d';
 
 const route = useRoute();
+const router = useRouter();
 const category = ref<Category | null>(null);
 const loading = ref(true);
 const error = ref<string | null>(null);
@@ -79,8 +35,7 @@ onMounted(async () => {
 const fetchCategoryDetails = async (id: string) => {
   try {
     loading.value = true;
-    const { data } = await axios.get(`http://localhost:5000/categories/${id}`);
-    category.value = data.data.category;
+    category.value = await getCategoryById(id);
   } catch (err) {
     error.value = 'Failed to fetch category details';
     console.error(err);
@@ -112,15 +67,11 @@ const handleModalSave = async () => {
       image: editedCategoryImage.value,
     };
 
-    const { data } = await axios.patch(
-      `http://localhost:5000/categories/${category.value._id}`,
-      updatedCategory,
-    );
-
-    category.value = data.data.category;
+    category.value = await updateCategory(category.value._id, updatedCategory);
     isCategoryEditModalOpen.value = false;
   } catch (err) {
     console.error('Failed to update category:', err);
+    error.value = 'Failed to update category';
   }
 };
 
@@ -129,14 +80,12 @@ const onDelete = async () => {
   const confirmed = confirm('Are you sure you want to delete this category?');
   if (confirmed) {
     try {
-      await axios.delete(
-        `http://localhost:5000/categories/${category.value._id}`,
-      );
+      await deleteCategory(category.value._id);
       alert('Category deleted successfully');
-      // Possibly redirect or update the UI
+      router.push({ name: 'categories' }); // Redirect to categories list
     } catch (err) {
       console.error('Failed to delete category:', err);
-      alert('Failed to delete category');
+      error.value = 'Failed to delete category';
     }
   }
 };
@@ -167,7 +116,6 @@ const onDelete = async () => {
       <!-- Category Header -->
       <div class="p-6">
         <!-- Edit/Delete Buttons -->
-
         <div class="flex flex-col gap-6 md:flex-row">
           <div class="md:w-1/3">
             <img
@@ -229,7 +177,6 @@ const onDelete = async () => {
     <Modal @close="handleModalClose">
       <template #body>
         <!-- close btn -->
-
         <div class="flex flex-col gap-4">
           <h4 class="text-2xl font-semibold text-gray-800 dark:text-white/90">
             Edit Category
@@ -258,7 +205,7 @@ const onDelete = async () => {
                 <textarea
                   placeholder="Enter a description..."
                   v-model="editedCategoryDescription"
-                  rows="6"
+                  rows="3"
                   class="custom-input custom-scrollbar h-auto"
                 ></textarea>
               </div>
@@ -270,6 +217,7 @@ const onDelete = async () => {
                   Image
                 </label>
                 <Dropzone
+                  v-model="editedCategoryImage"
                   :initialImage="category?.image"
                   uploadUrl="https://api.cloudinary.com/v1_1/dddhappm3/image/upload"
                 ></Dropzone>

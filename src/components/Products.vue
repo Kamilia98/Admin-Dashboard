@@ -14,6 +14,7 @@ import { ElDropdown, ElDropdownItem, ElDropdownMenu } from 'element-plus';
 import PlusIcon from '../icons/PlusIcon.vue';
 import Search from './common/Search.vue';
 import { watch } from 'vue';
+import { RefreshLeft } from '@element-plus/icons-vue';
 
 const headers = [
   { key: 'name', label: 'Name', sortable: true },
@@ -51,6 +52,9 @@ const handleResetFilters = () => {
   productStore.minPrice = null;
   productStore.maxPrice = null;
   productStore.getAllProducts(1);
+};
+const handleDelete = async (id: string) => {
+  await productStore.deleteProductById(id);
 };
 
 onMounted(async () => {
@@ -173,7 +177,7 @@ const selectVariant = (productId: string, index: number) => {
                 </el-icon>
               </template>
             </Button>
-            <Button variant="danger">
+            <Button variant="danger" @click="handleDelete(item._id)">
               <template #icon>
                 <el-icon>
                   <Delete />
@@ -273,7 +277,6 @@ const selectVariant = (productId: string, index: number) => {
                 </el-dropdown-menu>
               </template>
             </el-dropdown>
-            <!-- Add Product -->
           </div>
         </template>
       </Table>

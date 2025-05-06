@@ -70,15 +70,13 @@ export const useProductStore = defineStore('productStore', () => {
     }
   };
 
-  const removeProduct = async (id: string) => {
-    loading.value = true;
+  const deleteProductById = async (id: string) => {
     try {
       await productService.deleteProduct(id);
-      products.value = products.value.filter((item) => item._id !== id);
+      await getAllProducts(currentPage.value); // Refresh list after deletion
     } catch (err: any) {
-      error.value = err.message || 'Failed to delete product';
-    } finally {
-      loading.value = false;
+      console.error('Delete error:', err);
+      error.value = 'Failed to delete product.';
     }
   };
 
@@ -130,7 +128,7 @@ export const useProductStore = defineStore('productStore', () => {
     maxPrice,
     getAllProducts,
     getProductById,
-    removeProduct,
+    deleteProductById,
     addProduct,
     updateProduct,
   };

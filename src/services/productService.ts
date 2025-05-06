@@ -56,7 +56,9 @@ export const fetchProductById = async (id: string) => {
   }>(`${BASE_URL}/${id}`);
   return response.data;
 };
-export const deleteProduct = (id: string) => axios.delete(`${BASE_URL}/${id}`);
+export const deleteProduct = (id: string) => {
+  return axios.delete(`${BASE_URL}/${id}`);
+};
 
 export const createProduct = (newProduct: Product) => {
   return axios.post<Product>(`${BASE_URL}`, newProduct);

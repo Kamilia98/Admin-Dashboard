@@ -86,9 +86,9 @@ const productStore = useProductStore();
                     class="relative h-6 w-6 rounded-full transition-all duration-200 focus:outline-none"
                     :style="{ backgroundColor: variant.color.hex }"
                     :class="{
-                      'ring-2 ring-black':
+                      'ring-2 ring-blue-500 ring-offset-1':
                         selectedVariantIndex[item._id] === index,
-                      'border border-gray-300':
+                      'border-2 border-gray-400':
                         selectedVariantIndex[item._id] !== index,
                     }"
                     @click="selectVariant(item._id, index)"
@@ -103,30 +103,20 @@ const productStore = useProductStore();
                 </div>
 
                 <!-- Selected info: Dynamically shows the selected variant -->
-                <div
-                  v-if="item.varients[selectedVariantIndex[item._id]]"
-                  class="text-xs text-gray-600"
-                >
-                  {{
-                    item.varients[selectedVariantIndex[item._id]].color.name
-                  }}:
-                  {{
-                    item.varients[selectedVariantIndex[item._id]].quantity
-                  }}
-                  in stock
-                </div>
               </div>
             </template>
 
             <template #column-quantity="{ item }">
-              <span>
-                {{
-                  selectedVariantIndex[item._id] !== undefined &&
-                  item.varients[selectedVariantIndex[item._id]]
-                    ? item.varients[selectedVariantIndex[item._id]].quantity
-                    : 'N/A'
-                }}
-              </span>
+              <div class="flex flex-col text-xs">
+                <div v-if="item.varients[selectedVariantIndex[item._id]]">
+                  {{
+                    item.varients[selectedVariantIndex[item._id]].color.name
+                  }}:
+                  {{ item.varients[selectedVariantIndex[item._id]].quantity }}
+                  in stock
+                </div>
+                <div v-else>N/A</div>
+              </div>
             </template>
 
             <template #column-sale="{ value }">

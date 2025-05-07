@@ -118,6 +118,7 @@ watch(
       <template #actions>
         <div class="flex items-center justify-end gap-4 md:gap-6">
           <Search
+            title="orders"
             v-model="store.searchQuery"
             @search="store.fetchOrders({ page: 1, userId })"
           />
@@ -216,7 +217,7 @@ watch(
       :totalPages="store.totalPages"
       :totalItems="store.totalOrders"
       :limit="store.ORDER_LIMIT"
-      @changePage="store.fetchOrders"
+      @changePage="(page) => store.fetchOrders({ page })"
     />
   </div>
 </template>

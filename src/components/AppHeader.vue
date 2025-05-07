@@ -1,6 +1,6 @@
 <template>
   <header
-    class="sticky top-0 z-99999 flex w-full custom-border bg-white lg:border-b dark:bg-gray-900"
+    class="sticky top-0 z-99 flex w-full custom-border bg-white lg:border-b dark:bg-gray-900"
   >
     <div
       class="flex grow flex-col items-center justify-between lg:flex-row lg:px-6"
@@ -10,7 +10,7 @@
       >
         <button
           @click="handleToggle"
-          class="z-99999 flex h-10 w-10 items-center justify-center rounded-lg custom-border text-gray-500 lg:h-11 lg:w-11 lg:border dark:text-gray-400"
+          class="z-99 flex h-10 w-10 items-center justify-center rounded-lg custom-border text-gray-500 lg:h-11 lg:w-11 lg:border dark:text-gray-400"
           :class="[
             isMobileOpen
               ? 'bg-gray-100 lg:bg-transparent dark:bg-gray-800 dark:lg:bg-transparent'
@@ -23,7 +23,7 @@
         <HeaderLogo />
         <button
           @click="toggleApplicationMenu"
-          class="z-99999 flex h-10 w-10 items-center justify-center rounded-lg text-gray-700 hover:bg-gray-100 lg:hidden dark:text-gray-400 dark:hover:bg-gray-800"
+          class="z-99 flex h-10 w-10 items-center justify-center rounded-lg text-gray-700 hover:bg-gray-100 lg:hidden dark:text-gray-400 dark:hover:bg-gray-800"
         >
           <DotsIcons />
         </button>

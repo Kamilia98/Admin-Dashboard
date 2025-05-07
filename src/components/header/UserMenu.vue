@@ -81,14 +81,9 @@
 </template>
 
 <script setup lang="ts">
-import {
-  UserCircleIcon,
-  ChevronDownIcon,
-  LogoutIcon,
-  UserIcon,
-} from '../../icons';
+import { ChevronDownIcon, LogoutIcon } from '../../icons';
 import { RouterLink, useRouter } from 'vue-router';
-import { ref, onMounted, onUnmounted} from 'vue';
+import { ref, onMounted, onUnmounted } from 'vue';
 import { useAuth } from '../../composables/useAuth';
 import axios from 'axios';
 import { ElMessage } from 'element-plus';
@@ -105,10 +100,6 @@ const user = ref({
   email: '',
   thumbnail: '',
 });
-
-const menuItems = [
-  { href: '/profile', icon: UserCircleIcon, text: 'Edit profile' },
-];
 
 const fetchUserProfile = async () => {
   try {

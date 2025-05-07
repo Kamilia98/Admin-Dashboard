@@ -8,6 +8,8 @@ import {
   fetchOrderAnalytics as fetchOrderAnalyticsService,
 } from '../services/orderService';
 
+import { ElMessage } from 'element-plus';
+
 // --- Constants ---
 const ORDER_LIMIT = 8;
 const ORDER_STAGES: OrderStatus[] = [
@@ -84,6 +86,8 @@ export const useOrdersStore = defineStore('orders', () => {
     sortByParam?: string;
     userId?: string;
   } = {}) => {
+    if (loading.value) return;
+
     loading.value = true;
     try {
       const params: Record<string, any> = {
@@ -111,7 +115,7 @@ export const useOrdersStore = defineStore('orders', () => {
 
       orders.value = data.orders;
       totalOrders.value = data.totalOrders;
-      totalPages.value = Math.ceil(data.totalOrders / limits.value);
+      totalPages.value = Math.ceil(data.totalOrders / (limits.value || 1));
       currentPage.value = page;
       totalAmount.value = data.totalAmountOrders;
       averageAmount.value = data.averageOrderValue;
@@ -119,6 +123,9 @@ export const useOrdersStore = defineStore('orders', () => {
     } catch (err) {
       console.error('[Fetch Orders Error]:', err);
       error.value = err instanceof Error ? err.message : String(err);
+
+      // Error message
+      ElMessage.error('Failed to fetch orders. Please try again.');
       throw err;
     } finally {
       loading.value = false;
@@ -145,9 +152,15 @@ export const useOrdersStore = defineStore('orders', () => {
       const order = orders.value.find((o) => o.id === orderId);
       if (order) order.status = newStatus;
       channel.postMessage({ orderId, newStatus });
+
+      // Success message
+      ElMessage.success(`Order status updated to ${newStatus}!`);
     } catch (err) {
       console.error('[Update Status Error]:', err);
       error.value = err instanceof Error ? err.message : String(err);
+
+      // Error message
+      ElMessage.error('Failed to update order status. Please try again.');
       throw err;
     } finally {
       loading.value = false;
@@ -195,7 +208,13 @@ export const useOrdersStore = defineStore('orders', () => {
       page: 1,
       userId: userId.value,
       limit: limits.value,
-    });
+    })
+      .then(() => {
+        ElMessage.success('Filters reset successfully!');
+      })
+      .catch(() => {
+        ElMessage.error('Failed to reset filters. Please try again.');
+      });
   };
 
   const getNextStatusOptions = (status: OrderStatus) => {

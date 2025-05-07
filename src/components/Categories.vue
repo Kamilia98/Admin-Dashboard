@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { onMounted, ref } from 'vue';
 import { useCategoryStore } from '../stores/categoryStore';
-import { ElIcon } from 'element-plus';
+import { ElIcon, ElMessage, ElMessageBox } from 'element-plus';
 import { Edit, Delete, Plus, View } from '@element-plus/icons-vue';
 import Table from '../components/common/Table.vue';
 import Button from '../components/common/Button.vue';
@@ -110,10 +110,17 @@ const onEdit = (cat: Category) => {
 };
 
 const onDelete = async (id: string) => {
-  const confirmed = confirm('Are you sure you want to delete this category?');
-  if (!confirmed) return;
-
-  await categoryStore.deleteCategoryHandler(id);
+  ElMessageBox.confirm(
+    'Are you sure you want to delete this category?',
+    'Warning',
+    {
+      confirmButtonText: 'OK',
+      cancelButtonText: 'Cancel',
+      type: 'warning',
+    },
+  ).then(async () => {
+    await categoryStore.deleteCategoryHandler(id);
+  });
 };
 
 // Data Fetching

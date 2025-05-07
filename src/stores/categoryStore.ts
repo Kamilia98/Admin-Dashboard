@@ -9,6 +9,8 @@ import {
 } from '../services/categoryService';
 import type { Category } from '../types/category.d';
 
+import { ElMessage } from 'element-plus';
+
 export const useCategoryStore = defineStore('category', () => {
   const loading = ref(false);
   const error = ref<string | null>(null);
@@ -27,6 +29,7 @@ export const useCategoryStore = defineStore('category', () => {
       error.value =
         err?.response?.data?.message || 'Failed to fetch categories';
       console.error('Failed to fetch categories:', err);
+      ElMessage.error(error.value || 'An unknown error occurred');
     } finally {
       loading.value = false;
     }
@@ -40,6 +43,7 @@ export const useCategoryStore = defineStore('category', () => {
     } catch (err) {
       console.error('[Fetch Order Error]:', err);
       error.value = err instanceof Error ? err.message : String(err);
+      ElMessage.error(error.value || 'An unknown error occurred');
       throw err;
     } finally {
       loading.value = false;
@@ -56,9 +60,11 @@ export const useCategoryStore = defineStore('category', () => {
       error.value = null;
       await createCategory(categoryData);
       await fetchCategories();
+      ElMessage.success('Category created successfully!');
     } catch (err: any) {
       error.value = err?.response?.data?.message || 'Failed to create category';
       console.error('Failed to create category:', err);
+      ElMessage.error(error.value || 'An unknown error occurred');
     } finally {
       loading.value = false;
     }
@@ -73,9 +79,11 @@ export const useCategoryStore = defineStore('category', () => {
       error.value = null;
       await updateCategory(id, categoryData);
       await fetchCategories();
+      ElMessage.success('Category updated successfully!');
     } catch (err: any) {
       error.value = err?.response?.data?.message || 'Failed to update category';
       console.error('Failed to update category:', err);
+      ElMessage.error(error.value || 'An unknown error occurred');
     } finally {
       loading.value = false;
     }
@@ -87,9 +95,11 @@ export const useCategoryStore = defineStore('category', () => {
       error.value = null;
       await deleteCategory(id);
       await fetchCategories();
+      ElMessage.success('Category deleted successfully!');
     } catch (err: any) {
       error.value = err?.response?.data?.message || 'Failed to delete category';
       console.error('Failed to delete category:', err);
+      ElMessage.error(error.value || 'An unknown error occurred');
     } finally {
       loading.value = false;
     }

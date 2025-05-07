@@ -1,22 +1,42 @@
 import { defineStore } from 'pinia';
 import type { Product } from '../types/product';
+import type {
+  productVariant,
+  ProductApiResponse,
+} from '../types/product-varient';
 import * as productService from '../services/productService';
 import { ref } from 'vue';
 
 export const useProductStore = defineStore('productStore', () => {
   // States
-  const products = ref<Product[]>([]);
+  const products = ref<productVariant[]>([]);
+  const totalProducts = ref(0);
   const product = ref<Product | null>(null);
   const loading = ref(false);
   const error = ref<string | null>(null);
+  const currentPage = ref(1);
+  const pageSize = ref(10);
+  const sortBy = ref('');
+  const sortOrder = ref<'asc' | 'desc'>('asc');
 
   // Actions
-  const getAllProducts = async () => {
+
+  const getAllProducts = async (page = currentPage.value) => {
     loading.value = true;
     try {
-      const { data } = await productService.fetchAllProducts();
+      const { data }: ProductApiResponse =
+        await productService.fetchAllProducts(
+          page,
+          pageSize.value,
+          sortBy.value,
+          sortOrder.value,
+        );
       products.value = data.products;
-      console.log('[Product store -- all data]', products.value);
+      totalProducts.value = data.totalProducts;
+      currentPage.value = page;
+      console.log('[product-Store -- Sorting]', sortBy.value, sortOrder.value);
+      console.log('[Product store -- totalProducts]', data.totalProducts);
+      console.log('[Product store -- all variants]', products.value);
     } catch (err: any) {
       error.value = err.message || 'Failed to fetch products';
     } finally {
@@ -28,8 +48,7 @@ export const useProductStore = defineStore('productStore', () => {
     loading.value = true;
     try {
       const { data } = await productService.fetchProductById(id);
-      product.value = data.product;
-      return data.product;
+      product.value = data;
     } catch (err: any) {
       error.value = err.message || 'Failed to fetch product';
     } finally {
@@ -87,9 +106,14 @@ export const useProductStore = defineStore('productStore', () => {
     product,
     loading,
     error,
+    currentPage,
+    pageSize,
+    sortBy,
+    sortOrder,
     getAllProducts,
     getProductById,
     removeProduct,
+    totalProducts,
     addProduct,
     updateProduct,
   };

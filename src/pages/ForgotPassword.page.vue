@@ -1,62 +1,109 @@
 <script setup lang="ts">
 import { ref } from 'vue';
+import { useRouter } from 'vue-router';
 import { useAuth } from '../composables/useAuth';
-import { ElIcon, ElCheckbox } from 'element-plus';
-import { Hide, Loading, View } from '@element-plus/icons-vue';
+import { ElIcon, ElMessage } from 'element-plus';
+import { Loading } from '@element-plus/icons-vue';
+import axios from 'axios';
 
-const { login, error: authError, isLoading } = useAuth();
+const router = useRouter();
+const isLoading = ref(false);
 const email = ref('');
-const password = ref('');
-const showPassword = ref(false);
-const keepLoggedIn = ref(false);
-
 const errors = ref({
   email: '',
-  password: '',
   general: '',
 });
 
-const validateForm = () => {
-  let isValid = true;
-  errors.value = {
-    email: '',
-    password: '',
-    general: '',
-  };
-
-  // Email validation
+const validateEmail = () => {
+  errors.value.email = '';
   if (!email.value) {
     errors.value.email = 'Email is required';
-    isValid = false;
-  } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.value)) {
+    return false;
+  }
+  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  if (!emailRegex.test(email.value)) {
     errors.value.email = 'Please enter a valid email address';
-    isValid = false;
+    return false;
   }
-
-  // Password validation
-  if (!password.value) {
-    errors.value.password = 'Password is required';
-    isValid = false;
-  } else if (password.value.length < 6) {
-    errors.value.password = 'Password must be at least 6 characters';
-    isValid = false;
-  }
-
-  return isValid;
+  return true;
 };
 
-const togglePasswordVisibility = () => {
-  showPassword.value = !showPassword.value;
-};
-
-const handleLogin = async () => {
-  if (!validateForm()) return;
+const { forgotPassword } = useAuth();
+const handleSendResetLink = async () => {
+  if (!validateEmail()) return;
 
   try {
-    await login(email.value, password.value, keepLoggedIn.value);
-  } catch (err) {
-    console.error('Login failed:', err);
-    errors.value.general = authError.value || 'An error occurred during login';
+    isLoading.value = true;
+    const response = await axios.post(
+      'http://localhost:5000/auth/forgot-password',
+      {
+        email: email.value,
+      },
+    );
+
+    if (response.data.status === 'success') {
+      // Show success toast
+      ElMessage({
+        message: 'Reset link has been sent to your email',
+        type: 'success',
+        duration: 5000,
+        showClose: true,
+      });
+
+      // Redirect to login
+      router.push({
+        name: 'login',
+      });
+    }
+  } catch (err: any) {
+    console.error('Send reset link error:', err);
+    console.error('Error details:', {
+      status: err.response?.status,
+      message: err.response?.data?.message,
+      data: err.response?.data,
+      error: err.response?.data?.error || err.message,
+    });
+
+    // Show error toast
+    ElMessage({
+      message:
+        err.response?.data?.message ||
+        'Failed to send reset link. Please try again.',
+      type: 'error',
+      duration: 5000,
+      showClose: true,
+    });
+
+    // Handle different error cases based on backend responses
+    if (err.response?.status === 500) {
+      // Check for specific error messages from backend
+      const errorMessage =
+        err.response?.data?.error || err.response?.data?.message || err.message;
+
+      if (errorMessage === 'Error sending email.') {
+        errors.value.general =
+          'Unable to send reset email. Please check your email configuration.';
+      } else if (errorMessage?.includes('token')) {
+        errors.value.general =
+          'Error generating reset token. Please try again.';
+      } else {
+        errors.value.general =
+          'An unexpected error occurred. Please try again later.';
+      }
+    } else if (err.response?.status === 400) {
+      if (err.response.data.message === "User with this email doesn't exist.") {
+        errors.value.general = 'No account found with this email address.';
+      } else {
+        errors.value.general = 'Invalid email address or account not found';
+      }
+    } else if (err.response?.status === 404) {
+      errors.value.general =
+        'Service temporarily unavailable. Please try again later.';
+    } else {
+      errors.value.general = 'Failed to send reset link. Please try again.';
+    }
+  } finally {
+    isLoading.value = false;
   }
 };
 </script>
@@ -75,25 +122,27 @@ const handleLogin = async () => {
             <h1
               class="mb-2 text-title-sm font-semibold text-gray-800 sm:text-title-md dark:text-white/90"
             >
-              Sign In
+              Forgot Password
             </h1>
+            <p class="text-sm text-gray-600 dark:text-gray-400">
+              Enter your email address and we'll send you a reset link
+            </p>
           </div>
-          <form @submit.prevent="handleLogin">
+
+          <form @submit.prevent="handleSendResetLink">
             <div class="space-y-5">
-              <!-- Email -->
               <div>
                 <label
                   for="email"
                   class="mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-400"
                 >
-                  Email<span class="text-error-500">*</span>
+                  Email Address<span class="text-error-500">*</span>
                 </label>
                 <input
                   v-model="email"
                   type="email"
                   id="email"
-                  name="email"
-                  placeholder="info@gmail.com"
+                  placeholder="Enter your email address"
                   :class="[
                     'dark:bg-dark-900 h-11 w-full rounded-lg border bg-transparent px-4 py-2.5 text-sm text-gray-800 shadow-theme-xs placeholder:text-gray-400 focus:border-brand-300 focus:ring-3 focus:ring-brand-500/10 focus:outline-hidden dark:border-gray-700 dark:bg-gray-900 dark:text-white/90 dark:placeholder:text-white/30 dark:focus:border-brand-800',
                     errors.email
@@ -104,62 +153,6 @@ const handleLogin = async () => {
                 <p v-if="errors.email" class="mt-1 text-sm text-error-500">
                   {{ errors.email }}
                 </p>
-              </div>
-              <!-- Password -->
-              <div>
-                <label
-                  for="password"
-                  class="mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-400"
-                >
-                  Password<span class="text-error-500">*</span>
-                </label>
-                <div class="relative">
-                  <input
-                    v-model="password"
-                    :type="showPassword ? 'text' : 'password'"
-                    id="password"
-                    placeholder="Enter your password"
-                    :class="[
-                      'dark:bg-dark-900 h-11 w-full rounded-lg border bg-transparent py-2.5 pr-11 pl-4 text-sm text-gray-800 shadow-theme-xs placeholder:text-gray-400 focus:border-brand-300 focus:ring-3 focus:ring-brand-500/10 focus:outline-hidden dark:border-gray-700 dark:bg-gray-900 dark:text-white/90 dark:placeholder:text-white/30 dark:focus:border-brand-800',
-                      errors.password
-                        ? 'border-error-300 focus:border-error-300 focus:ring-error-500/10'
-                        : 'border-gray-300',
-                    ]"
-                  />
-                  <span
-                    @click="togglePasswordVisibility"
-                    class="absolute top-1/2 right-4 z-30 -translate-y-1/2 cursor-pointer text-gray-500 dark:text-gray-400"
-                  >
-                    <el-icon
-                      v-if="!showPassword"
-                      color="#98A2B3"
-                      width="20"
-                      height="20"
-                      ><View
-                    /></el-icon>
-                    <el-icon v-else color="#98A2B3" width="20" height="20"
-                      ><Hide
-                    /></el-icon>
-                  </span>
-                </div>
-                <p v-if="errors.password" class="mt-1 text-sm text-error-500">
-                  {{ errors.password }}
-                </p>
-              </div>
-              <!-- Checkbox -->
-              <div class="flex items-center justify-between">
-                <div>
-                  <el-checkbox
-                    v-model="keepLoggedIn"
-                    label="Keep me logged in"
-                    class="text-sm font-normal text-gray-700 dark:text-gray-400"
-                  />
-                </div>
-                <router-link
-                  to="/forgot-password"
-                  class="text-sm text-brand-500 hover:text-brand-600 dark:text-brand-400"
-                  >Forgot password?</router-link
-                >
               </div>
 
               <div
@@ -189,7 +182,7 @@ const handleLogin = async () => {
                   </div>
                 </div>
               </div>
-              <!-- Button -->
+
               <div class="space-y-3">
                 <button
                   type="submit"
@@ -199,8 +192,15 @@ const handleLogin = async () => {
                   <span v-if="isLoading" class="mr-2">
                     <el-icon><Loading /></el-icon>
                   </span>
-                  {{ isLoading ? 'Signing in...' : 'Sign In' }}
+                  {{ isLoading ? 'Sending Reset Link...' : 'Send Reset Link' }}
                 </button>
+
+                <router-link
+                  to="/login"
+                  class="flex w-full items-center justify-center rounded-lg border border-gray-300 bg-white px-4 py-3 text-sm font-medium text-gray-700 shadow-theme-xs transition hover:bg-gray-50 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-200 dark:hover:bg-gray-700"
+                >
+                  Back to Login
+                </router-link>
               </div>
             </div>
           </form>

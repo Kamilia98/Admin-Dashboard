@@ -77,7 +77,7 @@ onMounted(async () => {
           class="text-2xl font-bold tracking-tight text-gray-900 dark:text-white"
         >
           Store Configuration
-        </h1>
+    </h1>
         <button
           @click="handleSave"
           class="inline-flex items-center rounded-md border border-transparent bg-blue-600 px-4 py-2 text-sm font-medium text-white shadow-sm transition-colors duration-200 hover:bg-blue-700 focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 focus:outline-none"
@@ -97,7 +97,7 @@ onMounted(async () => {
           </svg>
           Save Changes
         </button>
-      </div>
+    </div>
 
       <div class="mb-6">
         <nav class="flex space-x-4" aria-label="Tabs">

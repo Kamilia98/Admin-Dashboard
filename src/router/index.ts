@@ -15,16 +15,32 @@ const routes = [
     meta: { requiresAuth: false, layout: 'auth' },
   },
   {
+    path: '/forgot-password',
+    name: 'forgot-password',
+    component: () => import('../pages/ForgotPassword.page.vue'),
+    meta: { requiresAuth: false, layout: 'auth' },
+  },
+  {
+    path: '/reset-password',
+    name: 'reset-password',
+    component: () => import('../pages/ResetPassword.page.vue'),
+    meta: { requiresAuth: false, layout: 'auth' },
+  },
+  {
     path: '/signout',
     name: 'signout',
     component: () => import('../pages/Login.page.vue'),
     meta: { requiresAuth: false, layout: 'auth' },
   },
   {
-    path: '',
+    path: '/dashboard',
     name: 'dashboard',
     component: () => import('../pages/Dashboard.page.vue'),
     meta: { requiresAuth: true, layout: 'admin' },
+  },
+  {
+    path: '/',
+    redirect: '/dashboard',
   },
   {
     path: '/orders',
@@ -76,6 +92,12 @@ const routes = [
     component: () => import('../pages/Products.page.vue'),
     meta: { requiresAuth: true, layout: 'admin' },
   },
+  {
+    path: '/categories/:id',
+    name: 'category-details',
+    component: () => import('../pages/CategoryDetails.page.vue'),
+    meta: { requiresAuth: true, layout: 'admin' },
+  },
 ];
 
 export const router = createRouter({
@@ -86,20 +108,20 @@ export const router = createRouter({
   routes,
 });
 
-// Navigation guard
-router.beforeEach((to, from, next) => {
-  const { isAuthenticated, initAuth } = useAuth();
+router.beforeEach(async (to, from, next) => {
+  const auth = useAuth();
 
-  // Initialize auth state
-  initAuth();
+  auth.initAuth();
 
-  if (to.meta.requiresAuth && !isAuthenticated.value) {
+  if (to.meta.requiresAuth && !auth.isAuthenticated.value) {
+    console.log('Route requires auth, redirecting to login');
     next({ name: 'login' });
   } else if (
     to.name === 'login' &&
-    isAuthenticated.value &&
+    auth.isAuthenticated.value &&
     from.name !== 'signout'
   ) {
+    console.log('Already logged in, redirecting to dashboard');
     next({ name: 'dashboard' });
   } else {
     next();

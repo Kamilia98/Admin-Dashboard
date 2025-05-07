@@ -1,10 +1,10 @@
 <script setup lang="ts">
-import EcommerceMetrics from '../components/ecommerce/EcommerceMetrics.vue';
-import MonthlyTarget from '../components/ecommerce/MonthlyTarget.vue';
-import MonthlySale from '../components/ecommerce/MonthlySale.vue';
-import StatisticsChart from '../components/ecommerce/StatisticsChart.vue';
-import CustomerDemographic from '../components/ecommerce/CustomerDemographic.vue';
-import RecentOrders from '../components/ecommerce/RecentOrders.vue';
+import EcommerceMetrics from '../components/dashboard/EcommerceMetrics.vue';
+import MonthlyTarget from '../components/dashboard/MonthlyTarget.vue';
+import MonthlySale from '../components/dashboard/MonthlySale.vue';
+import StatisticsChart from '../components/dashboard/StatisticsChart.vue';
+import CustomerDemographic from '../components/dashboard/CustomerDemographic.vue';
+import RecentOrders from '../components/dashboard/RecentOrders.vue';
 </script>
 
 <template>

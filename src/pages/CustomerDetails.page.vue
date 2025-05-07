@@ -2,7 +2,6 @@
 import { useProductStore } from '../stores/productStore';
 import { CircleCheckFilled, User } from '@element-plus/icons-vue';
 import { ElIcon } from 'element-plus';
-import Pagination from '../components/common/Pagination.vue';
 import OrderManager from '../components/orders/OrderManager.vue';
 import { computed, onMounted, ref } from 'vue';
 import { useRoute } from 'vue-router';
@@ -29,9 +28,7 @@ const loading = ref(false);
 const favouriteProducts = ref<string[]>([]);
 const route = useRoute();
 const user = ref<User | null>(null);
-// const currentPage = ref(1);
-const totalAmount = computed(() => orderStore.totalAmount);
-const averageAmount = computed(() => orderStore.averageAmount);
+
 // const favTest = [
 //   'test1',
 //   'test2',
@@ -44,8 +41,7 @@ const averageAmount = computed(() => orderStore.averageAmount);
 //   'test9',
 //   'test10',
 // ];
-const totalOrdersWithUser = computed(() => orderStore.totalOrdersWithUser);
-console.log(totalOrdersWithUser.value);
+
 // function handlePageChange(page: number) {
 //   console.log(page);
 //   console.log(555555555555555555555);
@@ -89,6 +85,15 @@ const fetchUser = async (userId: string) => {
 };
 onMounted(() => {
   fetchUser(route.params.userId as string);
+  orderStore.fetchOrderAnalytics(route.params.userId as string);
+});
+
+const averageOrderValue = computed(() => {
+  return (
+    orderStore.totalOrders > 0
+      ? orderStore.totalRevenue / orderStore.totalOrders
+      : 0
+  ).toFixed(2);
 });
 </script>
 <template>
@@ -193,7 +198,7 @@ onMounted(() => {
             >
               <h4 class="text-sm text-gray-500 dark:text-white">Total Order</h4>
               <div class="mt-2 text-3xl font-bold dark:text-white">
-                {{ totalOrdersWithUser }}
+                {{ orderStore.totalOrders }}
               </div>
             </ElCard>
             <ElCard
@@ -204,7 +209,7 @@ onMounted(() => {
                 Total Amount
               </h4>
               <div class="mt-2 text-3xl font-bold dark:text-white">
-                {{ totalAmount.toFixed(2) }}
+                {{ orderStore.totalRevenue }}
               </div>
             </ElCard>
             <ElCard
@@ -215,7 +220,7 @@ onMounted(() => {
                 Average Order Value
               </h4>
               <div class="mt-2 text-3xl font-bold dark:text-white">
-                {{ averageAmount.toFixed(2) }}
+                {{ averageOrderValue }}
               </div>
             </ElCard>
           </div>
@@ -241,19 +246,8 @@ onMounted(() => {
         :userId="user?._id"
         :limit="2"
         :currentPage="orderStore.currentPage"
-        class="w-full"
       />
     </ElCard>
-
-    <!-- Pagination -->
-    <Pagination
-      title="Order Pagination"
-      :currentPage="orderStore.currentPage"
-      :totalPages="Math.ceil(orderStore.totalPages / 2)"
-      :totalItems="orderStore.totalOrdersWithUser"
-      :limit="2"
-      @changePage="orderStore.fetchOrders"
-    />
   </div>
 </template>
 

@@ -2,27 +2,32 @@
 import { ref, computed, onMounted, watch } from 'vue';
 import {
   ElIcon,
-  ElButton,
-  ElInput,
+  // ElButton,
+  // ElInput,
   ElNotification,
   ElMessageBox,
   ElSelect,
   ElOption,
-  ElCard,
+  // ElCard,
 } from 'element-plus';
 import axios from 'axios';
 import { Delete } from '@element-plus/icons-vue';
 import { View } from '@element-plus/icons-vue';
 import { CircleCheckFilled } from '@element-plus/icons-vue';
-import { UserFilled } from '@element-plus/icons-vue';
-import { Calendar } from '@element-plus/icons-vue';
-import { Refresh } from '@element-plus/icons-vue';
+// import { UserFilled } from '@element-plus/icons-vue';
+// import { Calendar } from '@element-plus/icons-vue';
+// import { Refresh } from '@element-plus/icons-vue';
+// import { SearchIcon } from '../icons';
+// import { RouterLink } from 'vue-router';
 import Table from '../components/common/Table.vue';
 import Pagination from '../components/common/Pagination.vue';
 import debounce from 'lodash/debounce';
-import { SearchIcon } from '../icons';
-import { RouterLink } from 'vue-router';
-
+import UserGroupIcon from '../icons/UserGroupIcon.vue';
+import Search from '../components/common/Search.vue';
+import Card from '../components/common/Card.vue';
+import CalenderIcon from '../icons/CalenderIcon.vue';
+import DocsIcon from '../icons/DocsIcon.vue';
+import Button from '../components/common/Button.vue';
 interface User {
   username: string;
   email: string;
@@ -161,9 +166,9 @@ async function deleteUser(user: User) {
 <template>
   <!-- Customer Cards -->
   <div
-    class="mb-6 grid grid-cols-1 gap-4 text-center sm:grid-cols-2 lg:grid-cols-3"
+    class="grid grid-cols-1 gap-4 pb-6 text-center sm:grid-cols-2 lg:grid-cols-3"
   >
-    <el-card shadow="hover" class="rounded-2xl">
+    <!-- <el-card shadow="hover" class="rounded-2xl">
       <div class="relative flex items-center justify-center">
         <div>
           <p class="text-sm text-gray-500 dark:text-white">Total Customers</p>
@@ -171,12 +176,13 @@ async function deleteUser(user: User) {
             {{ totalUsers }}
           </p>
         </div>
-        <el-icon class="-top-1 -left-7 pt-8 text-3xl text-blue-500"
-          ><UserFilled class="dark:text-white"
+        <el-icon class="-top-1 -left-7 pt-9 text-3xl text-blue-500"
+          ><UserGroupIcon class="dark:text-white"
         /></el-icon>
       </div>
-    </el-card>
-    <el-card shadow="hover" class="rounded-2xl">
+    </el-card> -->
+
+    <!-- <el-card shadow="hover" class="rounded-2xl">
       <div class="relative flex items-center justify-center">
         <div>
           <p class="text-sm text-gray-500 dark:text-white">New This Month</p>
@@ -203,30 +209,24 @@ async function deleteUser(user: User) {
           ><Refresh class="dark:text-white"
         /></el-icon>
       </div>
-    </el-card>
+    </el-card> -->
+    <Card
+      title="Total Customers"
+      :value="totalUsers"
+      :icon="UserGroupIcon"
+    ></Card
+    ><Card
+      title="New This Month"
+      :value="newCustomers"
+      :icon="CalenderIcon"
+    ></Card
+    ><Card
+      title="Returning Customers"
+      :value="returningCustomers"
+      :icon="DocsIcon"
+    ></Card>
   </div>
-  <div class="mb-4 flex items-center justify-between">
-    <el-select
-      v-model="limit"
-      placeholder="Select"
-      size="large"
-      style="width: 120px"
-      class="mr-4"
-    >
-      <el-option label="10 entries" :value="10" />
-      <el-option label="7 entries" :value="7" />
-      <el-option label="3 entries" :value="3" />
-    </el-select>
-    <el-input
-      v-model="search"
-      placeholder="Search..."
-      size="large"
-      style="width: 18rem"
-    >
-      <template #prefix
-        ><el-icon><Search /></el-icon> <SearchIcon /> </template
-    ></el-input>
-  </div>
+
   <Table
     caption="Customers"
     :headers="headers"
@@ -234,6 +234,21 @@ async function deleteUser(user: User) {
     :loading="loading"
     row-key="_id"
   >
+    <template #actions>
+      <div class="flex items-center justify-end gap-4 md:gap-6">
+        <Search v-model="search" placeholder="Search by username..." />
+        <el-select
+          v-model="limit"
+          placeholder="Select"
+          size="large"
+          style="width: 120px"
+        >
+          <el-option label="10 entries" :value="10" />
+          <el-option label="7 entries" :value="7" />
+          <el-option label="3 entries" :value="3" />
+        </el-select>
+      </div>
+    </template>
     <!-- User column -->
     <template #column-username="{ item }">
       <div class="flex items-center gap-3">
@@ -255,24 +270,36 @@ async function deleteUser(user: User) {
     <!-- Actions column -->
     <template #column-actions="{ item }">
       <div class="flex items-center justify-center gap-4">
-        <el-button
+        <!-- <RouterLink
+          :to="{ name: 'customer-details', params: { userId: item._id } }"
+        >
+          <el-icon class="cursor-pointer pt-2" size="16"><View /></el-icon>
+        </RouterLink> -->
+        <!-- <el-button
           size="large"
           type="default"
           link
           @click.stop="deleteUser(item as User)"
         >
           <el-icon><Delete class="text-red-600" /></el-icon>
-        </el-button>
-        <RouterLink
+        </el-button> -->
+        <Button
+          tag="router-link"
           :to="{ name: 'customer-details', params: { userId: item._id } }"
-        >
-          <el-icon class="cursor-pointer pt-2" size="16"><View /></el-icon>
-        </RouterLink>
+          ><template #icon>
+            <el-icon><View /></el-icon> </template
+        ></Button>
+        <Button @click="deleteUser(item as User)" variant="danger">
+          <template #icon>
+            <el-icon><Delete /></el-icon>
+          </template>
+        </Button>
       </div>
     </template>
   </Table>
   <Pagination
-    title="User Pagination"
+    class="pt-4"
+    title="Customer Pagination"
     :current-page="currentPage"
     :total-pages="Math.ceil(totalUsers / limit)"
     :total-items="totalUsers"

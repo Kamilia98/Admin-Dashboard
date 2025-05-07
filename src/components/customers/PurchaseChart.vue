@@ -1,6 +1,6 @@
 <template>
   <div
-    class="rounded-xl border custom-border bg-white p-4 shadow dark:bg-white/[0.03]"
+    class="rounded-2xl border custom-border bg-white p-4 shadow dark:bg-white/[0.03]"
   >
     <h3 class="mb-4 text-lg font-semibold text-gray-700 dark:text-white">
       Purchase History

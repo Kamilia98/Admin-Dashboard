@@ -44,7 +44,8 @@ const averageAmount = computed(() => orderStore.averageAmount);
 //   'test9',
 //   'test10',
 // ];
-// const totalOrdersWithUser = computed(() => orderStore.totalOrdersWithUser);
+const totalOrdersWithUser = computed(() => orderStore.totalOrdersWithUser);
+console.log(totalOrdersWithUser.value);
 // function handlePageChange(page: number) {
 //   console.log(page);
 //   console.log(555555555555555555555);
@@ -192,7 +193,7 @@ onMounted(() => {
             >
               <h4 class="text-sm text-gray-500 dark:text-white">Total Order</h4>
               <div class="mt-2 text-3xl font-bold dark:text-white">
-                {{ orderStore.totalOrders }}
+                {{ totalOrdersWithUser }}
               </div>
             </ElCard>
             <ElCard

@@ -37,6 +37,7 @@ export const useProductStore = defineStore('productStore', () => {
       console.log('[product-Store -- Sorting]', sortBy.value, sortOrder.value);
       console.log('[Product store -- totalProducts]', data.totalProducts);
       console.log('[Product store -- all variants]', products.value);
+      // return data.products;
     } catch (err: any) {
       error.value = err.message || 'Failed to fetch products';
     } finally {
@@ -48,7 +49,8 @@ export const useProductStore = defineStore('productStore', () => {
     loading.value = true;
     try {
       const { data } = await productService.fetchProductById(id);
-      product.value = data;
+      product.value = data.product;
+      return data.product;
     } catch (err: any) {
       error.value = err.message || 'Failed to fetch product';
     } finally {

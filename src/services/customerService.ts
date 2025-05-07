@@ -9,6 +9,13 @@ export const fetchAllUsers = async (params: any) => {
 };
 
 export const fetchUserById = async (id: string): Promise<User> => {
-  const { data } = await axios.get(`${API_BASE}/${id}`);
-  return data.data;
+  const token = localStorage.getItem('token');
+  const { data } = await axios.get(`${API_BASE}/${id}`, {
+    headers: {
+      Authorization: `Bearer ${token}`,
+      'Content-Type': 'application/json',
+    },
+  });
+  console.log(data.data.user);
+  return data.data.user;
 };

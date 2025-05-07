@@ -66,7 +66,7 @@ const emit = defineEmits(['update:modelValue']);
 const dropzoneForm = ref(null);
 const dropzoneId = `dropzone-${Math.random().toString(36).substr(2, 9)}`;
 const uploadedImage = ref(props.modelValue);
-let dropzoneInstance = null;
+let dropzoneInstance: Dropzone | null = null;
 
 onMounted(() => {
   Dropzone.autoDiscover = false;
@@ -80,7 +80,7 @@ onMounted(() => {
     acceptedFiles: 'image/*',
     dictDefaultMessage: '',
     init: function () {
-      this.on('addedfile', async (file) => {
+      this.on('addedfile', async (file: File) => {
         const formData = new FormData();
         formData.append('file', file);
         formData.append('upload_preset', 'ml_default');
@@ -97,7 +97,7 @@ onMounted(() => {
 
           const data = await res.json();
           uploadedImage.value = data.secure_url;
-          emit('update:modelValue', data.secure_url);
+          emit('update:modelValue', data.secure_url || props.modelValue);
           this.emit('success', file, data);
           this.emit('complete', file);
         } catch (err) {
@@ -112,7 +112,6 @@ onMounted(() => {
           size: 12345,
           accepted: true,
         };
-
         this.emit('addedfile', mockFile);
         this.emit('thumbnail', mockFile, props.modelValue);
         this.emit('complete', mockFile);
@@ -127,13 +126,6 @@ onBeforeUnmount(() => {
   }
 });
 
-function removeImage() {
-  uploadedImage.value = '';
-  emit('update:modelValue', '');
-  if (dropzoneInstance) {
-    dropzoneInstance.removeAllFiles(true);
-  }
-}
 
 // Watch for external model changes
 watch(

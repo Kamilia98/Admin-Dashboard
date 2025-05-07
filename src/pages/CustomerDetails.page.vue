@@ -45,6 +45,7 @@ const averageAmount = computed(() => orderStore.averageAmount);
 //   'test10',
 // ];
 const totalOrdersWithUser = computed(() => orderStore.totalOrdersWithUser);
+console.log(totalOrdersWithUser.value);
 // function handlePageChange(page: number) {
 //   console.log(page);
 //   console.log(555555555555555555555);

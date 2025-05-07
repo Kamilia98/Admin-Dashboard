@@ -112,7 +112,7 @@ export const useOrdersStore = defineStore('orders', () => {
         params.searchQuery = searchQuery.value.trim();
 
       const { data } = await fetchAllOrders(params);
-
+      console.log(data);
       orders.value = data.orders;
       totalOrders.value = data.totalOrders;
       totalPages.value = Math.ceil(data.totalOrders / (limits.value || 1));

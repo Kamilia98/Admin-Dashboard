@@ -23,7 +23,7 @@
         <div class="flex items-center gap-2">
           <img src="/images/logo/logo.svg" alt="Logo" />
           <span
-            v-if="isExpanded || isMobileOpen"
+            v-if="isExpanded || isMobileOpen || isHovered"
             class="text-4xl font-semibold dark:text-white"
             >Admin</span
           >
@@ -196,8 +196,8 @@
 </template>
 
 <script setup lang="ts">
-import { computed } from "vue";
-import { useRoute } from "vue-router";
+import { computed } from 'vue';
+import { useRoute } from 'vue-router';
 
 import {
   GridIcon,
@@ -206,11 +206,11 @@ import {
   ProductsIcon,
   ChevronDownIcon,
   UserCircleIcon,
-} from "../icons";
+} from '../icons';
 
-import { useSidebar } from "../composables/useSidebar";
-import UserGroupIcon from "../icons/UserGroupIcon.vue";
-import OrdersIcon from "../icons/OrdersIcon.vue";
+import { useSidebar } from '../composables/useSidebar';
+import UserGroupIcon from '../icons/UserGroupIcon.vue';
+import OrdersIcon from '../icons/OrdersIcon.vue';
 
 const route = useRoute();
 
@@ -237,37 +237,37 @@ interface MenuGroup {
 
 const menuGroups: MenuGroup[] = [
   {
-    title: "Menu",
+    title: 'Menu',
     items: [
       {
         icon: GridIcon,
-        name: "Dashboard",
-        path: "/",
+        name: 'Dashboard',
+        path: '/',
       },
       {
         icon: ProductsIcon,
-        name: "Products",
-        path: "/products",
+        name: 'Products',
+        path: '/products',
       },
       {
         icon: UserGroupIcon,
-        name: "Customers",
-        path: "/customers",
-      },     
+        name: 'Customers',
+        path: '/customers',
+      },
       {
         icon: OrdersIcon,
-        name: "Orders",
-        path: "/orders",
+        name: 'Orders',
+        path: '/orders',
       },
       {
         icon: UserCircleIcon,
-        name: "User Profile",
-        path: "/profile",
+        name: 'User Profile',
+        path: '/profile',
       },
       {
         icon: SettingsIcon,
-        name: "Settings",
-        path: "/store",
+        name: 'Settings',
+        path: '/store',
       },
     ],
   },
@@ -303,15 +303,15 @@ const isSubmenuOpen = (groupIndex: number, itemIndex: number) => {
 
 const startTransition = (el: Element) => {
   const element = el as HTMLElement;
-  element.style.height = "auto";
+  element.style.height = 'auto';
   const height = element.scrollHeight;
-  element.style.height = "0px";
+  element.style.height = '0px';
   element.offsetHeight;
-  element.style.height = height + "px";
+  element.style.height = height + 'px';
 };
 
 const endTransition = (el: Element) => {
   const element = el as HTMLElement;
-  element.style.height = "";
+  element.style.height = '';
 };
 </script>

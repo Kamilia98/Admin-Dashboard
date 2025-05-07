@@ -1,5 +1,6 @@
 <script setup lang="ts">
-import { capitalize, onMounted, ref } from 'vue';
+import { onMounted, ref } from 'vue';
+import { useCategoryStore } from '../stores/categoryStore';
 import { ElIcon } from 'element-plus';
 import { Edit, Delete, Plus, View } from '@element-plus/icons-vue';
 import Table from '../components/common/Table.vue';
@@ -7,17 +8,9 @@ import Button from '../components/common/Button.vue';
 import Modal from '../components/common/Modal.vue';
 import Dropzone from './common/Dropzone.vue';
 import type { Category } from '../types/category.d';
-import {
-  deleteCategory,
-  getAllCategories,
-  updateCategory,
-  createCategory,
-} from '../services/categoryService';
 
-// State
-const loading = ref(false);
-const error = ref<string | null>(null);
-const categories = ref<Category[]>([]);
+// Store
+const categoryStore = useCategoryStore();
 
 // Modal States
 const isCategoryAddModalOpen = ref(false);
@@ -70,59 +63,49 @@ const handleEditModalClose = () => {
 // Form Validation
 const validateForm = (type: 'add' | 'edit'): boolean => {
   const form = type === 'add' ? formState.value.add : formState.value.edit;
+  console.log(form);
   if (!form.name || !form.image) {
-    error.value = 'Please fill in all required fields.';
     return false;
   }
   return true;
 };
 
-// CRUD Operations
 const handleAddModalSave = async () => {
-  try {
-    if (!validateForm('add')) return;
+  if (!validateForm('add')) return;
 
-    const payload = {
-      name: formState.value.add.name,
-      description: formState.value.add.description,
-      image: formState.value.add.image,
-    };
+  const payload = {
+    name: formState.value.add.name,
+    description: formState.value.add.description,
+    image: formState.value.add.image,
+  };
 
-    await createCategory(payload);
-    await fetchCategories();
-    handleAddModalClose();
-  } catch (err: any) {
-    error.value = err?.response?.data?.message || 'Failed to create category';
-    console.error('Failed to create category:', err);
-  }
+  await categoryStore.createCategoryHandler(payload);
+  handleAddModalClose();
 };
 
 const handleEditModalSave = async () => {
-  try {
-    if (!validateForm('edit')) return;
+  if (!validateForm('edit')) return;
 
-    const payload = {
-      name: formState.value.edit.name,
-      description: formState.value.edit.description,
-      image: formState.value.edit.image,
-    };
+  const payload = {
+    name: formState.value.edit.name,
+    description: formState.value.edit.description,
+    image: formState.value.edit.image,
+  };
 
-    await updateCategory(formState.value.edit.id, payload);
-    await fetchCategories();
-    handleEditModalClose();
-  } catch (err: any) {
-    error.value = err?.response?.data?.message || 'Failed to update category';
-    console.error('Failed to update category:', err);
-  }
+  console.log(payload);
+  await categoryStore.updateCategoryHandler(formState.value.edit.id, payload);
+  handleEditModalClose();
 };
 
-const onEdit = (category: Category) => {
+const onEdit = (cat: Category) => {
+  console.log(cat);
   formState.value.edit = {
-    id: category._id,
-    name: category.name,
-    description: category.description,
-    image: category.image,
+    id: cat._id,
+    name: cat.name,
+    description: cat.description,
+    image: cat.image,
   };
+  console.log(formState.value.edit);
   isCategoryEditModalOpen.value = true;
 };
 
@@ -130,59 +113,39 @@ const onDelete = async (id: string) => {
   const confirmed = confirm('Are you sure you want to delete this category?');
   if (!confirmed) return;
 
-  try {
-    await deleteCategory(id);
-    await fetchCategories();
-  } catch (err: any) {
-    error.value = err?.response?.data?.message || 'Failed to delete category';
-    console.error('Failed to delete category:', err);
-  }
-};
-
-const onAdd = () => {
-  isCategoryAddModalOpen.value = true;
+  await categoryStore.deleteCategoryHandler(id);
 };
 
 // Data Fetching
-const fetchCategories = async () => {
-  try {
-    loading.value = true;
-    error.value = null;
-    const data = await getAllCategories();
-    categories.value = data.map((cat: Category) => ({
-      ...cat,
-      name: capitalize(cat.name),
-    }));
-  } catch (err: any) {
-    error.value = err?.response?.data?.message || 'Failed to fetch categories';
-    console.error('Failed to fetch categories:', err);
-  } finally {
-    loading.value = false;
-  }
-};
-
 onMounted(() => {
-  fetchCategories();
+  categoryStore.fetchCategories();
 });
 </script>
 
 <template>
   <div class="space-y-4">
     <!-- Error Alert -->
-    <div v-if="error" class="rounded-lg bg-red-50 p-4 text-red-500">
-      {{ error }}
+    <div
+      v-if="categoryStore.error"
+      class="rounded-lg bg-red-50 p-4 text-red-500"
+    >
+      {{ categoryStore.error }}
     </div>
 
     <Table
       caption="Categories"
-      :items="categories"
+      :items="categoryStore.categories"
       :headers="[
-        { key: 'name', label: 'Name', sortable: false },
+        {
+          key: 'name',
+          label: 'Name',
+          sortable: false,
+        },
         { key: 'image', label: 'Image', sortable: false },
         { key: 'productCount', label: 'Products', sortable: false },
         { key: 'actions', label: 'Actions', sortable: false },
       ]"
-      :loading="loading"
+      :loading="categoryStore.loading"
     >
       <template #column-image="{ item }">
         <img
@@ -219,27 +182,22 @@ onMounted(() => {
       </template>
 
       <template #actions>
-        <button
-          @click="onAdd"
-          class="inline-flex items-center gap-2 rounded-lg border border-gray-300 bg-white px-4 py-2.5 text-theme-sm font-medium text-gray-700 shadow-theme-xs hover:bg-gray-50 hover:text-gray-800 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-400 dark:hover:bg-white/[0.03] dark:hover:text-gray-200"
-        >
-          <el-icon><Plus /></el-icon>
+        <Button @click="isCategoryAddModalOpen = true">
+          <template #icon>
+            <el-icon><Plus /></el-icon>
+          </template>
           Add Category
-        </button>
+        </Button>
       </template>
     </Table>
 
-    <!-- Edit Modal -->
     <Modal v-if="isCategoryEditModalOpen" @close="handleEditModalClose">
       <template #body>
         <div class="flex flex-col gap-4">
           <h4 class="text-2xl font-semibold text-gray-800 dark:text-white/90">
             Edit Category
           </h4>
-          <form
-            class="flex flex-col gap-4"
-            @submit.prevent="handleEditModalSave"
-          >
+          <form class="flex flex-col gap-4" @submit.prevent>
             <div class="flex custom-scrollbar flex-col gap-4 overflow-y-auto">
               <div>
                 <label
@@ -248,6 +206,7 @@ onMounted(() => {
                   Name
                 </label>
                 <input
+                  placeholder="Enter a name"
                   type="text"
                   v-model="formState.edit.name"
                   class="custom-input"
@@ -278,13 +237,12 @@ onMounted(() => {
                 <Dropzone
                   v-model="formState.edit.image"
                   :initialImage="formState.edit.image"
-                  uploadUrl="https://api.cloudinary.com/v1_1/dddhappm3/image/upload"
                 />
               </div>
             </div>
             <div class="flex items-center gap-3 lg:justify-end">
               <Button @click="handleEditModalClose">Close</Button>
-              <Button type="submit">Save Changes</Button>
+              <Button @click="handleEditModalSave">Save Changes</Button>
             </div>
           </form>
         </div>
@@ -298,10 +256,7 @@ onMounted(() => {
           <h4 class="text-2xl font-semibold text-gray-800 dark:text-white/90">
             Add Category
           </h4>
-          <form
-            class="flex flex-col gap-4"
-            @submit.prevent="handleAddModalSave"
-          >
+          <form class="flex flex-col gap-4" @submit.prevent>
             <div class="flex custom-scrollbar flex-col gap-4 overflow-y-auto">
               <div>
                 <label
@@ -310,6 +265,7 @@ onMounted(() => {
                   Name
                 </label>
                 <input
+                  placeholder="Enter a name"
                   type="text"
                   v-model="formState.add.name"
                   class="custom-input"
@@ -345,7 +301,7 @@ onMounted(() => {
             </div>
             <div class="flex items-center gap-3 lg:justify-end">
               <Button @click="handleAddModalClose">Close</Button>
-              <Button type="submit">Submit</Button>
+              <Button @click="handleAddModalSave">Submit</Button>
             </div>
           </form>
         </div>

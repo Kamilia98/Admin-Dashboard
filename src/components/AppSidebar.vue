@@ -206,6 +206,7 @@ import {
   ProductsIcon,
   ChevronDownIcon,
   UserCircleIcon,
+  CategoriesIcon,
 } from '../icons';
 
 import { useSidebar } from '../composables/useSidebar';
@@ -248,6 +249,11 @@ const menuGroups: MenuGroup[] = [
         icon: ProductsIcon,
         name: 'Products',
         path: '/products',
+      },
+      {
+        icon: CategoriesIcon,
+        name: 'Categories',
+        path: '/categories',
       },
       {
         icon: UserGroupIcon,

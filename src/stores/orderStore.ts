@@ -17,31 +17,28 @@ const ORDER_STAGES: OrderStatus[] = [
   OrderStatus.delivered,
 ];
 
-const STATUS_OPTIONS = [
-  { label: OrderStatus.pending, value: OrderStatus.pending },
-  { label: OrderStatus.processing, value: OrderStatus.processing },
-  { label: OrderStatus.shipped, value: OrderStatus.shipped },
-  { label: OrderStatus.delivered, value: OrderStatus.delivered },
-  { label: OrderStatus.canceled, value: OrderStatus.canceled },
-];
+const STATUS_OPTIONS = Object.values(OrderStatus).map((status) => ({
+  label: status,
+  value: status,
+}));
 
 const channel = new BroadcastChannel('orders-sync');
 
 export const useOrdersStore = defineStore('orders', () => {
   // --- State ---
-
   const orders = ref<Order[]>([]);
   const currentPage = ref(1);
   const totalPages = ref(1);
-  const limits = ref(8);
+  const limits = ref(ORDER_LIMIT);
   const totalOrders = ref(0);
   const totalAmount = ref(0);
   const averageAmount = ref(0);
   const totalOrdersWithUser = ref(0);
   const loading = ref(false);
+  const error = ref('');
   const initial = ref(true);
 
-  const userId = ref<string>('');
+  const userId = ref('');
   const searchQuery = ref('');
   const statusFilter = ref<string[]>([]);
   const dateRange = ref<[string, string]>(['', '']);
@@ -52,31 +49,35 @@ export const useOrdersStore = defineStore('orders', () => {
   const minAmount = ref(0);
   const maxAmount = ref(0);
   const totalRevenue = ref(0);
-  const statusCounts = ref<Record<OrderStatus, number>>({
-    [OrderStatus.pending]: 0,
-    [OrderStatus.processing]: 0,
-    [OrderStatus.shipped]: 0,
-    [OrderStatus.delivered]: 0,
-    [OrderStatus.canceled]: 0,
-  });
+
+  const statusCounts = ref<Record<OrderStatus, number>>(
+    Object.values(OrderStatus).reduce(
+      (acc, status) => ({ ...acc, [status]: 0 }),
+      {} as Record<OrderStatus, number>,
+    ),
+  );
 
   // --- Actions ---
+
   const fetchOrderAnalytics = async () => {
     try {
       const data = await fetchOrderAnalyticsService();
       totalOrders.value = data.totalOrders;
       totalRevenue.value = data.totalRevenue;
       statusCounts.value = { ...data.statusCounts };
-    } catch (error) {
-      console.error('Error loading order analytics:', error);
+    } catch (err) {
+      console.error('[Analytics Error]:', err);
+      error.value = err instanceof Error ? err.message : String(err);
+
+      throw err;
     }
   };
 
   const fetchOrders = async ({
     page = 1,
-    limit = ORDER_LIMIT,
+    limit = limits.value,
     sortByParam = sortBy.value,
-    userId,
+    userId: paramUserId,
   }: {
     page?: number;
     limit?: number;
@@ -86,21 +87,22 @@ export const useOrdersStore = defineStore('orders', () => {
     loading.value = true;
     try {
       const params: Record<string, any> = {
-        limit,
         page,
-        startDate: startDateFilter.value,
-        endDate: endDateFilter.value,
+        limit,
         sortBy: sortByParam,
         sortOrder: sortOrder.value,
+        startDate: startDateFilter.value,
+        endDate: endDateFilter.value,
         minAmount: minAmount.value,
         maxAmount: maxAmount.value,
       };
-      if (limit && initial.value) {
-        params.limit = limit;
+
+      if (initial.value) {
         limits.value = limit;
         initial.value = false;
       }
-      if (userId) params.userId = userId;
+
+      if (paramUserId) params.userId = paramUserId;
       if (statusFilter.value.length) params.status = statusFilter.value;
       if (searchQuery.value.trim())
         params.searchQuery = searchQuery.value.trim();
@@ -109,15 +111,15 @@ export const useOrdersStore = defineStore('orders', () => {
 
       orders.value = data.orders;
       totalOrders.value = data.totalOrders;
-      totalPages.value = Math.ceil(data.totalOrders / ORDER_LIMIT);
+      totalPages.value = Math.ceil(data.totalOrders / limits.value);
       currentPage.value = page;
       totalAmount.value = data.totalAmountOrders;
       averageAmount.value = data.averageOrderValue;
       totalOrdersWithUser.value = data.totalOrdersWithUser;
     } catch (err) {
       console.error('[Fetch Orders Error]:', err);
-      orders.value = [];
-      totalOrders.value = 0;
+      error.value = err instanceof Error ? err.message : String(err);
+      throw err;
     } finally {
       loading.value = false;
     }
@@ -125,23 +127,30 @@ export const useOrdersStore = defineStore('orders', () => {
 
   const fetchOrderById = async (id: string): Promise<Order | null> => {
     try {
+      loading.value = true;
       return await fetchOrderByIdService(id);
     } catch (err) {
       console.error('[Fetch Order Error]:', err);
-      return null;
+      error.value = err instanceof Error ? err.message : String(err);
+      throw err;
+    } finally {
+      loading.value = false;
     }
   };
 
   const updateOrderStatus = async (orderId: string, newStatus: OrderStatus) => {
     try {
+      loading.value = true;
       await updateOrderStatusService(orderId, newStatus);
       const order = orders.value.find((o) => o.id === orderId);
       if (order) order.status = newStatus;
-
-      // Sync with other tabs
       channel.postMessage({ orderId, newStatus });
     } catch (err) {
       console.error('[Update Status Error]:', err);
+      error.value = err instanceof Error ? err.message : String(err);
+      throw err;
+    } finally {
+      loading.value = false;
     }
   };
 
@@ -181,13 +190,12 @@ export const useOrdersStore = defineStore('orders', () => {
     maxAmount.value = 0;
     sortBy.value = 'createdAt';
     sortOrder.value = 'desc';
-    console.log('Limit:', limits.value);
+
     fetchOrders({
       page: 1,
       userId: userId.value,
       limit: limits.value,
     });
-    console.log('Limit:', limits.value);
   };
 
   const getNextStatusOptions = (status: OrderStatus) => {
@@ -195,15 +203,10 @@ export const useOrdersStore = defineStore('orders', () => {
       return [];
 
     const nextIndex = ORDER_STAGES.indexOf(status) + 1;
-    const options =
-      nextIndex < ORDER_STAGES.length
-        ? [
-            {
-              label: capitalize(ORDER_STAGES[nextIndex]),
-              value: ORDER_STAGES[nextIndex],
-            },
-          ]
-        : [];
+    const nextStatus = ORDER_STAGES[nextIndex];
+    const options = nextStatus
+      ? [{ label: capitalize(nextStatus), value: nextStatus }]
+      : [];
 
     return [
       ...options,
@@ -211,7 +214,7 @@ export const useOrdersStore = defineStore('orders', () => {
     ];
   };
 
-  // Initialize channel listener once
+  // Initialize channel listener
   handleChannelMessage();
 
   // --- Expose ---
@@ -222,16 +225,18 @@ export const useOrdersStore = defineStore('orders', () => {
     STATUS_OPTIONS,
 
     // State
-    totalOrdersWithUser,
-    totalAmount,
-    averageAmount,
-    totalRevenue,
-    statusCounts,
     orders,
     currentPage,
     totalPages,
+    limits,
     totalOrders,
+    totalAmount,
+    averageAmount,
+    totalOrdersWithUser,
+    totalRevenue,
+    statusCounts,
     loading,
+    error,
     searchQuery,
     statusFilter,
     dateRange,

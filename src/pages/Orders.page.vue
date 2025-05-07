@@ -15,13 +15,6 @@ const store = useOrdersStore();
   <div class="flex flex-col gap-8">
     <OrderStatistics />
     <OrdersManager />
-    <Pagination
-      title="orders"
-      :currentPage="store.currentPage"
-      :totalPages="store.totalPages"
-      :totalItems="store.totalOrders"
-      :limit="store.ORDER_LIMIT"
-      @changePage="store.fetchOrders"
-    />
+   
   </div>
 </template>

@@ -114,9 +114,10 @@ const onDelete = async (id: string) => {
     'Are you sure you want to delete this category?',
     'Warning',
     {
-      confirmButtonText: 'OK',
-      cancelButtonText: 'Cancel',
       type: 'warning',
+      confirmButtonText: 'Delete',
+      cancelButtonText: 'Cancel',
+      confirmButtonClass: 'el-button--danger el-button--plain',
     },
   ).then(async () => {
     await categoryStore.deleteCategoryHandler(id);

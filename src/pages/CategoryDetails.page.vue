@@ -3,7 +3,7 @@ import { onMounted, ref } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import Button from '../components/common/Button.vue';
 import Dropzone from '../components/common/Dropzone.vue';
-import { ElIcon } from 'element-plus';
+import { ElIcon, ElMessageBox } from 'element-plus';
 import { Edit, Delete } from '@element-plus/icons-vue';
 import { BoxCubeIcon } from '../icons';
 import Card from '../components/common/Card.vue';
@@ -60,11 +60,21 @@ const handleModalSave = async () => {
 
 const onDelete = async () => {
   if (!category.value) return;
-  const confirmed = confirm('Are you sure you want to delete this category?');
-  if (confirmed) {
-    await store.deleteCategoryHandler(category.value._id);
+  ElMessageBox.confirm(
+    'Are you sure you want to delete this category?',
+    'Warning',
+    {
+      confirmButtonText: 'Delete',
+      cancelButtonText: 'Cancel',
+      confirmButtonClass: 'el-button--danger el-button--plain',
+      type: 'warning',
+    },
+  ).then(async () => {
+    if (category.value) {
+      await store.deleteCategoryHandler(category.value._id);
+    }
     router.push({ name: 'categories' });
-  }
+  });
 };
 </script>
 

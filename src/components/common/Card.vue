@@ -21,7 +21,7 @@ defineProps<{
           title
         }}</span>
         <h4
-          class="mt-2 text-title-sm font-bold text-gray-800 dark:text-white/90"
+          class="mt-2 text-left text-title-sm font-bold text-gray-800 dark:text-white/90"
         >
           {{ value }}
         </h4>

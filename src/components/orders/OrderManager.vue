@@ -28,7 +28,6 @@ const props = defineProps<{
 }>();
 
 /* ========== Lifecycle ========== */
-
 onMounted(() => {
   if (props.userId) store.userId = props.userId;
   store.fetchOrders({
@@ -44,6 +43,7 @@ watch(
     store.fetchOrders({ page: 1, userId: newUserId, limit: props.limit });
   },
 );
+
 watch(
   () => props.limit,
   (newLimit) => {

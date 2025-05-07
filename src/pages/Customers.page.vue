@@ -307,7 +307,7 @@ async function deleteUser(user: User) {
     @changePage="handlePageChange"
   ></Pagination>
 </template>
-<style scoped>
+<!-- <style scoped>
 .el-icon {
   font-size: 20px;
 }
@@ -315,4 +315,4 @@ async function deleteUser(user: User) {
   width: 20px;
   height: 20px;
 }
-</style>
+</style> -->

@@ -23,7 +23,7 @@ interface User {
   isEstablished: boolean;
 }
 // const productStore = useProductStore();
-// const currentPage = ref(1);4//
+// const currentPage = ref(1);
 //  const favTest = [
 //   'test1',
 //   'test2',

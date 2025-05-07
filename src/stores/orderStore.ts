@@ -33,9 +33,6 @@ export const useOrdersStore = defineStore('orders', () => {
   const totalPages = ref(1);
   const limits = ref(ORDER_LIMIT);
   const totalOrders = ref(0);
-  const totalAmount = ref(0);
-  const averageAmount = ref(0);
-  const totalOrdersWithUser = ref(0);
   const loading = ref(false);
   const error = ref('');
   const initial = ref(true);
@@ -60,17 +57,16 @@ export const useOrdersStore = defineStore('orders', () => {
   );
 
   // --- Actions ---
-
-  const fetchOrderAnalytics = async () => {
+  const fetchOrderAnalytics = async (userId: string = '') => {
     try {
-      const data = await fetchOrderAnalyticsService();
+      const data = await fetchOrderAnalyticsService(userId);
       totalOrders.value = data.totalOrders;
       totalRevenue.value = data.totalRevenue;
       statusCounts.value = { ...data.statusCounts };
+      console.log(data, totalOrders.value);
     } catch (err) {
       console.error('[Analytics Error]:', err);
       error.value = err instanceof Error ? err.message : String(err);
-
       throw err;
     }
   };
@@ -112,14 +108,10 @@ export const useOrdersStore = defineStore('orders', () => {
         params.searchQuery = searchQuery.value.trim();
 
       const { data } = await fetchAllOrders(params);
-      console.log(data);
+
       orders.value = data.orders;
-      totalOrders.value = data.totalOrders;
       totalPages.value = Math.ceil(data.totalOrders / (limits.value || 1));
       currentPage.value = page;
-      totalAmount.value = data.totalAmountOrders;
-      averageAmount.value = data.averageOrderValue;
-      totalOrdersWithUser.value = data.totalOrdersWithUser;
     } catch (err) {
       console.error('[Fetch Orders Error]:', err);
       error.value = err instanceof Error ? err.message : String(err);
@@ -153,13 +145,11 @@ export const useOrdersStore = defineStore('orders', () => {
       if (order) order.status = newStatus;
       channel.postMessage({ orderId, newStatus });
 
-      // Success message
       ElMessage.success(`Order status updated to ${newStatus}!`);
     } catch (err) {
       console.error('[Update Status Error]:', err);
       error.value = err instanceof Error ? err.message : String(err);
 
-      // Error message
       ElMessage.error('Failed to update order status. Please try again.');
       throw err;
     } finally {
@@ -249,9 +239,6 @@ export const useOrdersStore = defineStore('orders', () => {
     totalPages,
     limits,
     totalOrders,
-    totalAmount,
-    averageAmount,
-    totalOrdersWithUser,
     totalRevenue,
     statusCounts,
     loading,

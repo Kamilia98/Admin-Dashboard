@@ -1,15 +1,14 @@
 <script lang="ts" setup>
-import { useProductStore } from '../stores/productStore';
 import { CircleCheckFilled, User } from '@element-plus/icons-vue';
 import { ElIcon } from 'element-plus';
 import Pagination from '../components/common/Pagination.vue';
 import OrderManager from '../components/orders/OrderManager.vue';
 import { computed, onMounted, ref } from 'vue';
 import { useRoute } from 'vue-router';
-import axios from 'axios';
 import { useOrdersStore } from '../stores/orderStore';
 import { ElCard } from 'element-plus';
 import PurchaseChart from '../components/customers/PurchaseChart.vue';
+import { useCustomerStore } from '../stores/customerStore';
 
 interface User {
   username: string;
@@ -23,16 +22,9 @@ interface User {
   favourites: string[];
   isEstablished: boolean;
 }
-const productStore = useProductStore();
-const orderStore = useOrdersStore();
-const loading = ref(false);
-const favouriteProducts = ref<string[]>([]);
-const route = useRoute();
-const user = ref<User | null>(null);
-// const currentPage = ref(1);
-const totalAmount = computed(() => orderStore.totalAmount);
-const averageAmount = computed(() => orderStore.averageAmount);
-// const favTest = [
+// const productStore = useProductStore();
+// const currentPage = ref(1);4//
+//  const favTest = [
 //   'test1',
 //   'test2',
 //   'test3',
@@ -44,51 +36,64 @@ const averageAmount = computed(() => orderStore.averageAmount);
 //   'test9',
 //   'test10',
 // ];
-const totalOrdersWithUser = computed(() => orderStore.totalOrdersWithUser);
-console.log(totalOrdersWithUser.value);
 // function handlePageChange(page: number) {
 //   console.log(page);
 //   console.log(555555555555555555555);
 //   currentPage.value = page;
 // }
-const fetchUser = async (userId: string) => {
-  try {
-    loading.value = true;
-    const { data } = await axios.get(`http://localhost:5000/users/${userId}`, {
-      headers: {
-        Authorization: `Bearer ${localStorage.getItem('token')}`,
-        'Content-Type': 'application/json',
-      },
-    });
-    loading.value = false;
-    user.value = data.data.user;
-    const formatted = new Date(data.data.user.createdAt).toLocaleString(
-      'en-US',
-      {
-        year: 'numeric',
-        month: 'long',
-        day: 'numeric',
-      },
-    );
-    user.value!.isEstablished =
-      new Date(user.value!.createdAt) < new Date('2025-04-20');
-    user.value!.createdAt = formatted;
-    favouriteProducts.value = await Promise.all(
-      user.value!.favourites.map(async (favourite) => {
-        return await productStore
-          .getProductById(favourite.toString())
-          .then((product) => {
-            return product!.name;
-          });
-      }),
-    );
-  } catch (error) {
-    console.error('Error fetching user:', error);
-    loading.value = false;
-  }
-};
-onMounted(() => {
-  fetchUser(route.params.userId as string);
+// const fetchUser = async (userId: string) => {
+//   try {
+//     loading.value = true;
+//     const { data } = await axios.get(`http://localhost:5000/users/${userId}`, {
+//       headers: {
+//         Authorization: `Bearer ${localStorage.getItem('token')}`,
+//         'Content-Type': 'application/json',
+//       },
+//     });
+//     loading.value = false;
+//     user.value = data.data.user;
+//     const formatted = new Date(data.data.user.createdAt).toLocaleString(
+//       'en-US',
+//       {
+//         year: 'numeric',
+//         month: 'long',
+//         day: 'numeric',
+//       },
+//     );
+//     user.value!.isEstablished =
+//       new Date(user.value!.createdAt) < new Date('2025-04-20');
+//     user.value!.createdAt = formatted;
+//     favouriteProducts.value = await Promise.all(
+//       user.value!.favourites.map(async (favourite) => {
+//         return await productStore
+//           .getProductById(favourite.toString())
+//           .then((product) => {
+//             return product!.name;
+//           });
+//       }),
+//     );
+//   } catch (error) {
+//     console.error('Error fetching user:', error);
+//     loading.value = false;
+//   }
+// };
+const route = useRoute();
+const orderStore = useOrdersStore();
+const customerStore = useCustomerStore();
+const { customer, favourites } = customerStore;
+console.log(customer);
+const user = ref<User | null>(null);
+const totalAmount = computed(() => orderStore.totalAmount);
+const averageAmount = computed(() => orderStore.averageAmount);
+
+const totalOrdersWithUser = computed(() => orderStore.totalOrdersWithUser);
+console.log(totalOrdersWithUser.value);
+
+onMounted(async () => {
+  const fetchedUser = await customerStore.fetchCustomer(
+    route.params.userId as string,
+  );
+  user.value = fetchedUser || null;
 });
 </script>
 <template>
@@ -164,10 +169,10 @@ onMounted(() => {
             <span class="font-medium text-gray-500 dark:text-gray-300"
               >Favourite Items:</span
             >
-            <template v-if="favouriteProducts.length > 0">
+            <template v-if="favourites.length > 0">
               <span class="mt-1 flex flex-wrap gap-2">
                 <span
-                  v-for="(fav, index) in favouriteProducts"
+                  v-for="(fav, index) in favourites"
                   :key="index"
                   class="rounded-full bg-blue-100 px-2 py-1 text-xs text-blue-700 dark:bg-blue-700 dark:text-white"
                 >

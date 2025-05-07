@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { onMounted, ref } from 'vue';
 import { useCategoryStore } from '../stores/categoryStore';
-import { ElIcon, ElMessage, ElMessageBox } from 'element-plus';
+import { ElIcon, ElMessageBox } from 'element-plus';
 import { Edit, Delete, Plus, View } from '@element-plus/icons-vue';
 import Table from '../components/common/Table.vue';
 import Button from '../components/common/Button.vue';
@@ -175,7 +175,7 @@ onMounted(() => {
               <el-icon><View /></el-icon>
             </template>
           </Button>
-          <Button variant="primary" @click="onEdit(item)">
+          <Button variant="primary" @click="onEdit(item as Category)">
             <template #icon>
               <el-icon><Edit /></el-icon>
             </template>

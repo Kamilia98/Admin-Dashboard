@@ -8,9 +8,11 @@ import Button from '../components/common/Button.vue';
 import Modal from '../components/common/Modal.vue';
 import Dropzone from '../components/common/Dropzone.vue';
 import type { Category } from '../types/category.d';
+import Search from '../components/common/Search.vue';
+import Pagination from '../components/common/Pagination.vue';
 
 // Store
-const categoryStore = useCategoryStore();
+const store = useCategoryStore();
 
 // Modal States
 const isCategoryAddModalOpen = ref(false);
@@ -79,7 +81,7 @@ const handleAddModalSave = async () => {
     image: formState.value.add.image,
   };
 
-  await categoryStore.createCategoryHandler(payload);
+  await store.createCategoryHandler(payload);
   handleAddModalClose();
 };
 
@@ -93,7 +95,7 @@ const handleEditModalSave = async () => {
   };
 
   console.log(payload);
-  await categoryStore.updateCategoryHandler(formState.value.edit.id, payload);
+  await store.updateCategoryHandler(formState.value.edit.id, payload);
   handleEditModalClose();
 };
 
@@ -119,29 +121,29 @@ const onDelete = async (id: string) => {
       type: 'warning',
     },
   ).then(async () => {
-    await categoryStore.deleteCategoryHandler(id);
+    await store.deleteCategoryHandler(id);
   });
 };
 
 // Data Fetching
 onMounted(() => {
-  categoryStore.fetchCategories();
+  store.fetchCategories();
 });
 </script>
 
 <template>
-  <div class="space-y-4">
-    <!-- Error Alert -->
-    <div
-      v-if="categoryStore.error"
-      class="rounded-lg bg-red-50 p-4 text-red-500"
-    >
-      {{ categoryStore.error }}
+  <div class="flex flex-col gap-8">
+    <div class="flex justify-end">
+      <Button @click="isCategoryAddModalOpen = true">
+        <template #icon>
+          <el-icon><Plus /></el-icon>
+        </template>
+        Add Category
+      </Button>
     </div>
-
     <Table
       caption="Categories"
-      :items="categoryStore.categories"
+      :items="store.categories"
       :headers="[
         {
           key: 'name',
@@ -152,7 +154,7 @@ onMounted(() => {
         { key: 'productCount', label: 'Products', sortable: false },
         { key: 'actions', label: 'Actions', sortable: false },
       ]"
-      :loading="categoryStore.loading"
+      :loading="store.loading"
     >
       <template #column-image="{ item }">
         <img
@@ -189,14 +191,22 @@ onMounted(() => {
       </template>
 
       <template #actions>
-        <Button @click="isCategoryAddModalOpen = true">
-          <template #icon>
-            <el-icon><Plus /></el-icon>
-          </template>
-          Add Category
-        </Button>
+        <Search
+          title="categories"
+          v-model="store.searchQuery"
+          @search="store.fetchCategories(1)"
+        />
       </template>
     </Table>
+
+    <Pagination
+      title="categories"
+      :currentPage="store.currentPage"
+      :totalPages="store.totalPages"
+      :totalItems="store.totalCategories"
+      :limit="store.CATEGORY_LIMIT"
+      @changePage="store.fetchCategories"
+    />
 
     <Modal v-if="isCategoryEditModalOpen" @close="handleEditModalClose">
       <template #body>

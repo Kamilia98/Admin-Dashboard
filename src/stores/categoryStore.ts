@@ -1,5 +1,5 @@
 import { defineStore } from 'pinia';
-import { capitalize, ref } from 'vue';
+import { ref } from 'vue';
 import {
   deleteCategory,
   getAllCategories,
@@ -11,20 +11,35 @@ import type { Category } from '../types/category.d';
 
 import { ElMessage } from 'element-plus';
 
+const CATEGORY_LIMIT = 3;
+
 export const useCategoryStore = defineStore('category', () => {
   const loading = ref(false);
   const error = ref<string | null>(null);
+  const searchQuery = ref<string>('');
   const categories = ref<Category[]>([]);
 
-  const fetchCategories = async () => {
+  const currentPage = ref(1);
+  const totalPages = ref(1);
+  const totalCategories = ref(0);
+  const limits = ref(CATEGORY_LIMIT);
+
+  const fetchCategories = async (page = currentPage.value) => {
     try {
       loading.value = true;
       error.value = null;
-      const data = await getAllCategories();
-      categories.value = data.map((cat: Category) => ({
-        ...cat,
-        name: capitalize(cat.name),
-      }));
+
+      const data = await getAllCategories({
+        page,
+        limit: limits.value,
+        searchQuery: searchQuery.value,
+      });
+
+      currentPage.value = page;
+      totalPages.value = data.totalPages;
+      totalCategories.value = data.totalCategories;
+      categories.value = data.categories;
+
     } catch (err: any) {
       error.value =
         err?.response?.data?.message || 'Failed to fetch categories';
@@ -59,7 +74,7 @@ export const useCategoryStore = defineStore('category', () => {
       loading.value = true;
       error.value = null;
       await createCategory(categoryData);
-      await fetchCategories();
+      await fetchCategories(1);
       ElMessage.success('Category created successfully!');
     } catch (err: any) {
       error.value = err?.response?.data?.message || 'Failed to create category';
@@ -108,7 +123,12 @@ export const useCategoryStore = defineStore('category', () => {
   return {
     loading,
     error,
+    searchQuery,
     categories,
+    currentPage,
+    totalPages,
+    totalCategories,
+    CATEGORY_LIMIT,
     fetchCategories,
     fetchCategoryById,
     createCategoryHandler,

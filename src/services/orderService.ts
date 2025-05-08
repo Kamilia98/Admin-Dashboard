@@ -60,11 +60,11 @@ export const updateOrderStatus = async (
 };
 
 // Fetch analytics for orders
-export const fetchOrderAnalytics = async () => {
+export const fetchOrderAnalytics = async (userId: string) => {
   try {
     const { data } = await axios.get(`${API_BASE}/analytics`, {
       headers: getAuthHeaders(),
-      params: { range: 'this-month' },
+      params: { range: 'this-month', userId },
     });
     return data.data;
   } catch (error) {

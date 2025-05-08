@@ -6,11 +6,12 @@ import Card from '../common/Card.vue';
 
 const store = useOrdersStore();
 
-onMounted(() => {
-  store.fetchOrderAnalytics();
+onMounted(async () => {
+  await store.fetchOrderAnalytics();
 });
 
 const averageOrderValue = computed(() => {
+  console.log(store.totalOrders);
   return (
     store.totalOrders > 0 ? store.totalRevenue / store.totalOrders : 0
   ).toFixed(2);
@@ -22,7 +23,7 @@ const averageOrderValue = computed(() => {
     <Card title="Orders" :value="store.totalOrders" :icon="BoxCubeIcon" />
     <Card
       title="Total Revenue"
-      :value="`$${store.totalRevenue.toFixed(2)}`"
+      :value="`$${store.totalRevenue}`"
       :icon="BoxCubeIcon"
     />
     <Card

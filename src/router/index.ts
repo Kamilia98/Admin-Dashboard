@@ -93,6 +93,12 @@ const routes = [
     meta: { requiresAuth: true, layout: 'admin' },
   },
   {
+    path: '/categories',
+    name: 'categories',
+    component: () => import('../pages/Categories.page.vue'),
+    meta: { requiresAuth: true, layout: 'admin' },
+  },
+  {
     path: '/categories/:id',
     name: 'category-details',
     component: () => import('../pages/CategoryDetails.page.vue'),

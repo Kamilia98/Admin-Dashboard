@@ -1,24 +1,18 @@
 <script lang="ts" setup>
 import { ref, computed, onMounted, watch } from 'vue';
 import {
-  ElIcon,
+  // ElCard,
   // ElButton,
   // ElInput,
+  ElIcon,
   ElNotification,
   ElMessageBox,
   ElSelect,
   ElOption,
-  // ElCard,
 } from 'element-plus';
-import axios from 'axios';
 import { Delete } from '@element-plus/icons-vue';
 import { View } from '@element-plus/icons-vue';
 import { CircleCheckFilled } from '@element-plus/icons-vue';
-// import { UserFilled } from '@element-plus/icons-vue';
-// import { Calendar } from '@element-plus/icons-vue';
-// import { Refresh } from '@element-plus/icons-vue';
-// import { SearchIcon } from '../icons';
-// import { RouterLink } from 'vue-router';
 import Table from '../components/common/Table.vue';
 import Pagination from '../components/common/Pagination.vue';
 import debounce from 'lodash/debounce';
@@ -28,6 +22,14 @@ import Card from '../components/common/Card.vue';
 import CalenderIcon from '../icons/CalenderIcon.vue';
 import DocsIcon from '../icons/DocsIcon.vue';
 import Button from '../components/common/Button.vue';
+import { useCustomerStore } from '../stores/customerStore';
+import { storeToRefs } from 'pinia';
+// import axios from 'axios';
+// import { UserFilled } from '@element-plus/icons-vue';
+// import { Calendar } from '@element-plus/icons-vue';
+// import { Refresh } from '@element-plus/icons-vue';
+// import { SearchIcon } from '../icons';
+// import { RouterLink } from 'vue-router';
 interface User {
   username: string;
   email: string;
@@ -40,14 +42,23 @@ interface User {
   isNew: boolean;
   returned: boolean;
 }
-const loading = ref(false);
-const allUsers = ref<User[]>([]);
+const customerStore = useCustomerStore();
+const {
+  customers: allUsers,
+  total,
+  newCustomers,
+  returningCustomers,
+  loading,
+} = storeToRefs(customerStore);
+const { fetchAllCustomers, removeCustomer } = customerStore;
 const currentPage = ref(1);
 const limit = ref(10);
-const totalUsers = ref(0);
 const search = ref('');
-const newCustomers = ref(0);
-const returningCustomers = ref(0);
+// const totalUsers = ref(0);
+// const loading = ref(false);
+// const allUsers = ref<User[]>([]);
+// const newCustomers = ref(0);
+// const returningCustomers = ref(0);
 
 const headers = [
   { key: 'username', label: 'User', sortable: false },
@@ -57,55 +68,55 @@ const headers = [
   { key: 'createdAt', label: 'Date & Time', sortable: false },
   { key: 'actions', label: 'Actions', sortable: false },
 ];
-const fetchUsers = async (page: number) => {
-  const token = localStorage.getItem('token');
-  loading.value = true;
-  try {
-    const { data } = await axios.get('http://localhost:5000/users', {
-      headers: {
-        Authorization: `Bearer ${token}`,
-        'Content-Type': 'application/json',
-      },
-      params: {
-        page,
-        limit: limit.value,
-        search: search.value,
-        role: 'USER',
-      },
-    });
-    newCustomers.value = data.data.newCustomers;
-    allUsers.value = data.data.users;
-    allUsers.value.forEach((user: User) => {
-      user.phone = String(user.phone || 'N/A');
-    });
-    allUsers.value.forEach((user: User) => {
-      const formatted = new Date(user.createdAt).toLocaleString('en-US', {
-        year: 'numeric',
-        month: 'long',
-        day: 'numeric',
-      });
-      user.createdAt = formatted;
-    });
-    allUsers.value.forEach((user: User) => {
-      user.isEstablished = new Date(user.createdAt) < new Date('2025-04-20');
-    });
-    returningCustomers.value = data.data.totalUsersWithOrders;
-    totalUsers.value = data.data.totalUsers;
-    console.log('Fetched users:', allUsers.value);
-  } catch (error) {
-    console.error('Error fetching users:', error);
-  } finally {
-    loading.value = false;
-  }
-};
+// const fetchUsers = async (page: number) => {
+//   const token = localStorage.getItem('token');
+//   loading.value = true;
+//   try {
+//     const { data } = await axios.get('http://localhost:5000/users', {
+//       headers: {
+//         Authorization: `Bearer ${token}`,
+//         'Content-Type': 'application/json',
+//       },
+//       params: {
+//         page,
+//         limit: limit.value,
+//         search: search.value,
+//         role: 'USER',
+//       },
+//     });
+//     newCustomers.value = data.data.newCustomers;
+//     allUsers.value = data.data.users;
+//     allUsers.value.forEach((user: User) => {
+//       user.phone = String(user.phone || 'N/A');
+//     });
+//     allUsers.value.forEach((user: User) => {
+//       const formatted = new Date(user.createdAt).toLocaleString('en-US', {
+//         year: 'numeric',
+//         month: 'long',
+//         day: 'numeric',
+//       });
+//       user.createdAt = formatted;
+//     });
+//     allUsers.value.forEach((user: User) => {
+//       user.isEstablished = new Date(user.createdAt) < new Date('2025-04-20');
+//     });
+//     returningCustomers.value = data.data.totalUsersWithOrders;
+//     totalUsers.value = data.data.totalUsers;
+//     console.log('Fetched users:', allUsers.value);
+//   } catch (error) {
+//     console.error('Error fetching users:', error);
+//   } finally {
+//     loading.value = false;
+//   }
+// };
 const debouncedFetch = debounce((page: number) => {
-  fetchUsers(page);
+  fetchAllCustomers(page, limit.value, search.value);
 }, 600);
 onMounted(async () => {
-  fetchUsers(currentPage.value);
+  fetchAllCustomers(currentPage.value, limit.value, search.value);
 });
 watch(currentPage, (newPage) => {
-  fetchUsers(newPage);
+  fetchAllCustomers(newPage, limit.value, search.value);
 });
 watch(search, () => {
   currentPage.value = 1;
@@ -113,7 +124,7 @@ watch(search, () => {
 });
 watch(limit, () => {
   currentPage.value = 1;
-  fetchUsers(1);
+  fetchAllCustomers(1, limit.value, search.value);
 });
 const paginatedUsers = computed(() => allUsers.value);
 function handlePageChange(page: number) {
@@ -132,12 +143,13 @@ async function deleteUser(user: User) {
         dangerouslyUseHTMLString: true,
       },
     );
-    await axios.delete(`http://localhost:5000/users/${user._id}`, {
-      headers: {
-        Authorization: `Bearer ${localStorage.getItem('token')}`,
-        'Content-Type': 'application/json',
-      },
-    });
+    // await axios.delete(`http://localhost:5000/users/${user._id}`, {
+    //   headers: {
+    //     Authorization: `Bearer ${localStorage.getItem('token')}`,
+    //     'Content-Type': 'application/json',
+    //   },
+    // });
+    await removeCustomer(user._id);
     ElNotification({
       title: 'Success',
       message: `User ${user.username} has been deleted.`,
@@ -145,7 +157,7 @@ async function deleteUser(user: User) {
       duration: 3000,
       position: 'bottom-right',
     });
-    fetchUsers(currentPage.value);
+    fetchAllCustomers(currentPage.value, limit.value, search.value);
   } catch (error) {
     console.log(error);
     if (error === 'cancel') {
@@ -210,11 +222,7 @@ async function deleteUser(user: User) {
         /></el-icon>
       </div>
     </el-card> -->
-    <Card
-      title="Total Customers"
-      :value="totalUsers"
-      :icon="UserGroupIcon"
-    ></Card
+    <Card title="Total Customers" :value="total" :icon="UserGroupIcon"></Card
     ><Card
       title="New This Month"
       :value="newCustomers"
@@ -301,8 +309,8 @@ async function deleteUser(user: User) {
     class="pt-4"
     title="Customer Pagination"
     :current-page="currentPage"
-    :total-pages="Math.ceil(totalUsers / limit)"
-    :total-items="totalUsers"
+    :total-pages="Math.ceil(total / limit)"
+    :total-items="total"
     :limit="limit"
     @changePage="handlePageChange"
   ></Pagination>

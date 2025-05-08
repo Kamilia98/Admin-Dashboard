@@ -9,6 +9,7 @@ import { useOrdersStore } from '../stores/orderStore';
 import { ElCard } from 'element-plus';
 import PurchaseChart from '../components/customers/PurchaseChart.vue';
 import { useCustomerStore } from '../stores/customerStore';
+import { storeToRefs } from 'pinia';
 
 interface User {
   username: string;
@@ -23,7 +24,7 @@ interface User {
   isEstablished: boolean;
 }
 // const productStore = useProductStore();
-// const currentPage = ref(1);4//
+// const currentPage = ref(1);
 //  const favTest = [
 //   'test1',
 //   'test2',
@@ -80,14 +81,12 @@ interface User {
 const route = useRoute();
 const orderStore = useOrdersStore();
 const customerStore = useCustomerStore();
-const { customer, favourites } = customerStore;
-console.log(customer);
+const { favourites } = storeToRefs(customerStore);
 const user = ref<User | null>(null);
 const totalAmount = computed(() => orderStore.totalAmount);
 const averageAmount = computed(() => orderStore.averageAmount);
 
 const totalOrdersWithUser = computed(() => orderStore.totalOrdersWithUser);
-console.log(totalOrdersWithUser.value);
 
 onMounted(async () => {
   const fetchedUser = await customerStore.fetchCustomer(

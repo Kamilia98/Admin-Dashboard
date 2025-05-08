@@ -14,7 +14,7 @@ const getAuthHeaders = () => {
   };
 };
 
-export const getAllCategories = async (params: Record<string, any>) => {
+export const fetchCategories = async (params: Record<string, any>) => {
   const { data } = await axios.get(API_BASE, {
     headers: getAuthHeaders(),
     params,
@@ -22,7 +22,7 @@ export const getAllCategories = async (params: Record<string, any>) => {
   return data.data;
 };
 
-export const getCategoryById = async (id: string) => {
+export const fetchCategory = async (id: string) => {
   const { data } = await axios.get(`${API_BASE}/${id}`, {
     headers: getAuthHeaders(),
   });

@@ -1,63 +1,60 @@
 import { defineStore } from 'pinia';
 import { ref } from 'vue';
+import { useRouter } from 'vue-router';
+import { ElMessage, ElMessageBox } from 'element-plus';
+
 import {
+  fetchCategories,
+  fetchCategory,
   deleteCategory,
-  getAllCategories,
   updateCategory,
   createCategory,
-  getCategoryById,
 } from '../services/categoryService';
-import type { Category } from '../types/category.d';
 
-import { ElMessage } from 'element-plus';
+import type { Category } from '../types/category.d';
 
 const CATEGORY_LIMIT = 3;
 
 export const useCategoryStore = defineStore('category', () => {
+  const router = useRouter();
+
+  // State
   const loading = ref(false);
   const error = ref<string | null>(null);
-  const searchQuery = ref<string>('');
+  const searchQuery = ref('');
   const categories = ref<Category[]>([]);
-
   const currentPage = ref(1);
   const totalPages = ref(1);
   const totalCategories = ref(0);
   const limits = ref(CATEGORY_LIMIT);
+  const isCategoryEditModalOpen = ref(false);
+  const isCategoryAddModalOpen = ref(false);
 
-  const fetchCategories = async (page = currentPage.value) => {
-    try {
-      loading.value = true;
-      error.value = null;
+  const formState = ref<{
+    add: { name: string; description: string; image: string };
+    edit: { id: string; name: string; description: string; image: string };
+  }>({
+    add: { name: '', description: '', image: '' },
+    edit: { id: '', name: '', description: '', image: '' },
+  });
 
-      const data = await getAllCategories({
-        page,
-        limit: limits.value,
-        searchQuery: searchQuery.value,
-      });
-
-      currentPage.value = page;
-      totalPages.value = data.totalPages;
-      totalCategories.value = data.totalCategories;
-      categories.value = data.categories;
-
-    } catch (err: any) {
-      error.value =
-        err?.response?.data?.message || 'Failed to fetch categories';
-      console.error('Failed to fetch categories:', err);
-      ElMessage.error(error.value || 'An unknown error occurred');
-    } finally {
-      loading.value = false;
+  // Utility
+  const resetForm = (type: 'add' | 'edit') => {
+    if (type === 'add') {
+      formState.value.add = { name: '', description: '', image: '' };
+    } else {
+      formState.value.edit = { id: '', name: '', description: '', image: '' };
     }
   };
 
-  const fetchCategoryById = async (id: string): Promise<Category | null> => {
+  const withLoading = async <T>(fn: () => Promise<T>): Promise<T> => {
+    loading.value = true;
+    error.value = null;
     try {
-      loading.value = true;
-      error.value = null;
-      return await getCategoryById(id);
-    } catch (err) {
-      console.error('[Fetch Order Error]:', err);
-      error.value = err instanceof Error ? err.message : String(err);
+      return await fn();
+    } catch (err: any) {
+      error.value =
+        err?.response?.data?.message || err?.message || 'An error occurred';
       ElMessage.error(error.value || 'An unknown error occurred');
       throw err;
     } finally {
@@ -65,62 +62,124 @@ export const useCategoryStore = defineStore('category', () => {
     }
   };
 
+  // Validation
+  const isFormValid = (type: 'add' | 'edit') => {
+    const form = formState.value[type];
+    return !!form.name && !!form.image;
+  };
+
+  // Modal handlers
+  const openEditModal = (cat: Category) => {
+    formState.value.edit = {
+      id: cat._id,
+      name: cat.name,
+      description: cat.description,
+      image: cat.image,
+    };
+    isCategoryEditModalOpen.value = true;
+  };
+
+  const closeEditModal = () => {
+    isCategoryEditModalOpen.value = false;
+    resetForm('edit');
+  };
+
+  const closeAddModal = () => {
+    isCategoryAddModalOpen.value = false;
+    resetForm('add');
+  };
+
+  const saveEdit = async () => {
+    if (!isFormValid('edit')) return;
+
+    await updateCategoryHandler(formState.value.edit.id, {
+      name: formState.value.edit.name,
+      description: formState.value.edit.description,
+      image: formState.value.edit.image,
+    });
+
+    closeEditModal();
+  };
+
+  const saveAdd = async () => {
+    if (!isFormValid('add')) return;
+
+    await createCategoryHandler({
+      name: formState.value.add.name,
+      description: formState.value.add.description,
+      image: formState.value.add.image,
+    });
+
+    closeAddModal();
+  };
+
+  // CRUD operations
+  const getCategories = async (page = currentPage.value) =>
+    withLoading(async () => {
+      const data = await fetchCategories({
+        page,
+        limit: limits.value,
+        searchQuery: searchQuery.value,
+      });
+      currentPage.value = page;
+      totalPages.value = data.totalPages;
+      totalCategories.value = data.totalCategories;
+      categories.value = data.categories;
+    });
+
+  const getCategory = async (id: string): Promise<Category | null> =>
+    await withLoading(async () => {
+      return await fetchCategory(id);
+    });
+
   const createCategoryHandler = async (categoryData: {
     name: string;
     description: string;
     image: string;
-  }) => {
-    try {
-      loading.value = true;
-      error.value = null;
+  }) =>
+    withLoading(async () => {
       await createCategory(categoryData);
-      await fetchCategories(1);
+      await getCategories(1);
       ElMessage.success('Category created successfully!');
-    } catch (err: any) {
-      error.value = err?.response?.data?.message || 'Failed to create category';
-      console.error('Failed to create category:', err);
-      ElMessage.error(error.value || 'An unknown error occurred');
-    } finally {
-      loading.value = false;
-    }
-  };
+    });
 
   const updateCategoryHandler = async (
     id: string,
     categoryData: { name: string; description: string; image: string },
-  ) => {
-    try {
-      loading.value = true;
-      error.value = null;
+  ) =>
+    withLoading(async () => {
       await updateCategory(id, categoryData);
-      await fetchCategories();
+      await getCategories();
       ElMessage.success('Category updated successfully!');
-    } catch (err: any) {
-      error.value = err?.response?.data?.message || 'Failed to update category';
-      console.error('Failed to update category:', err);
-      ElMessage.error(error.value || 'An unknown error occurred');
-    } finally {
-      loading.value = false;
-    }
-  };
+    });
 
-  const deleteCategoryHandler = async (id: string) => {
-    try {
-      loading.value = true;
-      error.value = null;
+  const deleteCategoryHandler = async (id: string) =>
+    withLoading(async () => {
       await deleteCategory(id);
-      await fetchCategories();
+      await getCategories(1);
       ElMessage.success('Category deleted successfully!');
-    } catch (err: any) {
-      error.value = err?.response?.data?.message || 'Failed to delete category';
-      console.error('Failed to delete category:', err);
-      ElMessage.error(error.value || 'An unknown error occurred');
-    } finally {
-      loading.value = false;
+    });
+
+  const confirmDelete = async (id: string) => {
+    try {
+      await ElMessageBox.confirm(
+        'Are you sure you want to delete this category?',
+        'Warning',
+        {
+          confirmButtonText: 'OK',
+          cancelButtonText: 'Cancel',
+          type: 'warning',
+        },
+      );
+      await deleteCategoryHandler(id);
+      router.push({ name: 'categories' });
+    } catch {
+      // Cancelled
     }
   };
 
   return {
+    // state
     loading,
     error,
     searchQuery,
@@ -128,11 +187,24 @@ export const useCategoryStore = defineStore('category', () => {
     currentPage,
     totalPages,
     totalCategories,
+    limits,
     CATEGORY_LIMIT,
-    fetchCategories,
-    fetchCategoryById,
-    createCategoryHandler,
-    updateCategoryHandler,
-    deleteCategoryHandler,
+
+    // modal & form state
+    isCategoryEditModalOpen,
+    isCategoryAddModalOpen,
+    formState,
+
+    // modal actions
+    openEditModal,
+    closeEditModal,
+    closeAddModal,
+    saveEdit,
+    saveAdd,
+
+    // handlers
+    getCategories,
+    getCategory,
+    confirmDelete,
   };
 });

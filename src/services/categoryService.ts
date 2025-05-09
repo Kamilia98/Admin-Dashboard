@@ -29,6 +29,18 @@ export const fetchCategory = async (id: string) => {
   return data.data.category;
 };
 
+export const fetchCategoriesAnalytics = async () => {
+  try {
+    const { data } = await axios.get(`${API_BASE}/analytics`, {
+      headers: getAuthHeaders(),
+    });
+    return data.data;
+  } catch (error) {
+    console.error('Failed to fetch categories analytics:', error);
+    throw error;
+  }
+};
+
 export const createCategory = async (payload: {
   name: string;
   description: string;

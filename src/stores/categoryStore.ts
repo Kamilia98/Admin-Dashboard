@@ -6,6 +6,7 @@ import { ElMessage, ElMessageBox } from 'element-plus';
 import {
   fetchCategories,
   fetchCategory,
+  fetchCategoriesAnalytics,
   deleteCategory,
   updateCategory,
   createCategory,
@@ -25,7 +26,10 @@ export const useCategoryStore = defineStore('category', () => {
   const categories = ref<Category[]>([]);
   const currentPage = ref(1);
   const totalPages = ref(1);
+  const totalFilteredCategories = ref(0);
   const totalCategories = ref(0);
+  const bestSelled = ref('');
+  const leastSelled = ref('');
   const limits = ref(CATEGORY_LIMIT);
   const sortBy = ref('createdAt');
   const sortOrder = ref<'asc' | 'desc'>('desc');
@@ -127,7 +131,7 @@ export const useCategoryStore = defineStore('category', () => {
       });
       currentPage.value = page;
       totalPages.value = data.totalPages;
-      totalCategories.value = data.totalCategories;
+      totalFilteredCategories.value = data.totalCategories;
       categories.value = data.categories;
     });
 
@@ -135,6 +139,20 @@ export const useCategoryStore = defineStore('category', () => {
     await withLoading(async () => {
       return await fetchCategory(id);
     });
+
+  const getCategoriesAnalytics = async () => {
+    try {
+      const data = await fetchCategoriesAnalytics();
+      console.log(data);
+      totalCategories.value = data.totalCategories;
+      bestSelled.value = data.mostSalledCategory.name;
+      leastSelled.value = data.leastSalledCategory.name;
+    } catch (err) {
+      console.error('[Analytics Error]:', err);
+      error.value = err instanceof Error ? err.message : String(err);
+      throw err;
+    }
+  };
 
   const createCategoryHandler = async (categoryData: {
     name: string;
@@ -204,7 +222,10 @@ export const useCategoryStore = defineStore('category', () => {
     categories,
     currentPage,
     totalPages,
+    totalFilteredCategories,
     totalCategories,
+    bestSelled,
+    leastSelled,
     limits,
     CATEGORY_LIMIT,
 
@@ -223,6 +244,7 @@ export const useCategoryStore = defineStore('category', () => {
     // handlers
     getCategories,
     getCategory,
+    getCategoriesAnalytics,
     confirmDelete,
     handleSort,
   };

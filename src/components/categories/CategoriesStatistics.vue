@@ -1,34 +1,37 @@
 <script setup lang="ts">
 import { computed, onMounted } from 'vue';
-import { BoxCubeIcon } from '../../icons';
-import { useOrdersStore } from '../../stores/orderStore';
+import {
+  BoxCubeIcon,
+  CategoriesIcon,
+  ArrowUpIcon,
+  ArrowDownIcon,
+} from '../../icons';
+import { useCategoryStore } from '../../stores/CategoryStore';
 import Card from '../common/Card.vue';
 
-const store = useOrdersStore();
+const store = useCategoryStore();
 
 onMounted(async () => {
-  await store.fetchOrderAnalytics();
-});
-
-const averageOrderValue = computed(() => {
-  return (
-    store.totalOrders > 0 ? store.totalRevenue / store.totalOrders : 0
-  ).toFixed(2);
+  await store.getCategoriesAnalytics();
 });
 </script>
 
 <template>
   <div class="grid grid-cols-1 gap-4 sm:grid-cols-3 md:grid-cols-3 md:gap-6">
-    <Card title="Orders" :value="store.totalOrders" :icon="BoxCubeIcon" />
     <Card
-      title="Total Revenue"
-      :value="`$${store.totalRevenue}`"
-      :icon="BoxCubeIcon"
+      title="Total Categories"
+      :value="store.totalCategories"
+      :icon="CategoriesIcon"
     />
     <Card
-      title="Average Order Value"
-      :value="`$${averageOrderValue}`"
-      :icon="BoxCubeIcon"
+      title="Top Selling Category"
+      :value="`${store.bestSelled}`"
+      :icon="ArrowUpIcon"
+    />
+    <Card
+      title="Least Sold Category"
+      :value="`${store.leastSelled}`"
+      :icon="ArrowDownIcon"
     />
   </div>
 </template>

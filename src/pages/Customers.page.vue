@@ -46,7 +46,7 @@ const headers = [
   { key: 'email', label: 'Email', sortable: false },
   { key: 'phone', label: 'Phone', sortable: false },
   { key: 'gender', label: 'Gender', sortable: false },
-  { key: 'createdAt', label: 'Date & Time', sortable: false },
+  { key: 'createdAt', label: 'Joined At', sortable: false },
   { key: 'actions', label: 'Actions', sortable: false },
 ];
 

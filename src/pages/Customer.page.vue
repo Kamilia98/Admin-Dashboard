@@ -8,10 +8,10 @@ import {
   ElOption,
   ElFormItem,
   ElButton,
-  ElSkeleton,
-  ElNotification,
 } from 'element-plus';
 import axios from 'axios';
+
+import { ElMessage } from 'element-plus';
 
 const route = useRoute();
 const router = useRouter();
@@ -37,22 +37,11 @@ const saveChanges = async () => {
       `http://localhost:5000/users/${route.params.id}`,
       user.value,
     );
-    ElNotification({
-      title: 'Success',
-      message: `User ${user.value.username} has Edited Successfully.`,
-      type: 'success',
-      duration: 3000,
-      position: 'bottom-right',
-    });
+    ElMessage.success(`User ${user.value.username} has Edited Successfully.`);
     router.back();
   } catch (error) {
-    ElNotification({
-      title: 'Error',
-      message: 'An unknown error occurred',
-      type: 'error',
-      duration: 3000,
-      position: 'bottom-right',
-    });
+    ElMessage.error('An unknown error occurred');
+
     console.error('Error saving changes:', error);
   }
 };
@@ -107,7 +96,5 @@ const cancelEdit = () => {
         </el-button>
       </div>
     </el-form>
-
-    <el-skeleton v-else animated />
   </div>
 </template>

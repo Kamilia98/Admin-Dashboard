@@ -33,12 +33,8 @@ export const useOrdersStore = defineStore('orders', () => {
   const totalPages = ref(1);
   const limits = ref(ORDER_LIMIT);
   const totalOrders = ref(0);
-  const averageOrdersValue = ref(0);
-  const totalAmountOrders = ref(0);
-  const userOrders = ref(0);
   const loading = ref(false);
   const error = ref('');
-  const initial = ref(true);
 
   const userId = ref('');
   const searchQuery = ref('');
@@ -65,8 +61,6 @@ export const useOrdersStore = defineStore('orders', () => {
       const data = await fetchOrderAnalyticsService(userId);
       totalOrders.value = data.totalOrders;
       totalRevenue.value = data.totalRevenue;
-      statusCounts.value = { ...data.statusCounts };
-      console.log(data, totalOrders.value);
     } catch (err) {
       console.error('[Analytics Error]:', err);
       error.value = err instanceof Error ? err.message : String(err);
@@ -76,7 +70,7 @@ export const useOrdersStore = defineStore('orders', () => {
 
   const fetchOrders = async ({
     page = currentPage.value,
-    limit = limits.value,
+    limit = ORDER_LIMIT,
     sortByParam = sortBy.value,
     userId: paramUserId,
   }: {
@@ -99,12 +93,6 @@ export const useOrdersStore = defineStore('orders', () => {
         minAmount: minAmount.value,
         maxAmount: maxAmount.value,
       };
-      console.log(params);
-
-      if (initial.value) {
-        limits.value = limit;
-        initial.value = false;
-      }
 
       if (paramUserId) params.userId = paramUserId;
       if (statusFilter.value.length) params.status = statusFilter.value;
@@ -112,23 +100,16 @@ export const useOrdersStore = defineStore('orders', () => {
         params.searchQuery = searchQuery.value.trim();
 
       const { data } = await fetchAllOrders(params);
-      userOrders.value = data.userOrders;
-      averageOrdersValue.value = data.averageOrdersValue;
-      totalAmountOrders.value = data.totalAmountOrders;
-      console.log(
-        totalOrders.value,
-        averageOrdersValue.value,
-        totalAmountOrders.value,
-      );
 
       orders.value = data.orders;
-      console.log(orders.value, data);
       totalPages.value = data.totalPages;
-      currentPage.value = data.currentPage;
+
+      currentPage.value = page;
+      limits.value = limit;
     } catch (err) {
+      orders.value = [];
       console.error('[Fetch Orders Error]:', err);
       error.value = err instanceof Error ? err.message : String(err);
-
       // Error message
       ElMessage.error('Failed to fetch orders. Please try again.');
       throw err;
@@ -252,9 +233,6 @@ export const useOrdersStore = defineStore('orders', () => {
     totalPages,
     limits,
     totalOrders,
-    totalAmountOrders,
-    averageOrdersValue,
-    userOrders,
     totalRevenue,
     statusCounts,
     loading,
@@ -269,6 +247,7 @@ export const useOrdersStore = defineStore('orders', () => {
     minAmount,
     maxAmount,
     userId,
+
     // Actions
     fetchOrders,
     fetchOrderById,

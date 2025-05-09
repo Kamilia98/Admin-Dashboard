@@ -1,35 +1,21 @@
 <script lang="ts" setup>
 import { ref, computed, onMounted, watch } from 'vue';
-import {
-  // ElCard,
-  // ElButton,
-  // ElInput,
-  ElIcon,
-  ElNotification,
-  ElMessageBox,
-  ElSelect,
-  ElOption,
-} from 'element-plus';
+import { ElIcon, ElMessageBox, ElSelect, ElOption } from 'element-plus';
+import { ElMessage } from 'element-plus';
+
 import { Delete } from '@element-plus/icons-vue';
 import { View } from '@element-plus/icons-vue';
 import { CircleCheckFilled } from '@element-plus/icons-vue';
 import Table from '../components/common/Table.vue';
 import Pagination from '../components/common/Pagination.vue';
 import debounce from 'lodash/debounce';
-import UserGroupIcon from '../icons/UserGroupIcon.vue';
 import Search from '../components/common/Search.vue';
 import Card from '../components/common/Card.vue';
-import CalenderIcon from '../icons/CalenderIcon.vue';
-import DocsIcon from '../icons/DocsIcon.vue';
+import { ReturningCustomersIcon, CalenderIcon, UserGroupIcon } from '../icons';
 import Button from '../components/common/Button.vue';
 import { useCustomerStore } from '../stores/customerStore';
 import { storeToRefs } from 'pinia';
-// import axios from 'axios';
-// import { UserFilled } from '@element-plus/icons-vue';
-// import { Calendar } from '@element-plus/icons-vue';
-// import { Refresh } from '@element-plus/icons-vue';
-// import { SearchIcon } from '../icons';
-// import { RouterLink } from 'vue-router';
+
 interface User {
   username: string;
   email: string;
@@ -54,11 +40,6 @@ const { fetchAllCustomers, removeCustomer } = customerStore;
 const currentPage = ref(1);
 const limit = ref(10);
 const search = ref('');
-// const totalUsers = ref(0);
-// const loading = ref(false);
-// const allUsers = ref<User[]>([]);
-// const newCustomers = ref(0);
-// const returningCustomers = ref(0);
 
 const headers = [
   { key: 'username', label: 'User', sortable: false },
@@ -68,47 +49,7 @@ const headers = [
   { key: 'createdAt', label: 'Date & Time', sortable: false },
   { key: 'actions', label: 'Actions', sortable: false },
 ];
-// const fetchUsers = async (page: number) => {
-//   const token = localStorage.getItem('token');
-//   loading.value = true;
-//   try {
-//     const { data } = await axios.get('http://localhost:5000/users', {
-//       headers: {
-//         Authorization: `Bearer ${token}`,
-//         'Content-Type': 'application/json',
-//       },
-//       params: {
-//         page,
-//         limit: limit.value,
-//         search: search.value,
-//         role: 'USER',
-//       },
-//     });
-//     newCustomers.value = data.data.newCustomers;
-//     allUsers.value = data.data.users;
-//     allUsers.value.forEach((user: User) => {
-//       user.phone = String(user.phone || 'N/A');
-//     });
-//     allUsers.value.forEach((user: User) => {
-//       const formatted = new Date(user.createdAt).toLocaleString('en-US', {
-//         year: 'numeric',
-//         month: 'long',
-//         day: 'numeric',
-//       });
-//       user.createdAt = formatted;
-//     });
-//     allUsers.value.forEach((user: User) => {
-//       user.isEstablished = new Date(user.createdAt) < new Date('2025-04-20');
-//     });
-//     returningCustomers.value = data.data.totalUsersWithOrders;
-//     totalUsers.value = data.data.totalUsers;
-//     console.log('Fetched users:', allUsers.value);
-//   } catch (error) {
-//     console.error('Error fetching users:', error);
-//   } finally {
-//     loading.value = false;
-//   }
-// };
+
 const debouncedFetch = debounce((page: number) => {
   fetchAllCustomers(page, limit.value, search.value);
 }, 600);
@@ -140,36 +81,21 @@ async function deleteUser(user: User) {
         confirmButtonText: 'Delete',
         cancelButtonText: 'Cancel',
         type: 'warning',
-        dangerouslyUseHTMLString: true,
+        confirmButtonClass: 'el-button--danger el-button--plain',
       },
     );
-    // await axios.delete(`http://localhost:5000/users/${user._id}`, {
-    //   headers: {
-    //     Authorization: `Bearer ${localStorage.getItem('token')}`,
-    //     'Content-Type': 'application/json',
-    //   },
-    // });
+
     await removeCustomer(user._id);
-    ElNotification({
-      title: 'Success',
-      message: `User ${user.username} has been deleted.`,
-      type: 'success',
-      duration: 3000,
-      position: 'bottom-right',
-    });
+    ElMessage.success(`User ${user.username} has been deleted successfully!`);
+
     fetchAllCustomers(currentPage.value, limit.value, search.value);
   } catch (error) {
     console.log(error);
     if (error === 'cancel') {
       return;
     }
-    ElNotification({
-      title: 'Error',
-      message: 'An unknown error occurred',
-      type: 'error',
-      duration: 3000,
-      position: 'bottom-right',
-    });
+
+    ElMessage.error('An unknown error occurred');
   }
 
   console.log('Delete user:', user);
@@ -180,48 +106,6 @@ async function deleteUser(user: User) {
   <div
     class="grid grid-cols-1 gap-4 pb-6 text-center sm:grid-cols-2 lg:grid-cols-3"
   >
-    <!-- <el-card shadow="hover" class="rounded-2xl">
-      <div class="relative flex items-center justify-center">
-        <div>
-          <p class="text-sm text-gray-500 dark:text-white">Total Customers</p>
-          <p class="pt-2 text-2xl font-semibold text-gray-800 dark:text-white">
-            {{ totalUsers }}
-          </p>
-        </div>
-        <el-icon class="-top-1 -left-7 pt-9 text-3xl text-blue-500"
-          ><UserGroupIcon class="dark:text-white"
-        /></el-icon>
-      </div>
-    </el-card> -->
-
-    <!-- <el-card shadow="hover" class="rounded-2xl">
-      <div class="relative flex items-center justify-center">
-        <div>
-          <p class="text-sm text-gray-500 dark:text-white">New This Month</p>
-          <p class="pt-2 text-2xl font-semibold text-gray-800 dark:text-white">
-            {{ newCustomers }}
-          </p>
-        </div>
-        <el-icon class="-top-1 -left-7 pt-8 text-3xl text-green-500"
-          ><Calendar class="dark:text-white"
-        /></el-icon>
-      </div>
-    </el-card>
-    <el-card shadow="hover" class="rounded-2xl">
-      <div class="relative flex items-center justify-center">
-        <div>
-          <p class="text-sm text-gray-500 dark:text-white">
-            Returning Customers
-          </p>
-          <p class="pt-2 text-2xl font-semibold text-gray-800 dark:text-white">
-            {{ returningCustomers }}
-          </p>
-        </div>
-        <el-icon class="-top-1 -left-12 pt-8 text-3xl text-purple-500"
-          ><Refresh class="dark:text-white"
-        /></el-icon>
-      </div>
-    </el-card> -->
     <Card title="Total Customers" :value="total" :icon="UserGroupIcon"></Card
     ><Card
       title="New This Month"
@@ -231,7 +115,7 @@ async function deleteUser(user: User) {
     ><Card
       title="Returning Customers"
       :value="returningCustomers"
-      :icon="DocsIcon"
+      :icon="ReturningCustomersIcon"
     ></Card>
   </div>
 
@@ -278,19 +162,6 @@ async function deleteUser(user: User) {
     <!-- Actions column -->
     <template #column-actions="{ item }">
       <div class="flex items-center justify-center gap-4">
-        <!-- <RouterLink
-          :to="{ name: 'customer-details', params: { userId: item._id } }"
-        >
-          <el-icon class="cursor-pointer pt-2" size="16"><View /></el-icon>
-        </RouterLink> -->
-        <!-- <el-button
-          size="large"
-          type="default"
-          link
-          @click.stop="deleteUser(item as User)"
-        >
-          <el-icon><Delete class="text-red-600" /></el-icon>
-        </el-button> -->
         <Button
           tag="router-link"
           :to="{ name: 'customer-details', params: { userId: item._id } }"
@@ -307,7 +178,7 @@ async function deleteUser(user: User) {
   </Table>
   <Pagination
     class="pt-4"
-    title="Customer Pagination"
+    title="Customer"
     :current-page="currentPage"
     :total-pages="Math.ceil(total / limit)"
     :total-items="total"
@@ -315,12 +186,3 @@ async function deleteUser(user: User) {
     @changePage="handlePageChange"
   ></Pagination>
 </template>
-<!-- <style scoped>
-.el-icon {
-  font-size: 20px;
-}
-.el-icon svg {
-  width: 20px;
-  height: 20px;
-}
-</style> -->

@@ -76,7 +76,7 @@ const handleDeleteLanguage = async (languageCode: string) => {
   try {
     await ElMessageBox.confirm(
       'Are you sure you want to delete this language?',
-      'Warning',
+      'Confirm Deletion',
       {
         confirmButtonText: 'Delete',
         cancelButtonText: 'Cancel',

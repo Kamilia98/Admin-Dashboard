@@ -28,23 +28,14 @@ const props = defineProps<{
 }>();
 
 /* ========== Lifecycle ========== */
-onMounted(() => {
-  console.log(props.userId, props.limit);
+onMounted(async () => {
   if (props.userId) store.userId = props.userId;
-  store.fetchOrders({
+  await store.fetchOrders({
+    page: 1,
     userId: props.userId,
     limit: props.limit,
   });
 });
-
-watch(
-  () => props.userId,
-  (newUserId) => {
-    console.log(newUserId);
-    if (newUserId) store.userId = newUserId;
-    store.fetchOrders({ page: 1, userId: newUserId, limit: props.limit });
-  },
-);
 
 watch(
   () => props.limit,
@@ -56,7 +47,7 @@ watch(
 
 <template>
   <!-- Orders Table -->
-  <div class="flex flex-col gap-8">
+  <div class="flex flex-col gap-4">
     <Table
       caption="Orders"
       :loading="store.loading"
@@ -218,8 +209,8 @@ watch(
       :currentPage="store.currentPage"
       :totalPages="store.totalPages"
       :totalItems="store.totalOrders"
-      :limit="store.ORDER_LIMIT"
-      @changePage="(page) => store.fetchOrders({ page })"
+      :limit="store.limits"
+      @changePage="(page) => store.fetchOrders({ page, limit: limit })"
     />
   </div>
 </template>

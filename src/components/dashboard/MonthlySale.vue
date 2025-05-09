@@ -6,13 +6,33 @@
       <h3 class="text-lg font-semibold text-gray-800 dark:text-white/90">
         Monthly Sales
       </h3>
+
+      <div class="relative">
+        <div
+          class="inline-flex items-center gap-0.5 rounded-lg bg-gray-100 p-0.5 dark:bg-gray-900"
+        >
+          <button
+            v-for="option in options"
+            :key="option.value"
+            @click="handleSelect(option.value)"
+            :class="[
+              selected === option.value
+                ? 'bg-white text-gray-900 shadow-theme-xs dark:bg-gray-800 dark:text-white'
+                : 'text-gray-500 dark:text-gray-400',
+              'rounded-md px-3 py-2 text-theme-sm font-medium hover:text-gray-900 hover:shadow-theme-xs dark:hover:bg-gray-800 dark:hover:text-white',
+            ]"
+          >
+            {{ option.label }}
+          </button>
+        </div>
+      </div>
     </div>
 
     <div class="custom-scrollbar max-w-full overflow-x-auto">
       <div id="chartOne" class="-ml-5 min-w-[650px] pl-2 xl:min-w-full">
         <VueApexCharts
           type="bar"
-          height="180"
+          height="230"
           :options="chartOptions"
           :series="series"
         />
@@ -29,6 +49,17 @@ import VueApexCharts from 'vue3-apexcharts';
 const loading = ref(false);
 const error = ref<string | null>(null);
 
+const options = [
+  { value: 'last', label: 'Last year' },
+  { value: 'current', label: 'This Year' },
+];
+
+const handleSelect = async (option: string) => {
+  selected.value = option;
+  await fetchAnalyticsData(option);
+};
+const selected = ref('current');
+
 // This holds the dynamic series data
 const series = ref([
   {
@@ -37,14 +68,19 @@ const series = ref([
   },
 ]);
 
-const fetchAnalyticsData = async () => {
+const fetchAnalyticsData = async (period: string) => {
   loading.value = true;
   error.value = null;
   try {
-    const res = await axios.get('http://localhost:5000/dashboard/montlySales');
+    const res = await axios.get('http://localhost:5000/dashboard/montlySales', {
+      params: {
+        period,
+      },
+    });
     const monthlySales = res.data.data.map((el: { totalSales: string }) =>
       Number(el.totalSales),
     );
+    selected.value = period;
 
     // Update the series data
     series.value = [
@@ -62,7 +98,7 @@ const fetchAnalyticsData = async () => {
 };
 
 onMounted(() => {
-  fetchAnalyticsData();
+  fetchAnalyticsData('current');
 });
 
 const chartOptions = ref({

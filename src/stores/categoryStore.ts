@@ -27,6 +27,8 @@ export const useCategoryStore = defineStore('category', () => {
   const totalPages = ref(1);
   const totalCategories = ref(0);
   const limits = ref(CATEGORY_LIMIT);
+  const sortBy = ref('createdAt');
+  const sortOrder = ref<'asc' | 'desc'>('desc');
   const isCategoryEditModalOpen = ref(false);
   const isCategoryAddModalOpen = ref(false);
 
@@ -120,6 +122,8 @@ export const useCategoryStore = defineStore('category', () => {
         page,
         limit: limits.value,
         searchQuery: searchQuery.value,
+        sortBy: sortBy.value,
+        sortOrder: sortOrder.value,
       });
       currentPage.value = page;
       totalPages.value = data.totalPages;
@@ -164,18 +168,32 @@ export const useCategoryStore = defineStore('category', () => {
     try {
       await ElMessageBox.confirm(
         'Are you sure you want to delete this category?',
-        'Warning',
+        'Confirm Deletion',
         {
-          confirmButtonText: 'OK',
+          confirmButtonText: 'Delete',
           cancelButtonText: 'Cancel',
           type: 'warning',
+          confirmButtonClass: 'el-button--danger el-button--plain',
         },
       );
+
       await deleteCategoryHandler(id);
       router.push({ name: 'categories' });
     } catch {
       // Cancelled
     }
+  };
+
+  const handleSort = ({
+    key,
+    direction,
+  }: {
+    key: string;
+    direction: 'asc' | 'desc';
+  }) => {
+    sortBy.value = key;
+    sortOrder.value = direction;
+    getCategories(1);
   };
 
   return {
@@ -206,5 +224,6 @@ export const useCategoryStore = defineStore('category', () => {
     getCategories,
     getCategory,
     confirmDelete,
+    handleSort,
   };
 });

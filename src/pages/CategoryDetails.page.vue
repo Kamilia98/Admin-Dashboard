@@ -4,7 +4,7 @@ import { useRoute } from 'vue-router';
 import Button from '../components/common/Button.vue';
 import { ElIcon } from 'element-plus';
 import { Edit, Delete } from '@element-plus/icons-vue';
-import { BoxCubeIcon } from '../icons';
+import { BoxCubeIcon, MoneyIcon } from '../icons';
 import Card from '../components/common/Card.vue';
 import { useCategoryStore } from '../stores/categoryStore';
 import type { Category } from '../types/category';
@@ -22,6 +22,7 @@ onMounted(() => {
 
 const fetchCategoryDetails = async (id: string) => {
   category.value = await store.getCategory(id);
+  console.log(category.value);
 };
 </script>
 
@@ -80,8 +81,51 @@ const fetchCategoryDetails = async (id: string) => {
                 </p>
               </div>
               <div class="grid grid-cols-1 gap-4 sm:grid-cols-2 md:gap-6">
-                <Card title="Products" value="5" :icon="BoxCubeIcon" />
-                <Card title="Sales" value="5" :icon="BoxCubeIcon" />
+                <!-- Products Card -->
+                <div
+                  class="rounded-2xl border border-gray-200 bg-white p-4 md:p-6 dark:border-gray-800 dark:bg-white/[0.03]"
+                >
+                  <div class="flex items-center gap-4">
+                    <div
+                      class="flex h-12 w-12 items-center justify-center rounded-xl bg-gray-100 dark:bg-gray-800 dark:text-gray-400"
+                    >
+                      <BoxCubeIcon />
+                    </div>
+                    <div>
+                      <h2 class="text-sm text-gray-500 dark:text-gray-400">
+                        Products
+                      </h2>
+                      <h4
+                        class="text-lg font-bold text-gray-800 dark:text-white/90"
+                      >
+                        {{ category.totalProducts }}
+                      </h4>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- Sales Card -->
+                <div
+                  class="rounded-2xl border border-gray-200 bg-white p-4 md:p-6 dark:border-gray-800 dark:bg-white/[0.03]"
+                >
+                  <div class="flex items-center gap-4">
+                    <div
+                      class="flex h-12 w-12 items-center justify-center rounded-xl bg-gray-100 dark:bg-gray-800 dark:text-gray-400"
+                    >
+                      <MoneyIcon />
+                    </div>
+                    <div>
+                      <h2 class="text-sm text-gray-500 dark:text-gray-400">
+                        Sales
+                      </h2>
+                      <h4
+                        class="text-lg font-bold text-gray-800 dark:text-white/90"
+                      >
+                        {{ category.totalSales }}
+                      </h4>
+                    </div>
+                  </div>
+                </div>
               </div>
             </div>
           </div>

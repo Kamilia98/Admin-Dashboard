@@ -2,6 +2,7 @@
 import { CircleCheckFilled, User } from '@element-plus/icons-vue';
 import { ElIcon } from 'element-plus';
 import OrderManager from '../components/orders/OrderManager.vue';
+import OrderStatistics from '../components/orders/OrderStatistics.vue';
 import { computed, onMounted, ref } from 'vue';
 import { useRoute } from 'vue-router';
 import { useOrdersStore } from '../stores/orderStore';
@@ -142,23 +143,7 @@ const averageOrderValue = computed(() => {
       <div class="w-full self-stretch md:w-3/4">
         <div class="flex h-full flex-col justify-between space-y-6">
           <!-- Order Stats Cards -->
-          <div class="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
-            <Card
-              title="Orders"
-              :value="orderStore.totalOrders"
-              :icon="BoxCubeIcon"
-            />
-            <Card
-              title="Total Amount"
-              :value="`$${orderStore.totalRevenue}`"
-              :icon="BoxCubeIcon"
-            />
-            <Card
-              title="Average Order Value"
-              :value="`$${averageOrderValue}`"
-              :icon="BoxCubeIcon"
-            />
-          </div>
+          <OrderStatistics v-if="user?._id" :userId="user?._id" />
 
           <!-- Purchase Chart -->
           <PurchaseChart

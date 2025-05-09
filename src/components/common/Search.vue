@@ -2,9 +2,16 @@
 import { ref, watch } from 'vue';
 import { SearchIcon } from '../../icons';
 
-const props = defineProps<{
-  modelValue: string;
-}>();
+const props = defineProps({
+  title: {
+    type: String,
+    default: '',
+  },
+  modelValue: {
+    type: String,
+    required: true,
+  },
+});
 
 const emit = defineEmits<{
   (e: 'update:modelValue', value: string): void;
@@ -47,7 +54,7 @@ function handleSubmit() {
         @input="updateInput(($event.target as HTMLInputElement).value)"
         @change="updateInput(($event.target as HTMLInputElement).value)"
         type="text"
-        placeholder="Search orders..."
+        :placeholder="`Search ${title}...`"
         class="dark:bg-dark-900 h-11 w-full rounded-lg border border-gray-200 bg-transparent py-2.5 pr-14 pl-12 text-sm text-gray-800 shadow-theme-xs placeholder:text-gray-400 focus:border-brand-300 focus:ring-3 focus:ring-brand-500/10 focus:outline-none xl:w-[430px] dark:border-gray-800 dark:text-white/90 dark:placeholder:text-white/30 dark:focus:border-brand-800"
       />
     </div>

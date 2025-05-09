@@ -75,7 +75,7 @@ export const useOrdersStore = defineStore('orders', () => {
   };
 
   const fetchOrders = async ({
-    page = 1,
+    page = currentPage.value,
     limit = limits.value,
     sortByParam = sortBy.value,
     userId: paramUserId,
@@ -99,6 +99,7 @@ export const useOrdersStore = defineStore('orders', () => {
         minAmount: minAmount.value,
         maxAmount: maxAmount.value,
       };
+      console.log(params);
 
       if (initial.value) {
         limits.value = limit;
@@ -122,8 +123,8 @@ export const useOrdersStore = defineStore('orders', () => {
 
       orders.value = data.orders;
       console.log(orders.value, data);
-      totalPages.value = Math.ceil(data.totalOrders / (limits.value || 1));
-      currentPage.value = page;
+      totalPages.value = data.totalPages;
+      currentPage.value = data.currentPage;
     } catch (err) {
       console.error('[Fetch Orders Error]:', err);
       error.value = err instanceof Error ? err.message : String(err);

@@ -18,7 +18,7 @@
         opacity="1"
         data-original="#000000"
         stroke="currentColor"
-        stroke-width="8"
+        stroke-width="15"
       ></path>
 
       <path
@@ -26,7 +26,7 @@
         fill="currentColor"
         opacity="1"
         stroke="currentColor"
-        stroke-width="8"
+        stroke-width="10"
         data-original="#000000"
       ></path>
     </g>

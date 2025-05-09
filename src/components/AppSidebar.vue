@@ -207,6 +207,7 @@ import {
   ChevronDownIcon,
   UserCircleIcon,
   CategoriesIcon,
+  HomeIcon,
 } from '../icons';
 
 import { useSidebar } from '../composables/useSidebar';
@@ -241,7 +242,7 @@ const menuGroups: MenuGroup[] = [
     title: 'Menu',
     items: [
       {
-        icon: GridIcon,
+        icon: HomeIcon,
         name: 'Dashboard',
         path: '/',
       },

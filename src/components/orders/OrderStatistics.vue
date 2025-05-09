@@ -22,7 +22,7 @@ const averageOrderValue = computed(() => {
   <div class="grid grid-cols-1 gap-4 sm:grid-cols-3 md:grid-cols-3 md:gap-6">
     <Card title="Orders" :value="store.totalOrders" :icon="BoxCubeIcon" />
     <Card
-      title="Total Revenue"
+      title="Total Sales"
       :value="`$${store.totalRevenue}`"
       :icon="BoxCubeIcon"
     />

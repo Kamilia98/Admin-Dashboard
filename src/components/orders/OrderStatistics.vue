@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { computed, onMounted } from 'vue';
-import { BoxCubeIcon } from '../../icons';
+import { BoxCubeIcon, OrdersIcon, MoneyIcon, AverageIcon } from '../../icons';
 import { useOrdersStore } from '../../stores/orderStore';
 import Card from '../common/Card.vue';
 
@@ -8,6 +8,15 @@ const store = useOrdersStore();
 
 onMounted(async () => {
   await store.fetchOrderAnalytics();
+});
+
+const props = defineProps<{
+  userId?: string;
+}>();
+
+onMounted(async () => {
+  if (props.userId) store.userId = props.userId;
+  await store.fetchOrderAnalytics(props.userId);
 });
 
 const averageOrderValue = computed(() => {
@@ -19,16 +28,16 @@ const averageOrderValue = computed(() => {
 
 <template>
   <div class="grid grid-cols-1 gap-4 sm:grid-cols-3 md:grid-cols-3 md:gap-6">
-    <Card title="Orders" :value="store.totalOrders" :icon="BoxCubeIcon" />
+    <Card title="Total Orders" :value="store.totalOrders" :icon="OrdersIcon" />
     <Card
       title="Total Sales"
       :value="`$${store.totalRevenue}`"
-      :icon="BoxCubeIcon"
+      :icon="MoneyIcon"
     />
     <Card
       title="Average Order Value"
       :value="`$${averageOrderValue}`"
-      :icon="BoxCubeIcon"
+      :icon="AverageIcon"
     />
   </div>
 </template>

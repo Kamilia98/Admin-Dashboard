@@ -33,6 +33,9 @@ export const useOrdersStore = defineStore('orders', () => {
   const totalPages = ref(1);
   const limits = ref(ORDER_LIMIT);
   const totalOrders = ref(0);
+  const averageOrdersValue = ref(0);
+  const totalAmountOrders = ref(0);
+  const userOrders = ref(0);
   const loading = ref(false);
   const error = ref('');
   const initial = ref(true);
@@ -108,8 +111,17 @@ export const useOrdersStore = defineStore('orders', () => {
         params.searchQuery = searchQuery.value.trim();
 
       const { data } = await fetchAllOrders(params);
+      userOrders.value = data.userOrders;
+      averageOrdersValue.value = data.averageOrdersValue;
+      totalAmountOrders.value = data.totalAmountOrders;
+      console.log(
+        totalOrders.value,
+        averageOrdersValue.value,
+        totalAmountOrders.value,
+      );
 
       orders.value = data.orders;
+      console.log(orders.value, data);
       totalPages.value = Math.ceil(data.totalOrders / (limits.value || 1));
       currentPage.value = page;
     } catch (err) {
@@ -239,6 +251,9 @@ export const useOrdersStore = defineStore('orders', () => {
     totalPages,
     limits,
     totalOrders,
+    totalAmountOrders,
+    averageOrdersValue,
+    userOrders,
     totalRevenue,
     statusCounts,
     loading,
@@ -253,7 +268,6 @@ export const useOrdersStore = defineStore('orders', () => {
     minAmount,
     maxAmount,
     userId,
-
     // Actions
     fetchOrders,
     fetchOrderById,

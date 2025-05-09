@@ -3,7 +3,7 @@ import { CircleCheckFilled, User } from '@element-plus/icons-vue';
 import { ElIcon } from 'element-plus';
 import Pagination from '../components/common/Pagination.vue';
 import OrderManager from '../components/orders/OrderManager.vue';
-import { onMounted, ref, watch } from 'vue';
+import { computed, onMounted, ref, watch } from 'vue';
 import { useRoute } from 'vue-router';
 import { useOrdersStore } from '../stores/orderStore';
 import { ElCard } from 'element-plus';
@@ -85,33 +85,35 @@ const orderStore = useOrdersStore();
 const customerStore = useCustomerStore();
 const { favourites } = storeToRefs(customerStore);
 const user = ref<User | null>(null);
-const { userOrders, totalAmountOrders, averageOrdersValue, orders } =
-  storeToRefs(orderStore);
 
 onMounted(async () => {
   const fetchedUser = await customerStore.fetchCustomer(
     route.params.userId as string,
   );
   user.value = fetchedUser || null;
-  orderStore.fetchOrders({
-    page: currentPage.value,
-    limit: limit.value,
-    userId: route.params.userId as string,
-  });
+  orderStore.fetchOrderAnalytics(user.value?._id);
 });
-watch(user, (newUser) => {
-  user.value = newUser;
-  console.log(user.value);
-});
-function handlePageChange(page: number) {
-  currentPage.value = page;
-}
-watch(currentPage, (newPage) => {
-  orderStore.fetchOrders({
-    page: newPage,
-    limit: limit.value,
-    userId: route.params.userId as string,
-  });
+// watch(user, (newUser) => {
+//   user.value = newUser;
+//   console.log(user.value);
+// });
+// function handlePageChange(page: number) {
+//   currentPage.value = page;
+// }
+// watch(currentPage, (newPage) => {
+//   orderStore.fetchOrders({
+//     page: newPage,
+//     limit: limit.value,
+//     userId: route.params.userId as string,
+//   });
+// });
+
+const averageOrderValue = computed(() => {
+  return (
+    orderStore.totalOrders > 0
+      ? orderStore.totalRevenue / orderStore.totalOrders
+      : 0
+  ).toFixed(2);
 });
 </script>
 <template>
@@ -218,7 +220,7 @@ watch(currentPage, (newPage) => {
                 Total Orders
               </h4>
               <div class="mt-2 text-3xl font-bold dark:text-white">
-                {{ userOrders }}
+                {{ orderStore.totalOrders }}
               </div>
             </ElCard>
             <ElCard
@@ -229,7 +231,7 @@ watch(currentPage, (newPage) => {
                 Total Amount
               </h4>
               <div class="mt-2 text-3xl font-bold dark:text-white">
-                {{ totalAmountOrders.toFixed(2) }}
+                {{ orderStore.totalRevenue }}
               </div>
             </ElCard>
             <ElCard
@@ -240,7 +242,7 @@ watch(currentPage, (newPage) => {
                 Average Order Value
               </h4>
               <div class="mt-2 text-3xl font-bold dark:text-white">
-                {{ averageOrdersValue.toFixed(2) }}
+                {{ averageOrderValue }}
               </div>
             </ElCard>
           </div>
@@ -248,7 +250,7 @@ watch(currentPage, (newPage) => {
           <!-- Purchase Chart -->
           <PurchaseChart
             :orders="
-              orders.map((order) => ({
+              orderStore.orders.map((order) => ({
                 ...order,
                 totalAmount: parseFloat(order.totalAmount),
               }))
@@ -269,16 +271,6 @@ watch(currentPage, (newPage) => {
         class="w-full"
       />
     </ElCard>
-
-    <!-- Pagination -->
-    <Pagination
-      title="Order Pagination"
-      :currentPage="currentPage"
-      :totalPages="Math.ceil(userOrders / limit)"
-      :totalItems="userOrders"
-      :limit="2"
-      @changePage="handlePageChange"
-    />
   </div>
 </template>
 

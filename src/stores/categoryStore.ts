@@ -168,13 +168,15 @@ export const useCategoryStore = defineStore('category', () => {
     try {
       await ElMessageBox.confirm(
         'Are you sure you want to delete this category?',
-        'Warning',
+        'Confirm Deletion',
         {
-          confirmButtonText: 'OK',
+          confirmButtonText: 'Delete',
           cancelButtonText: 'Cancel',
           type: 'warning',
+          confirmButtonClass: 'el-button--danger el-button--plain',
         },
       );
+
       await deleteCategoryHandler(id);
       router.push({ name: 'categories' });
     } catch {

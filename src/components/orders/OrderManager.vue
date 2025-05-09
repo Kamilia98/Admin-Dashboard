@@ -28,23 +28,16 @@ const props = defineProps<{
 }>();
 
 /* ========== Lifecycle ========== */
-onMounted(() => {
+onMounted(async () => {
+  console.log('eorgiheorg');
   console.log(props.userId, props.limit);
   if (props.userId) store.userId = props.userId;
-  store.fetchOrders({
+  await store.fetchOrders({
     userId: props.userId,
     limit: props.limit,
   });
+  console.log(store.orders);
 });
-
-watch(
-  () => props.userId,
-  (newUserId) => {
-    console.log(newUserId);
-    if (newUserId) store.userId = newUserId;
-    store.fetchOrders({ page: 1, userId: newUserId, limit: props.limit });
-  },
-);
 
 watch(
   () => props.limit,

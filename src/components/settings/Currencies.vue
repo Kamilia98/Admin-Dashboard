@@ -92,11 +92,11 @@ const handleDeleteCurrency = async (currencyCode: string) => {
   try {
     await ElMessageBox.confirm(
       'Are you sure you want to delete this currency?',
-      'Warning',
+      'Confirm Deletion',
       {
         confirmButtonText: 'Delete',
         cancelButtonText: 'Cancel',
-        type: 'danger',
+        type: 'warning',
         confirmButtonClass: 'el-button--danger el-button--plain',
       },
     );

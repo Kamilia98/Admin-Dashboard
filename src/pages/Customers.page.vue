@@ -82,6 +82,7 @@ async function deleteUser(user: User) {
         cancelButtonText: 'Cancel',
         type: 'warning',
         confirmButtonClass: 'el-button--danger el-button--plain',
+        dangerouslyUseHTMLString: true,
       },
     );
 

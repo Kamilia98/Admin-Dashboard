@@ -42,7 +42,7 @@ const handleDeleteShippingMethod = async (methodId: string) => {
   try {
     await ElMessageBox.confirm(
       'Are you sure you want to delete this shipping method?',
-      'Warning',
+      'Confirm Deletion',
       {
         confirmButtonText: 'Delete',
         cancelButtonText: 'Cancel',

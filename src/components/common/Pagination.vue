@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { ElIcon } from 'element-plus';
 import { ArrowRight, ArrowLeft } from '@element-plus/icons-vue';
+import { computed } from 'vue';
 
 const props = defineProps<{
   title: string;
@@ -13,54 +14,51 @@ const props = defineProps<{
 const emit = defineEmits(['changePage']);
 
 const changePage = (page: number) => {
-  console.log('Page changed to:', page);
-  if (page >= 1 && page <= props.totalPages) {
+  if (page >= 1 && page <= props.totalPages && page !== props.currentPage) {
     emit('changePage', page);
   }
 };
+
+const startItem = computed(() => (props.currentPage - 1) * props.limit + 1);
+const endItem = computed(() =>
+  Math.min(props.currentPage * props.limit, props.totalItems),
+);
 </script>
+
 <template>
   <div class="flex w-full items-center justify-between">
-    <!-- Left side: Status -->
-    <div class="text-sm text-gray-700">
-      Showing {{ (currentPage - 1) * limit + 1 }} -
-      {{ Math.min(currentPage * limit, totalItems) }} of {{ totalItems }}
-      {{ title }}
+    <div class="text-sm text-gray-700 dark:text-white">
+      <template v-if="totalItems">
+        Showing {{ startItem }} - {{ endItem }} of {{ totalItems }} {{ title }}
+      </template>
+      <template v-else>No {{ title }} to show</template>
     </div>
 
-    <!-- Right side: Pagination -->
     <div
-      class="flex self-end rounded-xl border border-gray-200 bg-white dark:border-gray-800 dark:bg-white/[0.03]"
+      v-if="totalItems > 1"
+      class="flex rounded-xl border border-gray-200 bg-white dark:border-gray-800 dark:bg-white/[0.03]"
     >
-      <div
-        class="flex cursor-pointer items-center justify-center p-1 px-4"
+      <button
         @click="changePage(currentPage - 1)"
+        :disabled="currentPage <= 1"
+        class="flex items-center justify-center px-4 py-1 disabled:text-gray-500 dark:text-white"
       >
-        <button
-          @click="changePage(currentPage - 1)"
-          :disabled="currentPage <= 1"
-          class="flex cursor-pointer disabled:text-gray-500 dark:text-white"
-        >
-          <ElIcon size="16"><ArrowLeft /></ElIcon>
-        </button>
-      </div>
+        <ElIcon size="16"><ArrowLeft /></ElIcon>
+      </button>
+
       <div
         class="border-x border-gray-200 bg-white px-4 py-2 dark:border-gray-800 dark:bg-white/[0.03] dark:text-white"
       >
         {{ currentPage }}
       </div>
-      <div
-        class="flex cursor-pointer items-center justify-center p-1 px-4"
+
+      <button
         @click="changePage(currentPage + 1)"
+        :disabled="currentPage >= totalPages"
+        class="flex items-center justify-center px-4 py-1 disabled:text-gray-500 dark:text-white"
       >
-        <button
-          @click="changePage(currentPage + 1)"
-          :disabled="currentPage >= totalPages"
-          class="flex cursor-pointer disabled:text-gray-500 dark:text-white"
-        >
-          <ElIcon size="16"><ArrowRight /></ElIcon>
-        </button>
-      </div>
+        <ElIcon size="16"><ArrowRight /></ElIcon>
+      </button>
     </div>
   </div>
 </template>

@@ -44,9 +44,14 @@
 
     <template #column-actions="{ item }">
       <div class="flex justify-center">
-        <router-link :to="`/orders/${item.id}`">
-          <el-icon class="cursor-pointer" size="16"><View /></el-icon>
-        </router-link>
+        <Button
+          tag="router-link"
+          :to="{ name: 'order-details', params: { id: item.id } }"
+        >
+          <template #icon>
+            <el-icon><View /></el-icon>
+          </template>
+        </Button>
       </div>
     </template>
 
@@ -62,12 +67,13 @@
 </template>
 
 <script setup lang="ts">
-import { onMounted } from 'vue';
+import { onMounted, ref } from 'vue';
 
 import { ElIcon } from 'element-plus';
 import { View } from '@element-plus/icons-vue';
 
 import Table from '../common/Table.vue';
+import Button from '../common/Button.vue';
 import OrderStatusSelector from '../orders/OrderStatusSelector.vue';
 
 import { useOrdersStore } from '../../stores/orderStore';

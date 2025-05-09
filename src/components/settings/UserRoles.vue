@@ -80,7 +80,7 @@ const handleDeleteUserRole = async (roleId: string) => {
   try {
     await ElMessageBox.confirm(
       'Are you sure you want to delete this user role?',
-      'Warning',
+      'Confirm Deletion',
       {
         confirmButtonText: 'Delete',
         cancelButtonText: 'Cancel',

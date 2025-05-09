@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { ArrowUp, ArrowDown } from '@element-plus/icons-vue';
-import { ElIcon, ElSkeleton } from 'element-plus';
+import { ElIcon, ElSkeleton, ElTooltip } from 'element-plus';
 
 defineProps<{
   caption: string;
@@ -42,23 +42,28 @@ const emit = defineEmits<{
                   {{ header.label }}
                 </p>
                 <div class="flex w-4 flex-col gap-1" v-if="header.sortable">
-                  <el-icon
-                    size="14"
-                    @click="emit('sort', { key: header.key, direction: 'asc' })"
-                    class="cursor-pointer"
-                  >
-                    <ArrowUp />
-                  </el-icon>
-
-                  <el-icon
-                    size="14"
-                    @click="
-                      emit('sort', { key: header.key, direction: 'desc' })
-                    "
-                    class="cursor-pointer"
-                  >
-                    <ArrowDown />
-                  </el-icon>
+                  <el-tooltip content="Ascendingly">
+                    <el-icon
+                      size="14"
+                      @click="
+                        emit('sort', { key: header.key, direction: 'asc' })
+                      "
+                      class="cursor-pointer"
+                    >
+                      <ArrowUp />
+                    </el-icon>
+                  </el-tooltip>
+                  <el-tooltip content="Descendingly">
+                    <el-icon
+                      size="14"
+                      @click="
+                        emit('sort', { key: header.key, direction: 'desc' })
+                      "
+                      class="cursor-pointer"
+                    >
+                      <ArrowDown />
+                    </el-icon>
+                  </el-tooltip>
                 </div>
               </div>
             </th>

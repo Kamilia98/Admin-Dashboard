@@ -158,7 +158,7 @@ const selectVariant = (productId: string, index: number) => {
             <Button
               tag="router-link"
               :to="{
-                name: 'category-details',
+                name: 'product-details',
                 params: {
                   id: item._id,
                 },

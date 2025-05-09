@@ -59,6 +59,10 @@ import DotsIcons from './DotsIcons.vue';
 import CategoriesIcon from './CategoriesIcon.vue';
 import ReturningCustomersIcon from './ReturningCustomersIcon.vue';
 
+import AverageIcon from './AverageIcon.vue';
+import ArrowUpIcon from './ArrowUpIcon.vue';
+import ArrowDownIcon from './ArrowDownIcon.vue';
+
 export {
   BellIcon,
   BarChartIcon,
@@ -120,4 +124,7 @@ export {
   DotsIcons,
   CategoriesIcon,
   ReturningCustomersIcon,
+  AverageIcon,
+  ArrowUpIcon,
+  ArrowDownIcon,
 };

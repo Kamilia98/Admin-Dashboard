@@ -27,7 +27,7 @@ const endItem = computed(() =>
 
 <template>
   <div class="flex w-full items-center justify-between">
-    <div class="text-sm text-gray-700">
+    <div class="text-sm text-gray-700 dark:text-white">
       <template v-if="totalItems">
         Showing {{ startItem }} - {{ endItem }} of {{ totalItems }} {{ title }}
       </template>

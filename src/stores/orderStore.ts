@@ -35,7 +35,6 @@ export const useOrdersStore = defineStore('orders', () => {
   const totalOrders = ref(0);
   const loading = ref(false);
   const error = ref('');
-  const initial = ref(true);
 
   const userId = ref('');
   const searchQuery = ref('');
@@ -71,7 +70,7 @@ export const useOrdersStore = defineStore('orders', () => {
 
   const fetchOrders = async ({
     page = currentPage.value,
-    limit = limits.value,
+    limit = ORDER_LIMIT,
     sortByParam = sortBy.value,
     userId: paramUserId,
   }: {
@@ -94,12 +93,6 @@ export const useOrdersStore = defineStore('orders', () => {
         minAmount: minAmount.value,
         maxAmount: maxAmount.value,
       };
-      console.log(params);
-
-      if (initial.value) {
-        limits.value = limit;
-        initial.value = false;
-      }
 
       if (paramUserId) params.userId = paramUserId;
       if (statusFilter.value.length) params.status = statusFilter.value;
@@ -110,7 +103,9 @@ export const useOrdersStore = defineStore('orders', () => {
 
       orders.value = data.orders;
       totalPages.value = data.totalPages;
-      currentPage.value = data.currentPage;
+
+      currentPage.value = page;
+      limits.value = limit;
     } catch (err) {
       orders.value = [];
       console.error('[Fetch Orders Error]:', err);

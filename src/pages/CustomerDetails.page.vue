@@ -1,15 +1,15 @@
 <script lang="ts" setup>
 import { CircleCheckFilled, User } from '@element-plus/icons-vue';
 import { ElIcon } from 'element-plus';
-import Pagination from '../components/common/Pagination.vue';
 import OrderManager from '../components/orders/OrderManager.vue';
-import { computed, onMounted, ref, watch } from 'vue';
+import { computed, onMounted, ref } from 'vue';
 import { useRoute } from 'vue-router';
 import { useOrdersStore } from '../stores/orderStore';
-import { ElCard } from 'element-plus';
 import PurchaseChart from '../components/customers/PurchaseChart.vue';
 import { useCustomerStore } from '../stores/customerStore';
 import { storeToRefs } from 'pinia';
+import BoxCubeIcon from '../icons/BoxCubeIcon.vue';
+import Card from '../components/common/Card.vue';
 
 interface User {
   username: string;
@@ -23,63 +23,7 @@ interface User {
   favourites: string[];
   isEstablished: boolean;
 }
-// const productStore = useProductStore();
-// const currentPage = ref(1);
-//  const favTest = [
-//   'test1',
-//   'test2',
-//   'test3',
-//   'test4',
-//   'test5',
-//   'test6',
-//   'test7',
-//   'test8',
-//   'test9',
-//   'test10',
-// ];
-// function handlePageChange(page: number) {
-//   console.log(page);
-//   console.log(555555555555555555555);
-//   currentPage.value = page;
-// }
-// const fetchUser = async (userId: string) => {
-//   try {
-//     loading.value = true;
-//     const { data } = await axios.get(`http://localhost:5000/users/${userId}`, {
-//       headers: {
-//         Authorization: `Bearer ${localStorage.getItem('token')}`,
-//         'Content-Type': 'application/json',
-//       },
-//     });
-//     loading.value = false;
-//     user.value = data.data.user;
-//     const formatted = new Date(data.data.user.createdAt).toLocaleString(
-//       'en-US',
-//       {
-//         year: 'numeric',
-//         month: 'long',
-//         day: 'numeric',
-//       },
-//     );
-//     user.value!.isEstablished =
-//       new Date(user.value!.createdAt) < new Date('2025-04-20');
-//     user.value!.createdAt = formatted;
-//     favouriteProducts.value = await Promise.all(
-//       user.value!.favourites.map(async (favourite) => {
-//         return await productStore
-//           .getProductById(favourite.toString())
-//           .then((product) => {
-//             return product!.name;
-//           });
-//       }),
-//     );
-//   } catch (error) {
-//     console.error('Error fetching user:', error);
-//     loading.value = false;
-//   }
-// };
-const currentPage = ref(1);
-const limit = ref(2);
+
 const route = useRoute();
 const orderStore = useOrdersStore();
 const customerStore = useCustomerStore();
@@ -93,20 +37,6 @@ onMounted(async () => {
   user.value = fetchedUser || null;
   orderStore.fetchOrderAnalytics(user.value?._id);
 });
-// watch(user, (newUser) => {
-//   user.value = newUser;
-//   console.log(user.value);
-// });
-// function handlePageChange(page: number) {
-//   currentPage.value = page;
-// }
-// watch(currentPage, (newPage) => {
-//   orderStore.fetchOrders({
-//     page: newPage,
-//     limit: limit.value,
-//     userId: route.params.userId as string,
-//   });
-// });
 
 const averageOrderValue = computed(() => {
   return (
@@ -121,8 +51,8 @@ const averageOrderValue = computed(() => {
     <!-- Top section: Profile + Stats/Chart side by side -->
     <div class="flex flex-col items-stretch gap-4 md:flex-row">
       <!-- Left Profile Section -->
-      <ElCard
-        class="w-full self-stretch rounded-xl border custom-border bg-white p-6 shadow md:w-1/4"
+      <div
+        class="w-full self-stretch rounded-xl border custom-border bg-white p-6 shadow md:w-1/4 dark:bg-white/[0.03]"
       >
         <div class="flex items-center gap-10 text-center">
           <div class="relative inline-block">
@@ -134,6 +64,7 @@ const averageOrderValue = computed(() => {
               />
             </div>
             <el-icon
+              size="24"
               v-if="user?.isEstablished"
               class="absolute -top-7 -right-6 rounded-full bg-transparent ring-2 ring-transparent"
             >
@@ -205,46 +136,28 @@ const averageOrderValue = computed(() => {
             </template>
           </p>
         </div>
-      </ElCard>
+      </div>
 
       <!-- Right Section (Stats + Chart) -->
       <div class="w-full self-stretch md:w-3/4">
         <div class="flex h-full flex-col justify-between space-y-6">
           <!-- Order Stats Cards -->
           <div class="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
-            <ElCard
-              shadow="hover"
-              class="rounded-2xl border custom-border p-6 text-center shadow"
-            >
-              <h4 class="text-sm text-gray-500 dark:text-white">
-                Total Orders
-              </h4>
-              <div class="mt-2 text-3xl font-bold dark:text-white">
-                {{ orderStore.totalOrders }}
-              </div>
-            </ElCard>
-            <ElCard
-              shadow="hover"
-              class="rounded-2xl border custom-border bg-white p-6 text-center shadow"
-            >
-              <h4 class="text-sm text-gray-500 dark:text-white">
-                Total Amount
-              </h4>
-              <div class="mt-2 text-3xl font-bold dark:text-white">
-                {{ orderStore.totalRevenue }}
-              </div>
-            </ElCard>
-            <ElCard
-              shadow="hover"
-              class="rounded-2xl border custom-border bg-white p-6 text-center shadow"
-            >
-              <h4 class="text-sm text-gray-500 dark:text-white">
-                Average Order Value
-              </h4>
-              <div class="mt-2 text-3xl font-bold dark:text-white">
-                {{ averageOrderValue }}
-              </div>
-            </ElCard>
+            <Card
+              title="Orders"
+              :value="orderStore.totalOrders"
+              :icon="BoxCubeIcon"
+            />
+            <Card
+              title="Total Amount"
+              :value="`$${orderStore.totalRevenue}`"
+              :icon="BoxCubeIcon"
+            />
+            <Card
+              title="Average Order Value"
+              :value="`$${averageOrderValue}`"
+              :icon="BoxCubeIcon"
+            />
           </div>
 
           <!-- Purchase Chart -->
@@ -261,8 +174,8 @@ const averageOrderValue = computed(() => {
     </div>
 
     <!-- Full Width OrderManager -->
-    <ElCard
-      class="flex w-full flex-col gap-4 rounded-xl border custom-border bg-white p-6 shadow"
+    <div
+      class="flex w-full flex-col gap-4 rounded-xl border custom-border bg-white p-6 shadow dark:bg-white/[0.03]"
     >
       <OrderManager
         v-if="user?._id"
@@ -270,16 +183,6 @@ const averageOrderValue = computed(() => {
         :limit="2"
         class="w-full"
       />
-    </ElCard>
+    </div>
   </div>
 </template>
-
-<style scoped>
-.el-icon {
-  width: 24px;
-}
-.el-icon svg {
-  width: 2em;
-  height: 2em;
-}
-</style>

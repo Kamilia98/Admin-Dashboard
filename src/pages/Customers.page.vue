@@ -9,11 +9,9 @@ import { CircleCheckFilled } from '@element-plus/icons-vue';
 import Table from '../components/common/Table.vue';
 import Pagination from '../components/common/Pagination.vue';
 import debounce from 'lodash/debounce';
-import UserGroupIcon from '../icons/UserGroupIcon.vue';
 import Search from '../components/common/Search.vue';
 import Card from '../components/common/Card.vue';
-import CalenderIcon from '../icons/CalenderIcon.vue';
-import DocsIcon from '../icons/DocsIcon.vue';
+import { ReturningCustomersIcon, CalenderIcon, UserGroupIcon } from '../icons';
 import Button from '../components/common/Button.vue';
 import { useCustomerStore } from '../stores/customerStore';
 import { storeToRefs } from 'pinia';
@@ -117,7 +115,7 @@ async function deleteUser(user: User) {
     ><Card
       title="Returning Customers"
       :value="returningCustomers"
-      :icon="DocsIcon"
+      :icon="ReturningCustomersIcon"
     ></Card>
   </div>
 

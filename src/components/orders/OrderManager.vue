@@ -29,14 +29,12 @@ const props = defineProps<{
 
 /* ========== Lifecycle ========== */
 onMounted(async () => {
-  console.log('eorgiheorg');
-  console.log(props.userId, props.limit);
   if (props.userId) store.userId = props.userId;
   await store.fetchOrders({
+    page: 1,
     userId: props.userId,
     limit: props.limit,
   });
-  console.log(store.orders);
 });
 
 watch(
@@ -211,8 +209,8 @@ watch(
       :currentPage="store.currentPage"
       :totalPages="store.totalPages"
       :totalItems="store.totalOrders"
-      :limit="store.ORDER_LIMIT"
-      @changePage="(page) => store.fetchOrders({ page })"
+      :limit="store.limits"
+      @changePage="(page) => store.fetchOrders({ page, limit: limit })"
     />
   </div>
 </template>

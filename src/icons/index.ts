@@ -57,6 +57,7 @@ import OpenSidebarIcon from './OpenSidebarIcon.vue';
 import CloseSidebarIcon from './CloseSidebarIcon.vue';
 import DotsIcons from './DotsIcons.vue';
 import CategoriesIcon from './CategoriesIcon.vue';
+import ReturningCustomersIcon from './ReturningCustomersIcon.vue';
 
 export {
   BellIcon,
@@ -118,4 +119,5 @@ export {
   CloseSidebarIcon,
   DotsIcons,
   CategoriesIcon,
+  ReturningCustomersIcon,
 };

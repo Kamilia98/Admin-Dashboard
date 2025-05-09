@@ -23,7 +23,7 @@
                 Country
               </p>
               <p class="text-sm font-medium text-gray-800 dark:text-white/90">
-                Egypt
+                {{ userStore.user.country || 'N/A' }}
               </p>
             </div>
 
@@ -34,7 +34,7 @@
                 City/State
               </p>
               <p class="text-sm font-medium text-gray-800 dark:text-white/90">
-                Ismailiya, Egypt
+                {{ userStore.user.city || 'N/A' }}
               </p>
             </div>
           </div>
@@ -54,7 +54,6 @@
         <div
           class="relative no-scrollbar w-full max-w-[700px] overflow-y-auto rounded-3xl bg-white p-4 lg:p-11 dark:bg-gray-900"
         >
-          <!-- close btn -->
           <button
             @click="isProfileAddressModal = false"
             class="transition-color absolute top-5 right-5 z-999 flex h-11 w-11 items-center justify-center rounded-full bg-gray-100 text-gray-400 hover:bg-gray-200 hover:text-gray-600 dark:bg-gray-700 dark:text-gray-400 dark:hover:bg-white/[0.07] dark:hover:text-gray-300"
@@ -82,7 +81,7 @@
                   </label>
                   <input
                     type="text"
-                    value="Egypt"
+                    v-model="formData.country"
                     class="dark:bg-dark-900 h-11 w-full appearance-none rounded-lg border border-gray-300 bg-transparent bg-none px-4 py-2.5 text-sm text-gray-800 shadow-theme-xs placeholder:text-gray-400 focus:border-brand-300 focus:ring-3 focus:ring-brand-500/10 focus:outline-hidden dark:border-gray-700 dark:bg-gray-900 dark:text-white/90 dark:placeholder:text-white/30 dark:focus:border-brand-800"
                   />
                 </div>
@@ -95,7 +94,7 @@
                   </label>
                   <input
                     type="text"
-                    value="Ismailiya, Egypt"
+                    v-model="formData.city"
                     class="dark:bg-dark-900 h-11 w-full appearance-none rounded-lg border border-gray-300 bg-transparent bg-none px-4 py-2.5 text-sm text-gray-800 shadow-theme-xs placeholder:text-gray-400 focus:border-brand-300 focus:ring-3 focus:ring-brand-500/10 focus:outline-hidden dark:border-gray-700 dark:bg-gray-900 dark:text-white/90 dark:placeholder:text-white/30 dark:focus:border-brand-800"
                   />
                 </div>
@@ -125,17 +124,39 @@
 </template>
 
 <script setup lang="ts">
-import { ref } from 'vue';
+import { ref, watch } from 'vue';
 import Modal from './Modal.vue';
 import { ElIcon } from 'element-plus';
 import { Edit, CloseBold } from '@element-plus/icons-vue';
+import { useUserProfile } from '../../composables/useUserProfile';
+import { useUserStore } from '../../stores/userProfile'; 
+
+const { saveUserProfile } = useUserProfile();
+const userStore = useUserStore(); 
 const isProfileAddressModal = ref(false);
 
-const saveProfile = () => {
-  // Implement save profile logic here
-  console.log('Profile saved');
-  isProfileAddressModal.value = false;
+const formData = ref({
+  country: '',
+  city: '',
+});
+
+watch(() => userStore.user, (newUser) => {
+  formData.value = {
+    country: newUser.country || '',
+    city: newUser.city || '',
+  };
+}, { immediate: true });
+
+const saveProfile = async () => {
+  const success = await saveUserProfile({
+    ...userStore.user,
+    ...formData.value
+  });
+  if (success) {
+    isProfileAddressModal.value = false;
+  }
 };
+
 </script>
 
 <style></style>

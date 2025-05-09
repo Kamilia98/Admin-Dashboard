@@ -15,12 +15,14 @@ export const useAuth = () => {
   const isAuthenticated = computed(() => !!token.value);
 
   const initAuth = () => {
+    // console.log('initAuth called')
     const savedToken = getToken();
     if (savedToken) {
       token.value = savedToken;
       axios.defaults.headers.common['Authorization'] = `Bearer ${savedToken}`;
       rememberMe.value = localStorage.getItem('rememberMe') === 'true';
     }
+    // console.log('Token in initAuth:', token.value)
   };
 
   const getToken = () => {
@@ -71,9 +73,7 @@ export const useAuth = () => {
 
   const logout = async () => {
     try {
-      await axios.post(`${API_URL}/logout`, null, {
-        headers: { Authorization: `Bearer ${token.value}` },
-      });
+      await axios.get(`${API_URL}/logout`);
     } catch (err) {
       console.error('Logout error:', err);
     } finally {

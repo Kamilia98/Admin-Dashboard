@@ -75,7 +75,7 @@ export const useOrdersStore = defineStore('orders', () => {
   };
 
   const fetchOrders = async ({
-    page = 1,
+    page = currentPage.value,
     limit = limits.value,
     sortByParam = sortBy.value,
     userId: paramUserId,
@@ -99,6 +99,7 @@ export const useOrdersStore = defineStore('orders', () => {
         minAmount: minAmount.value,
         maxAmount: maxAmount.value,
       };
+      console.log(params);
 
       if (initial.value) {
         limits.value = limit;

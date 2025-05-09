@@ -15,8 +15,7 @@ html {
 }
 
 .el-button--primary {
-  --el-button-bg-color: var(--color-brand-500) !important;
-  background-color: var(--color-brand-500) !important;
+  background-color: var(--color-brand-500);
 }
 
 html.dark .el-message-box__content {

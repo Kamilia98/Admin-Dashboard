@@ -122,8 +122,8 @@ export const useOrdersStore = defineStore('orders', () => {
 
       orders.value = data.orders;
       console.log(orders.value, data);
-      totalPages.value = Math.ceil(data.totalOrders / (limits.value || 1));
-      currentPage.value = page;
+      totalPages.value = data.totalPages;
+      currentPage.value = data.currentPage;
     } catch (err) {
       console.error('[Fetch Orders Error]:', err);
       error.value = err instanceof Error ? err.message : String(err);

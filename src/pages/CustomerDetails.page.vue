@@ -3,12 +3,13 @@ import { CircleCheckFilled, User } from '@element-plus/icons-vue';
 import { ElIcon } from 'element-plus';
 import Pagination from '../components/common/Pagination.vue';
 import OrderManager from '../components/orders/OrderManager.vue';
-import { computed, onMounted, ref } from 'vue';
+import { onMounted, ref, watch } from 'vue';
 import { useRoute } from 'vue-router';
 import { useOrdersStore } from '../stores/orderStore';
 import { ElCard } from 'element-plus';
 import PurchaseChart from '../components/customers/PurchaseChart.vue';
 import { useCustomerStore } from '../stores/customerStore';
+import { storeToRefs } from 'pinia';
 
 interface User {
   username: string;
@@ -77,23 +78,40 @@ interface User {
 //     loading.value = false;
 //   }
 // };
+const currentPage = ref(1);
+const limit = ref(2);
 const route = useRoute();
 const orderStore = useOrdersStore();
 const customerStore = useCustomerStore();
-const { customer, favourites } = customerStore;
-console.log(customer);
+const { favourites } = storeToRefs(customerStore);
 const user = ref<User | null>(null);
-const totalAmount = computed(() => orderStore.totalAmount);
-const averageAmount = computed(() => orderStore.averageAmount);
-
-const totalOrdersWithUser = computed(() => orderStore.totalOrdersWithUser);
-console.log(totalOrdersWithUser.value);
+const { userOrders, totalAmountOrders, averageOrdersValue, orders } =
+  storeToRefs(orderStore);
 
 onMounted(async () => {
   const fetchedUser = await customerStore.fetchCustomer(
     route.params.userId as string,
   );
   user.value = fetchedUser || null;
+  orderStore.fetchOrders({
+    page: currentPage.value,
+    limit: limit.value,
+    userId: route.params.userId as string,
+  });
+});
+watch(user, (newUser) => {
+  user.value = newUser;
+  console.log(user.value);
+});
+function handlePageChange(page: number) {
+  currentPage.value = page;
+}
+watch(currentPage, (newPage) => {
+  orderStore.fetchOrders({
+    page: newPage,
+    limit: limit.value,
+    userId: route.params.userId as string,
+  });
 });
 </script>
 <template>
@@ -196,9 +214,11 @@ onMounted(async () => {
               shadow="hover"
               class="rounded-2xl border custom-border p-6 text-center shadow"
             >
-              <h4 class="text-sm text-gray-500 dark:text-white">Total Order</h4>
+              <h4 class="text-sm text-gray-500 dark:text-white">
+                Total Orders
+              </h4>
               <div class="mt-2 text-3xl font-bold dark:text-white">
-                {{ totalOrdersWithUser }}
+                {{ userOrders }}
               </div>
             </ElCard>
             <ElCard
@@ -209,7 +229,7 @@ onMounted(async () => {
                 Total Amount
               </h4>
               <div class="mt-2 text-3xl font-bold dark:text-white">
-                {{ totalAmount.toFixed(2) }}
+                {{ totalAmountOrders.toFixed(2) }}
               </div>
             </ElCard>
             <ElCard
@@ -220,7 +240,7 @@ onMounted(async () => {
                 Average Order Value
               </h4>
               <div class="mt-2 text-3xl font-bold dark:text-white">
-                {{ averageAmount.toFixed(2) }}
+                {{ averageOrdersValue.toFixed(2) }}
               </div>
             </ElCard>
           </div>
@@ -228,7 +248,7 @@ onMounted(async () => {
           <!-- Purchase Chart -->
           <PurchaseChart
             :orders="
-              orderStore.orders.map((order) => ({
+              orders.map((order) => ({
                 ...order,
                 totalAmount: parseFloat(order.totalAmount),
               }))
@@ -243,9 +263,9 @@ onMounted(async () => {
       class="flex w-full flex-col gap-4 rounded-xl border custom-border bg-white p-6 shadow"
     >
       <OrderManager
+        v-if="user?._id"
         :userId="user?._id"
         :limit="2"
-        :currentPage="orderStore.currentPage"
         class="w-full"
       />
     </ElCard>
@@ -253,11 +273,11 @@ onMounted(async () => {
     <!-- Pagination -->
     <Pagination
       title="Order Pagination"
-      :currentPage="orderStore.currentPage"
-      :totalPages="Math.ceil(orderStore.totalPages / 2)"
-      :totalItems="orderStore.totalOrdersWithUser"
+      :currentPage="currentPage"
+      :totalPages="Math.ceil(userOrders / limit)"
+      :totalItems="userOrders"
       :limit="2"
-      @changePage="orderStore.fetchOrders"
+      @changePage="handlePageChange"
     />
   </div>
 </template>

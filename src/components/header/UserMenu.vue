@@ -6,12 +6,22 @@
       :disabled="isLoading"
     >
       <span class="mr-3 h-8 w-8 overflow-hidden rounded-full">
-        <img
-          v-if="!isLoading"
-          :src="user.thumbnail"
-          :alt="user.fullName"
-          class="h-full w-full object-cover"
-        />
+        <template v-if="!isLoading">
+          <img
+            v-if="userStore.user.thumbnail"
+            :src="userStore.user.thumbnail"
+            :alt="userStore.user.fullName"
+            class="h-full w-full object-cover"
+          />
+          <div
+            v-else
+            class="flex h-full w-full items-center justify-center bg-gray-100 dark:bg-gray-800"
+          >
+            <span class="text-lg text-gray-500 dark:text-gray-400">
+              {{ userStore.user.fullName?.charAt(0)?.toUpperCase() }}
+            </span>
+          </div>
+        </template>
         <div
           v-else
           class="h-full w-full animate-pulse bg-gray-200 dark:bg-gray-700"
@@ -19,7 +29,7 @@
       </span>
 
       <span v-if="!isLoading" class="mr-1 block text-theme-sm font-medium">{{
-        user.fname
+        userStore.user.fname
       }}</span>
       <div
         v-else
@@ -29,7 +39,6 @@
       <ChevronDownIcon :class="{ 'rotate-180': dropdownOpen }" />
     </button>
 
-    <!-- Dropdown Start -->
     <div
       v-if="dropdownOpen"
       class="absolute right-0 mt-[17px] flex w-[260px] flex-col rounded-2xl border border-gray-200 bg-white p-3 shadow-theme-lg dark:border-gray-800 dark:bg-gray-dark"
@@ -40,27 +49,38 @@
         @click="closeDropdown"
       >
         <div class="h-12 w-12 overflow-hidden rounded-full">
-          <img
-            v-if="!isLoading"
-            :src="user.thumbnail"
-            :alt="user.fullName"
-            class="h-full w-full object-cover"
-          />
+          <template v-if="!isLoading">
+            <img
+              v-if="userStore.user.thumbnail"
+              :src="userStore.user.thumbnail"
+              :alt="userStore.user.fullName"
+              class="h-full w-full object-cover"
+            />
+            <div
+              v-else
+              class="flex h-full w-full items-center justify-center bg-gray-100 dark:bg-gray-800"
+            >
+              <span class="text-2xl text-gray-500 dark:text-gray-400">
+                {{ capitalize(userStore.user.fullName?.charAt(0)) }}
+              </span>
+            </div>
+          </template>
           <div
             v-else
             class="h-full w-full animate-pulse bg-gray-200 dark:bg-gray-700"
           ></div>
         </div>
+
         <div>
           <span
             class="block text-theme-sm font-medium text-gray-700 dark:text-gray-400"
           >
-            {{ user.fullName }}
+            {{ capitalize(userStore.user.fullName) }}
           </span>
           <span
             class="mt-0.5 block text-theme-xs text-gray-500 dark:text-gray-400"
           >
-            {{ user.email }}
+            {{ userStore.user.email }}
           </span>
         </div>
       </router-link>
@@ -76,82 +96,25 @@
         Sign out
       </router-link>
     </div>
-    <!-- Dropdown End -->
-  </div>
+    </div>
 </template>
 
 <script setup lang="ts">
 import { ChevronDownIcon, LogoutIcon } from '../../icons';
-import { RouterLink, useRouter } from 'vue-router';
-import { ref, onMounted, onUnmounted } from 'vue';
+import { useRouter } from 'vue-router';
+import { ref, onMounted, onUnmounted, capitalize} from 'vue';
 import { useAuth } from '../../composables/useAuth';
-import axios from 'axios';
-import { ElMessage } from 'element-plus';
+import { useUserStore } from '../../stores/userProfile'; 
+import { useUserProfile } from '../../composables/useUserProfile'; 
 
 const router = useRouter();
-const { logout } = useAuth();
+const { logout} = useAuth();
+const userStore = useUserStore(); 
+const isLoading = ref(false); 
+const { fetchUserProfile } = useUserProfile();
 
 const dropdownOpen = ref(false);
 const dropdownRef = ref<HTMLElement | null>(null);
-const isLoading = ref(false);
-const user = ref({
-  fname: '',
-  fullName: '',
-  email: '',
-  thumbnail: '',
-});
-
-const fetchUserProfile = async () => {
-  try {
-    isLoading.value = true;
-    const token =
-      localStorage.getItem('token') || sessionStorage.getItem('token');
-
-    if (!token) {
-      throw new Error('No authentication token found');
-    }
-
-    const response = await axios.get('http://localhost:5000/users/profile', {
-      headers: {
-        Authorization: `Bearer ${token}`,
-        'Content-Type': 'application/json',
-      },
-    });
-
-    if (response.data.status === 'success') {
-      const userData = response.data.data.user;
-      user.value = {
-        fname: userData.username.split(' ')[0],
-        fullName: userData.username,
-        email: userData.email,
-        thumbnail: userData.thumbnail || '',
-      };
-    }
-  } catch (error: any) {
-    console.error('Error fetching user profile:', error);
-
-    if (error.response?.status === 401) {
-      ElMessage({
-        message: 'Session expired. Please login again.',
-        type: 'error',
-        duration: 5000,
-        showClose: true,
-      });
-      logout();
-      router.push({ name: 'login' });
-      return;
-    }
-
-    ElMessage({
-      message: 'Failed to load user profile. Please try again.',
-      type: 'error',
-      duration: 5000,
-      showClose: true,
-    });
-  } finally {
-    isLoading.value = false;
-  }
-};
 
 const toggleDropdown = () => {
   dropdownOpen.value = !dropdownOpen.value;

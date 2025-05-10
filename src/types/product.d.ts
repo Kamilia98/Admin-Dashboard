@@ -13,7 +13,7 @@ interface Color {
   sku: string;
 }
 
-interface Product {
+export interface Product {
   _id?: string;
   name: string;
   subtitle: string;

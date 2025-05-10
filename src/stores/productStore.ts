@@ -24,6 +24,10 @@ export const useProductStore = defineStore('productStore', () => {
   const minPrice = ref<number | null>(null);
   const maxPrice = ref<number | null>(null);
 
+  const AnaylticsTotalProducts = ref(0);
+  const lowStockCount = ref(0);
+  const bestSellingProductName = ref('');
+
   // Actions
   const getAllProducts = async (page = currentPage.value) => {
     loading.value = true;
@@ -98,6 +102,7 @@ export const useProductStore = defineStore('productStore', () => {
       loading.value = false;
     }
   };
+
   const updateProduct = async (
     id: string,
     updatedProduct: Partial<Product>,
@@ -118,6 +123,20 @@ export const useProductStore = defineStore('productStore', () => {
     }
   };
 
+  const getProductsAnalytics = async () => {
+    try {
+      const { data } = await productService.fetchProductAnalytics();
+
+      AnaylticsTotalProducts.value = data.data.totalProducts;
+      lowStockCount.value = data.data.lowStockCount;
+      bestSellingProductName.value = data.data.bestSellingProduct.name;
+    } catch (err) {
+      error.value =
+        (err instanceof Error ? err.message : 'Unknown error') ||
+        'Failed to get anayltics ';
+    }
+  };
+
   return {
     products,
     totalProducts,
@@ -131,8 +150,13 @@ export const useProductStore = defineStore('productStore', () => {
     selectedCategories,
     minPrice,
     maxPrice,
+
+    AnaylticsTotalProducts,
+    lowStockCount,
+    bestSellingProductName,
     getAllProducts,
     getProductById,
+    getProductsAnalytics,
     deleteProductById,
     addProduct,
     updateProduct,

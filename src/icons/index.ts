@@ -63,6 +63,7 @@ import AverageIcon from './AverageIcon.vue';
 import ArrowUpIcon from './ArrowUpIcon.vue';
 import ArrowDownIcon from './ArrowDownIcon.vue';
 
+import LowStockIcon from './LowStockIcon.vue';
 export {
   BellIcon,
   BarChartIcon,
@@ -127,4 +128,5 @@ export {
   AverageIcon,
   ArrowUpIcon,
   ArrowDownIcon,
+  LowStockIcon,
 };

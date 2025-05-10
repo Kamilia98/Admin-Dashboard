@@ -96,21 +96,21 @@
         Sign out
       </router-link>
     </div>
-    </div>
+  </div>
 </template>
 
 <script setup lang="ts">
 import { ChevronDownIcon, LogoutIcon } from '../../icons';
 import { useRouter } from 'vue-router';
-import { ref, onMounted, onUnmounted, capitalize} from 'vue';
-import { useAuth } from '../../composables/useAuth';
-import { useUserStore } from '../../stores/userProfile'; 
-import { useUserProfile } from '../../composables/useUserProfile'; 
+import { ref, onMounted, onUnmounted, capitalize } from 'vue';
+import { useUserStore } from '../../stores/userProfile';
+import { useUserProfile } from '../../composables/useUserProfile';
+import { useAuthStore } from '../../stores/authStore';
 
 const router = useRouter();
-const { logout} = useAuth();
-const userStore = useUserStore(); 
-const isLoading = ref(false); 
+const { logout } = useAuthStore();
+const userStore = useUserStore();
+const isLoading = ref(false);
 const { fetchUserProfile } = useUserProfile();
 
 const dropdownOpen = ref(false);

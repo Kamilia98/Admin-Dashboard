@@ -4,12 +4,15 @@ import './style.css';
 import App from './App.vue';
 import { router } from './router';
 import VueApexCharts from 'vue3-apexcharts';
-import { useAuth } from './composables/useAuth';
 import 'jsvectormap/dist/jsvectormap.css';
+import { useAuthStore } from './stores/authStore';
 
 const app = createApp(App);
 
-const { initAuth } = useAuth();
-initAuth();
+app.use(router);
 app.use(createPinia());
-app.use(router).use(VueApexCharts).mount('#app');
+
+const store = useAuthStore();
+store.initAuth();
+
+app.use(VueApexCharts).mount('#app');

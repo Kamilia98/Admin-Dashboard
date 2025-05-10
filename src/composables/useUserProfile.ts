@@ -1,9 +1,9 @@
 import { ref } from 'vue';
 import axios from 'axios';
 import { ElMessage } from 'element-plus';
-import { useAuth } from './useAuth';
 import { useRouter } from 'vue-router';
-import { useUserStore } from '../stores/userProfile'; 
+import { useUserStore } from '../stores/userProfile';
+import { useAuthStore } from '../stores/authStore';
 
 export interface UserProfile {
   fname: string;
@@ -20,7 +20,7 @@ export interface UserProfile {
 
 export function useUserProfile() {
   const router = useRouter();
-  const { logout } = useAuth();
+  const { logout } = useAuthStore();
   const error = ref<string | any>(null);
   const isLoading = ref(false);
   const user = ref<UserProfile>({
@@ -36,7 +36,7 @@ export function useUserProfile() {
     city: '',
   });
 
-  const userStore = useUserStore(); 
+  const userStore = useUserStore();
 
   const fetchUserProfile = async () => {
     isLoading.value = true;
@@ -87,8 +87,7 @@ export function useUserProfile() {
         router.push({ name: 'login' });
         return;
       }
-    }
-    finally {
+    } finally {
       // console.log('before>>', isLoading.value);
       isLoading.value = false;
       // console.log('end>>', isLoading.value);
@@ -99,7 +98,8 @@ export function useUserProfile() {
     isLoading.value = true;
     error.value = null;
     try {
-      const token = localStorage.getItem('token') || sessionStorage.getItem('token');
+      const token =
+        localStorage.getItem('token') || sessionStorage.getItem('token');
       const response = await axios.put(
         'http://localhost:5000/users/profile',
         profileData,
@@ -108,7 +108,7 @@ export function useUserProfile() {
             Authorization: `Bearer ${token}`,
             'Content-Type': 'application/json',
           },
-        }
+        },
       );
       if (response.data.status === 'success') {
         await fetchUserProfile();
@@ -132,7 +132,8 @@ export function useUserProfile() {
     isLoading.value = true;
     error.value = null;
     try {
-      const token = localStorage.getItem('token') || sessionStorage.getItem('token');
+      const token =
+        localStorage.getItem('token') || sessionStorage.getItem('token');
       const response = await axios.put(
         'http://localhost:5000/users//profile/change-img',
         { thumbnail: imageUrl },
@@ -141,20 +142,22 @@ export function useUserProfile() {
             Authorization: `Bearer ${token}`,
             'Content-Type': 'application/json',
           },
-        }
+        },
       );
       if (response.data.status === 'success') {
         user.value.thumbnail = imageUrl;
-        userStore.setThumbnail(imageUrl); 
+        userStore.setThumbnail(imageUrl);
         ElMessage.success('Profile picture updated successfully');
         return true;
       } else {
-        error.value = response.data.message || 'Failed to update profile picture';
+        error.value =
+          response.data.message || 'Failed to update profile picture';
         ElMessage.error(error.value);
         return false;
       }
     } catch (err: any) {
-      error.value = err.response?.data?.message || 'Error updating profile picture';
+      error.value =
+        err.response?.data?.message || 'Error updating profile picture';
       ElMessage.error(error.value);
       return false;
     } finally {

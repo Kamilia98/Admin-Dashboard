@@ -1,10 +1,10 @@
 <script setup lang="ts">
 import { ref } from 'vue';
-import { useAuth } from '../composables/useAuth';
 import { ElIcon, ElCheckbox } from 'element-plus';
 import { Hide, Loading, View } from '@element-plus/icons-vue';
+import { useAuthStore } from '../stores/authStore';
 
-const { login, error: authError, isLoading } = useAuth();
+const { login, error: authError, isLoading } = useAuthStore();
 const email = ref('');
 const password = ref('');
 const showPassword = ref(false);
@@ -56,7 +56,7 @@ const handleLogin = async () => {
     await login(email.value, password.value, keepLoggedIn.value);
   } catch (err) {
     console.error('Login failed:', err);
-    errors.value.general = authError.value || 'An error occurred during login';
+    errors.value.general = authError || 'An error occurred during login';
   }
 };
 </script>

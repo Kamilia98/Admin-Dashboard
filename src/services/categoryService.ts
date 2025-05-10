@@ -1,13 +1,12 @@
 // src/services/categoryService.ts
 import axios from 'axios';
-import { useAuth } from '../composables/useAuth';
+import { useAuthStore } from '../stores/authStore';
 
 const API_BASE = 'http://localhost:5000/categories';
 
 // Utility to get headers with the current token
 const getAuthHeaders = () => {
-  const { getToken } = useAuth();
-  const token = getToken();
+  const { token } = useAuthStore();
   return {
     Authorization: `Bearer ${token}`,
     'Content-Type': 'application/json',

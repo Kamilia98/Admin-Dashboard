@@ -163,7 +163,6 @@ const computeGrowth = (data: number[]): number[] => {
     const change = prev !== 0 ? ((current - prev) / prev) * 100 : 0;
     growth.push(Number(change.toFixed(2)));
   }
-  console.log(growth);
   return growth;
 };
 

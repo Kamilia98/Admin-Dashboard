@@ -1,12 +1,11 @@
 import axios from 'axios';
 import type { User } from '../types/user';
-import { useAuth } from '../composables/useAuth';
+import { useAuthStore } from '../stores/authStore';
 
 const API_BASE = 'http://localhost:5000/users';
 
 const getAuthHeaders = () => {
-  const { getToken } = useAuth();
-  const token = getToken();
+  const { token } = useAuthStore();
   return {
     Authorization: `Bearer ${token}`,
     'Content-Type': 'application/json',

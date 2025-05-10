@@ -66,7 +66,7 @@ export function useUserProfile() {
           fullName: userData.username,
           email: userData.email || '',
           thumbnail: userData.thumbnail || '',
-          role: userData.role || 'User',
+          role: userData.role || '',
           phone: userData.phone || '',
           bio: userData.bio,
           country: userData.country,

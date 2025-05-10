@@ -1,6 +1,16 @@
 import { defineStore } from 'pinia';
 import { ref, computed } from 'vue';
+import axios from 'axios';
+import { ElMessage } from 'element-plus';
 
+interface AdminUser {
+  _id: string;
+  username: string;
+  email: string;
+  role: string;
+  status: string;
+  createdAt?: string;
+}
 export interface StoreConfig {
   storeName: string;
   defaultCurrency: string;
@@ -12,19 +22,19 @@ export interface StoreConfig {
 }
 
 export interface ShippingMethod {
-  id: string;
+  id?: string;
   name: string;
   cost: number;
   isActive: boolean;
-  deletedAt?: Date;
+  deletedAt?: Date | null;
 }
 
 export interface UserRole {
-  id: string;
+  id?: string;
   name: string;
   permissions: string[];
   isActive: boolean;
-  deletedAt?: Date;
+  deletedAt?: Date | null;
 }
 
 export interface Currency {
@@ -34,7 +44,7 @@ export interface Currency {
   exchangeRate: number;
   isDefault: boolean;
   isActive: boolean;
-  deletedAt?: Date;
+  deletedAt?: Date | null;
 }
 
 export interface Language {
@@ -42,7 +52,7 @@ export interface Language {
   name: string;
   isDefault: boolean;
   isActive: boolean;
-  deletedAt?: Date;
+  deletedAt?: Date | null;
 }
 
 export const useStoreConfigStore = defineStore('storeConfig', () => {
@@ -56,6 +66,7 @@ export const useStoreConfigStore = defineStore('storeConfig', () => {
     supportedLanguages: [],
   });
 
+  const adminUsers = ref<AdminUser[]>([]);
   const isLoading = ref(false);
   const error = ref<string | null>(null);
 
@@ -117,32 +128,6 @@ export const useStoreConfigStore = defineStore('storeConfig', () => {
     const method = storeConfig.value.shippingMethods.find((m) => m.id === id);
     if (method) {
       method.deletedAt = new Date();
-    }
-  };
-
-  const addUserRole = (role: Omit<UserRole, 'id'>) => {
-    const newRole: UserRole = {
-      ...role,
-      id: crypto.randomUUID(),
-      isActive: true,
-    };
-    storeConfig.value.userRoles.push(newRole);
-  };
-
-  const updateUserRole = (id: string, updates: Partial<UserRole>) => {
-    const index = storeConfig.value.userRoles.findIndex((r) => r.id === id);
-    if (index !== -1) {
-      storeConfig.value.userRoles[index] = {
-        ...storeConfig.value.userRoles[index],
-        ...updates,
-      };
-    }
-  };
-
-  const softDeleteUserRole = (id: string) => {
-    const role = storeConfig.value.userRoles.find((r) => r.id === id);
-    if (role) {
-      role.deletedAt = new Date();
     }
   };
 
@@ -209,8 +194,26 @@ export const useStoreConfigStore = defineStore('storeConfig', () => {
   const saveStoreConfig = async () => {
     isLoading.value = true;
     error.value = null;
-    try {     
-      await new Promise((resolve) => setTimeout(resolve, 1000));
+    try {
+      const token =
+        localStorage.getItem('token') || sessionStorage.getItem('token');
+      const response = await axios.put(
+        'http://localhost:5000/settings',
+        storeConfig.value,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+            'Content-Type': 'application/json',
+          },
+        },
+      );
+      if (response.data.status === 'success') {
+        ElMessage.success('Store configuration saved successfully!');
+        console.log('Store configuration saved successfully!');
+      } else {
+        error.value =
+          response.data.message || 'Failed to save store configuration';
+      }
     } catch (err) {
       error.value =
         err instanceof Error
@@ -225,79 +228,146 @@ export const useStoreConfigStore = defineStore('storeConfig', () => {
     isLoading.value = true;
     error.value = null;
     try {
-      // TODO: Implement API call to load store configuration
-      // For now, we'll just simulate loading with some default data
-      await new Promise((resolve) => setTimeout(resolve, 1000));
-      storeConfig.value = {
-        storeName: 'My Store',
-        defaultCurrency: 'USD',
-        defaultLanguage: 'en',
-        shippingMethods: [
-          {
-            id: '1',
-            name: 'Standard Shipping',
-            cost: 5.99,
-            isActive: true,
-          },
-          {
-            id: '2',
-            name: 'Express Shipping',
-            cost: 12.99,
-            isActive: true,
-          },
-        ],
-        userRoles: [
-          {
-            id: '1',
-            name: 'Owner',
-            permissions: ['all'],
-            isActive: true,
-          },
-          {
-            id: '2',
-            name: 'Admin',
-            permissions: ['manage_products', 'manage_orders'],
-            isActive: true,
-          },
-        ],
-        supportedCurrencies: [
-          {
-            code: 'USD',
-            symbol: '$',
-            name: 'US Dollar',
-            exchangeRate: 1,
-            isDefault: true,
-            isActive: true,
-          },
-          {
-            code: 'EGP',
-            symbol: '£',
-            name: 'Egyptian Pound',
-            exchangeRate: 50.00,
-            isDefault: false,
-            isActive: true,
-          },
-        ],
-        supportedLanguages: [
-          {
-            code: 'en',
-            name: 'English',
-            isDefault: true,
-            isActive: true,
-          },
-          {
-            code: 'ar',
-            name: 'Arabic',
-            isDefault: false,
-            isActive: true,
-          },
-        ],
-      };
+      const token =
+        localStorage.getItem('token') || sessionStorage.getItem('token');
+      const response = await axios.get('http://localhost:5000/settings', {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+
+      storeConfig.value = response.data.data;
     } catch (err) {
       error.value =
         err instanceof Error
           ? err.message
           : 'Failed to load store configuration';
+    } finally {
+      isLoading.value = false;
+    }
+  };
+
+  // ***********************************************/
+  //         Admin User Actions
+  // ***********************************************/
+  const inviteAdminUser = async (admin: { email: string; role: string }) => {
+    isLoading.value = true;
+    error.value = null;
+    try {
+      const token =
+        localStorage.getItem('token') || sessionStorage.getItem('token');
+      const response = await axios.post(
+        'http://localhost:5000/auth/admin/invite', 
+        admin,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+            'Content-Type': 'application/json',
+          },
+        },
+      );
+      if (response.data.status === 'success') {
+        ElMessage.success('Invitation sent successfully!');
+
+        await loadAdminUsers();
+      } else {
+        error.value = response.data.message || 'Failed to send invitation.';
+        ElMessage.error('An unknown error occurred');
+      }
+    } catch (err: any) {
+      error.value =
+        err instanceof Error ? err.message : 'Failed to send invitation.';
+      ElMessage.error('Failed to send invitation.');
+    } finally {
+      isLoading.value = false;
+    }
+  };
+  const loadAdminUsers = async () => {
+    isLoading.value = true;
+    error.value = null;
+    try {
+      const token =
+        localStorage.getItem('token') || sessionStorage.getItem('token');
+      const response = await axios.get(
+        'http://localhost:5000/users/admin/users',
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        },
+      );
+      if (response.data.status === 'success') {
+        adminUsers.value = response.data.data;
+      } else {
+        error.value = response.data.message || 'Failed to load admin users.';
+        ElMessage.error(error.value || 'An unknown error occurred');
+      }
+    } catch ( err: any) {
+      error.value =
+        err instanceof Error ? err.message : 'Failed to load admin users.';
+      ElMessage.error(error.value);
+    } finally {
+      isLoading.value = false;
+    }
+  };
+
+  const updateAdminUserRole = async (adminId: string, newRole: string) => {
+    isLoading.value = true;
+    error.value = null;
+    try {
+      const token =
+        localStorage.getItem('token') || sessionStorage.getItem('token');
+      const response = await axios.patch(
+        `http://localhost:5000/users/admin/users/${adminId}`,
+        { role: newRole },
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+            'Content-Type': 'application/json',
+          },
+        },
+      );
+      if (response.data.status === 'success') {
+        ElMessage.success('Admin role updated successfully!');
+        await loadAdminUsers();
+      } else {
+        error.value = response.data.message || 'Failed to update admin role.';
+        ElMessage.error(error.value || 'An unknown error occurred');
+      }
+    } catch (err: any) {
+      error.value =
+        err instanceof Error ? err.message : 'Failed to update admin role.';
+      ElMessage.error(error.value);
+    } finally {
+      isLoading.value = false;
+    }
+  };
+
+  const removeAdminUser = async (adminId: string) => {
+    isLoading.value = true;
+    error.value = null;
+    try {
+      const token =
+        localStorage.getItem('token') || sessionStorage.getItem('token');
+      const response = await axios.delete(
+        `http://localhost:5000/users/admin/users/${adminId}`,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        },
+      );
+      if (response.data.status === 'success') {
+        ElMessage.success('Admin user removed successfully!');
+        await loadAdminUsers(); // Reload the list
+      } else {
+        error.value = response.data.message || 'Failed to remove admin user.';
+        ElMessage.error(error.value || 'An unknown error occurred');
+      }
+    } catch (err : any) {
+      error.value =
+        err instanceof Error ? err.message : 'Failed to remove admin user.';
+      ElMessage.error(error.value);
     } finally {
       isLoading.value = false;
     }
@@ -315,16 +385,22 @@ export const useStoreConfigStore = defineStore('storeConfig', () => {
     addShippingMethod,
     updateShippingMethod,
     softDeleteShippingMethod,
-    addUserRole,
-    updateUserRole,
-    softDeleteUserRole,
     addCurrency,
     updateCurrency,
     softDeleteCurrency,
     addLanguage,
     updateLanguage,
     softDeleteLanguage,
+
+    // handle store config
     saveStoreConfig,
     loadStoreConfig,
+
+    // handle admin users
+    adminUsers,
+    inviteAdminUser,
+    updateAdminUserRole,
+    removeAdminUser,
+    loadAdminUsers,
   };
 });

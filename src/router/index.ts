@@ -35,6 +35,7 @@ const routes = [
   {
     path: '/',
     redirect: '/dashboard',
+    
   },
   {
     path: '/orders',

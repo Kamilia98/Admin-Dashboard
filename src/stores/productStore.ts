@@ -9,7 +9,6 @@ import { ref } from 'vue';
 
 export const useProductStore = defineStore('productStore', () => {
   // States
-  // States
   const products = ref<productVariant[]>([]);
   const totalProducts = ref(0);
   const product = ref<Product | null>(null);

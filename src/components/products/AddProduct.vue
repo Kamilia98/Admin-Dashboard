@@ -12,10 +12,10 @@ import {
   ElSteps,
   ElStep,
 } from 'element-plus';
-import { useProductStore } from '../stores/productStore';
-import { useCategoryStore } from '../stores/categoryStore';
-import Button from './common/Button.vue';
-import PlusIcon from '../icons/PlusIcon.vue';
+import { useProductStore } from '../../stores/productStore';
+import { useCategoryStore } from '../../stores/categoryStore';
+import Button from '../common/Button.vue';
+import PlusIcon from '../../icons/PlusIcon.vue';
 import type { FormRules } from 'element-plus';
 
 const router = useRouter();

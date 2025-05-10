@@ -7,15 +7,11 @@ import type { AnalyticsData } from '../../types/analytics-data';
 import axios from 'axios';
 
 const analyticsData = ref<AnalyticsData>({
-  totalProducts: 0,
   totalCustomers: 0,
   totalOrders: 0,
-  totalSales: 0,
   trends: {
     orders: { trend: '', percentageChange: '' },
     customers: { trend: '', percentageChange: '' },
-    sales: { trend: '', percentageChange: '' },
-    products: { trend: '', percentageChange: '' },
   },
 });
 

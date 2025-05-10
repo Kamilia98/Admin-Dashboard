@@ -5,6 +5,7 @@ import MonthlySale from '../components/dashboard/MonthlySale.vue';
 import StatisticsChart from '../components/dashboard/StatisticsChart.vue';
 import CustomerDemographic from '../components/dashboard/CustomerDemographic.vue';
 import RecentOrders from '../components/dashboard/RecentOrders.vue';
+import Featured from '../components/dashboard/Featured.vue';
 </script>
 
 <template>
@@ -21,11 +22,11 @@ import RecentOrders from '../components/dashboard/RecentOrders.vue';
       <statistics-chart />
     </div>
 
-    <div class="col-span-12 xl:col-span-5">
-      <customer-demographic />
+    <div class="col-span-12">
+      <Featured />
     </div>
 
-    <div class="col-span-12 xl:col-span-7">
+    <div class="col-span-12">
       <recent-orders />
     </div>
   </div>

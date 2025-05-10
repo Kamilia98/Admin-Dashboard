@@ -54,13 +54,7 @@ const routes = [
     component: () => import('../pages/Order.page.vue'),
     meta: { requiresAuth: true, layout: 'admin' },
   },
-  {
-    path: '/customers/:id',
-    name: 'edit-customers',
-    component: () => import('../pages/Customer.page.vue'),
-    // props: true,
-    meta: { requiresAuth: true },
-  },
+
   {
     path: '/customer/:userId',
     name: 'customer-details',

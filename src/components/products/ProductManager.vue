@@ -90,18 +90,9 @@ const selectVariant = (productId: string, index: number) => {
 </script>
 
 <template>
-  <div class="flex flex-col gap-8">
-    <div class="flex justify-end">
-      <Button tag="router-link" :to="{ name: 'add-product' }">
-        <template #icon>
-          <ElIcon><Plus /></ElIcon>
-        </template>
-        Add Product
-      </Button>
-    </div>
-
+  <div class="flex flex-col gap-4">
     <Table
-      caption="All Products"
+      caption="Products"
       :headers="headers"
       :items="productStore.products"
       :loading="productStore.loading"
@@ -259,7 +250,7 @@ const selectVariant = (productId: string, index: number) => {
 
     <!-- Pagination -->
     <Pagination
-      title="Product Pagination"
+      title="products"
       :current-page="productStore.currentPage"
       :total-pages="
         Math.ceil(productStore.totalProducts / productStore.pageSize)

@@ -112,7 +112,7 @@
               tag="router-link"
               :to="{
                 name: 'product-details',
-                params: { id: bestEntities.bestProduct?._id },
+                params: { id: bestEntities.bestProduct?.productId },
               }"
               class="w-full sm:w-auto"
             >

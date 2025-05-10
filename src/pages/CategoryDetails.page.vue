@@ -5,11 +5,11 @@ import Button from '../components/common/Button.vue';
 import { ElIcon } from 'element-plus';
 import { Edit, Delete } from '@element-plus/icons-vue';
 import { BoxCubeIcon, MoneyIcon } from '../icons';
-import Card from '../components/common/Card.vue';
 import { useCategoryStore } from '../stores/categoryStore';
 import type { Category } from '../types/category';
 import ResourceWrapper from '../components/common/ResourceWrapper.vue';
 import EditModal from '../components/categories/EditModal.vue';
+import ProductManager from '../components/products/ProductManager.vue';
 
 const route = useRoute();
 const store = useCategoryStore();
@@ -29,8 +29,10 @@ const fetchCategoryDetails = async (id: string) => {
 <template>
   <ResourceWrapper :loading="store.loading" :error="store.error">
     <template v-if="category">
-      <div class="space-y-8 rounded-lg bg-white dark:bg-white/[0.03]">
-        <div class="p-6">
+      <div class="flex flex-col gap-4">
+        <div
+          class="space-y-8 rounded-xl border custom-border bg-white p-6 dark:bg-white/[0.03]"
+        >
           <div class="flex flex-col gap-6 md:flex-row">
             <div class="md:w-1/3">
               <img
@@ -129,6 +131,11 @@ const fetchCategoryDetails = async (id: string) => {
               </div>
             </div>
           </div>
+        </div>
+        <div
+          class="rounded-xl border custom-border bg-white p-6 dark:bg-white/[0.03]"
+        >
+          <ProductManager :category-id="category._id" />
         </div>
       </div>
     </template>

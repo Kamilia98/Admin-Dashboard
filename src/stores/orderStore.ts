@@ -11,7 +11,7 @@ import {
 import { ElMessage } from 'element-plus';
 
 // --- Constants ---
-const ORDER_LIMIT = 8;
+const ORDER_LIMIT = 10;
 const ORDER_STAGES: OrderStatus[] = [
   OrderStatus.pending,
   OrderStatus.processing,

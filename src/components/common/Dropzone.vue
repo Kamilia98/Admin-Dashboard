@@ -61,7 +61,7 @@ const props = defineProps({
     default: '',
   },
 });
-const emit = defineEmits(['update:modelValue']);
+const emit = defineEmits(['update:modelValue', 'haleem']);
 
 const dropzoneForm = ref(null);
 const dropzoneId = `dropzone-${Math.random().toString(36).substr(2, 9)}`;
@@ -96,8 +96,11 @@ onMounted(() => {
           );
 
           const data = await res.json();
+          console.log('[DropZone---data]', data);
           uploadedImage.value = data.secure_url;
+
           emit('update:modelValue', data.secure_url || props.modelValue);
+          emit('haleem', data);
           this.emit('success', file, data);
           this.emit('complete', file);
         } catch (err) {
@@ -125,7 +128,6 @@ onBeforeUnmount(() => {
     dropzoneInstance.destroy();
   }
 });
-
 
 // Watch for external model changes
 watch(

@@ -7,7 +7,7 @@ interface Image {
 interface Color {
   _id?: string;
   name: string;
-  hex: string;
+  // hex: string;
   images: Image[];
   quantity: number;
   sku: string;
@@ -22,7 +22,7 @@ interface Product {
   sale: number;
   brand: string;
   colors: Color[];
-  categories: { _id: string; name: string }[];
+  categories: string[];
   date?: string;
   additionalInformation: {
     general: {

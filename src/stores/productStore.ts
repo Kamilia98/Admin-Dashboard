@@ -83,17 +83,17 @@ export const useProductStore = defineStore('productStore', () => {
       error.value = 'Failed to delete product.';
     }
   };
-
   const addProduct = async (newProduct: Product) => {
     loading.value = true;
     error.value = null;
     try {
       const response = await productService.addProduct(newProduct);
-      products.value.push(response.data);
-      console.log('[Product added]', response.data);
+      getAllProducts(1);
+      // products.value.push(response.data.data);
+      console.log('[Product added]', response.data.data);
     } catch (err: any) {
       console.error('Add product error:', err);
-      error.value = err.message || 'Failed to add product.';
+      error.value = err.response?.data?.message || 'Failed to add product.';
     } finally {
       loading.value = false;
     }

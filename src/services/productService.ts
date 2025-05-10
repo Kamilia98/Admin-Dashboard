@@ -59,11 +59,10 @@ export const fetchProductById = async (id: string) => {
 export const deleteProduct = (id: string) => {
   return axios.delete(`${BASE_URL}/${id}`);
 };
-
-export const createProduct = (newProduct: Product) => {
-  return axios.post<Product>(`${BASE_URL}`, newProduct);
+export const addProduct = async (newProduct: Product) => {
+  const response = await axios.post(`${BASE_URL}/create`, newProduct);
+  return response.data;
 };
-
 export const updateProduct = (id: string, updatedProduct: Partial<Product>) => {
   return axios.put<Product>(`${BASE_URL}/update/${id}`, updatedProduct);
 };

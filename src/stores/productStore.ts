@@ -89,15 +89,16 @@ export const useProductStore = defineStore('productStore', () => {
     loading.value = true;
     error.value = null;
     try {
-      const { data } = await productService.createProduct(newProduct);
-      products.value.push(data);
+      const response = await productService.addProduct(newProduct);
+      products.value.push(response.data);
+      console.log('[Product added]', response.data);
     } catch (err: any) {
-      error.value = err.message || 'Failed to create product';
+      console.error('Add product error:', err);
+      error.value = err.message || 'Failed to add product.';
     } finally {
       loading.value = false;
     }
   };
-
   const updateProduct = async (
     id: string,
     updatedProduct: Partial<Product>,

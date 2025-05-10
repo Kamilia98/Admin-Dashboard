@@ -90,7 +90,12 @@ const selectVariant = (productId: string, index: number) => {
     </div> -->
     <div class="flex flex-col gap-4">
       <div class="flex justify-end">
-        <Button>
+        <Button
+          tag="router-link"
+          :to="{
+            name: 'add-product',
+          }"
+        >
           <template #icon>
             <el-icon>
               <Plus />
@@ -118,7 +123,7 @@ const selectVariant = (productId: string, index: number) => {
                 class="relative h-6 w-6 rounded-full transition-all duration-200 focus:outline-none"
                 :style="{ backgroundColor: variant.color.hex }"
                 :class="{
-                  'ring-2 ring-blue-500 ring-offset-1':
+                  'ring-offset- ring-2 ring-blue-500':
                     selectedVariantIndex[item._id] === index,
                   'border-2 border-gray-400':
                     selectedVariantIndex[item._id] !== index,

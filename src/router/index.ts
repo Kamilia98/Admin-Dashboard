@@ -93,6 +93,12 @@ const routes = [
     meta: { requiresAuth: true, layout: 'admin' },
   },
   {
+    path: '/add-product',
+    name: 'add-product',
+    component: () => import('../components/AddProduct.vue'),
+    meta: { requiresAuth: true, layout: 'admin' },
+  },
+  {
     path: '/products/:id',
     name: 'product-details',
     component: () => import('../pages/ProductDetails.page.vue'),

@@ -1,11 +1,11 @@
 interface Image {
   public_id: string;
   url: string;
-  _id: string;
+  _id?: string;
 }
 
 interface Color {
-  _id: string;
+  _id?: string;
   name: string;
   hex: string;
   images: Image[];
@@ -14,7 +14,7 @@ interface Color {
 }
 
 interface Product {
-  _id: string;
+  _id?: string;
   name: string;
   subtitle: string;
   description: string;
@@ -23,7 +23,7 @@ interface Product {
   brand: string;
   colors: Color[];
   categories: { _id: string; name: string }[];
-  date: string;
+  date?: string;
   additionalInformation: {
     general: {
       salesPackage: string;

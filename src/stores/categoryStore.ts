@@ -120,8 +120,9 @@ export const useCategoryStore = defineStore('category', () => {
   const getCategories = async (
     page = currentPage.value,
     limit = limits.value,
-  ) =>
-    withLoading(async () => {
+  ) => {
+    try {
+      error.value = null;
       const data = await fetchCategories({
         page,
         limit,
@@ -129,12 +130,17 @@ export const useCategoryStore = defineStore('category', () => {
         sortBy: sortBy.value,
         sortOrder: sortOrder.value,
       });
-      console.log('[category store]');
       currentPage.value = page;
       totalPages.value = data.totalPages;
       totalFilteredCategories.value = data.totalCategories;
       categories.value = data.categories;
-    });
+    } catch (err) {
+      console.error(err);
+      error.value = err instanceof Error ? err.message : String(err);
+    } finally {
+      loading.value = false;
+    }
+  };
 
   const getCategory = async (id: string): Promise<Category | null> =>
     await withLoading(async () => {

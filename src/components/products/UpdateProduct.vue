@@ -16,6 +16,7 @@ import Button from '../common/Button.vue';
 import PlusIcon from '../../icons/PlusIcon.vue';
 import type { FormRules, FormInstance } from 'element-plus';
 import Dropzone from '../common/Dropzone.vue';
+import ResourceWrapper from '../common/ResourceWrapper.vue';
 
 const router = useRouter();
 const route = useRoute();
@@ -340,697 +341,690 @@ onMounted(() => {
 });
 
 // Show loading while fetching product data
-const isReady = computed(() => !isFetching.value);
+// const isReady = computed(() => !isFetching.value);
 </script>
 
 <template>
-  <div v-if="isFetching" class="flex h-96 items-center justify-center">
-    <div class="flex flex-col items-center space-y-4">
-      <svg
-        class="h-12 w-12 animate-spin text-blue-600"
-        xmlns="http://www.w3.org/2000/svg"
-        fill="none"
-        viewBox="0 0 24 24"
-      >
-        <circle
-          class="opacity-25"
-          cx="12"
-          cy="12"
-          r="10"
-          stroke="currentColor"
-          stroke-width="4"
-        ></circle>
-        <path
-          class="opacity-75"
-          fill="currentColor"
-          d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
-        ></path>
-      </svg>
-      <p class="text-lg font-medium text-gray-700">Loading product data...</p>
-    </div>
-  </div>
-
-  <div
-    v-else
-    class="mx-auto max-w-5xl rounded-lg bg-white p-8 shadow-lg dark:bg-white/[0.03]"
-  >
-    <!-- Header with progress indicator -->
-    <div class="mb-10 text-center">
-      <h1 class="mb-2 text-3xl font-bold text-gray-800">Update Product</h1>
-      <p class="mb-6 text-gray-500">
-        Edit your product information to update your catalog
-      </p>
-
-      <!-- Custom Step Progress Bar -->
-      <div class="relative">
-        <div class="mb-2 flex items-center justify-between">
-          <div
-            v-for="(step, index) in steps"
-            :key="index"
-            class="relative z-10 flex flex-col items-center"
-          >
-            <div
-              :class="[
-                'flex h-10 w-10 items-center justify-center rounded-full text-sm font-medium transition-all duration-300',
-                index < activeStep
-                  ? 'bg-green-500 text-white'
-                  : index === activeStep
-                    ? 'bg-blue-600 text-white ring-4 ring-blue-100'
-                    : 'bg-gray-200 text-gray-600',
-              ]"
-            >
-              <span v-if="index < activeStep">✓</span>
-              <span v-else>{{ index + 1 }}</span>
-            </div>
-            <div
-              class="mt-2 text-xs font-medium"
-              :class="{
-                'text-green-600': index < activeStep,
-                'text-blue-600': index === activeStep,
-                'text-gray-500': index > activeStep,
-              }"
-            >
-              {{ step.title }}
-            </div>
-          </div>
-        </div>
-
-        <!-- Connection line -->
-        <div
-          class="absolute top-5 left-0 -z-10 h-1 w-full -translate-y-1/2 transform bg-gray-200"
-        ></div>
-        <div
-          class="absolute top-5 left-0 -z-10 h-1 -translate-y-1/2 transform bg-blue-500 transition-all duration-500"
-          :style="`width: ${(activeStep / (steps.length - 1)) * 100}%`"
-        ></div>
-      </div>
-    </div>
-
-    <!-- Form Content -->
-    <el-form
-      ref="formRef"
-      :model="formData"
-      :rules="rules"
-      label-position="top"
-      class="space-y-8"
-      @submit.prevent
-      hide-required-asterisk
-      :validate-on-rule-change="false"
+  <ResourceWrapper :loading="isFetching">
+    <div
+      class="mx-auto max-w-5xl rounded-lg bg-white p-6 shadow-lg dark:bg-white/[0.03]"
     >
-      <!-- Step 1 - Basic Info -->
-      <div v-if="activeStep === 0" class="animate-fadeIn">
-        <div class="mb-6 rounded-lg bg-blue-50 p-1">
-          <h2 class="px-3 py-2 text-xl font-semibold text-blue-700">
-            Basic Information
-          </h2>
-        </div>
+      <!-- Header with progress indicator -->
+      <div class="mb-10 text-center">
+        <h1 class="mb-2 text-3xl font-bold text-gray-800">Update Product</h1>
+        <p class="mb-6 text-gray-500">
+          Edit your product information to update your catalog
+        </p>
 
-        <div
-          class="space-y-6 rounded-lg border border-gray-200 bg-white p-6 shadow-sm"
-        >
-          <el-form-item label="Product Name" prop="name" data-field="name">
-            <el-input
-              v-model="formData.name"
-              placeholder="Enter product name"
-              class="hover:border-blue-500 focus:border-blue-500"
-            />
-          </el-form-item>
-
-          <el-form-item label="Subtitle" prop="subtitle" data-field="subtitle">
-            <el-input
-              v-model="formData.subtitle"
-              placeholder="Add a brief subtitle"
-              class="hover:border-blue-500 focus:border-blue-500"
-            />
-          </el-form-item>
-
-          <el-form-item
-            label="Description"
-            prop="description"
-            data-field="description"
-          >
-            <el-input
-              v-model="formData.description"
-              type="textarea"
-              :rows="5"
-              placeholder="Describe your product in detail"
-              class="hover:border-blue-500 focus:border-blue-500"
-            />
-          </el-form-item>
-        </div>
-      </div>
-
-      <!-- Step 2 - Pricing & Brand -->
-      <div v-if="activeStep === 1" class="animate-fadeIn">
-        <div class="mb-6 rounded-lg bg-blue-50 p-1">
-          <h2 class="px-3 py-2 text-xl font-semibold text-blue-700">
-            Pricing & Brand
-          </h2>
-        </div>
-
-        <div
-          class="space-y-6 rounded-lg border border-gray-200 bg-white p-6 shadow-sm"
-        >
-          <div class="grid gap-6 md:grid-cols-2">
-            <el-form-item
-              label="Price ($)"
-              prop="price"
-              data-field="price"
-              class="mb-0"
+        <!-- Custom Step Progress Bar -->
+        <div class="relative">
+          <div class="mb-2 flex items-center justify-evenly">
+            <div
+              v-for="(step, index) in steps"
+              :key="index"
+              class="relative z-10 flex flex-col items-center"
             >
-              <div class="relative">
-                <span
-                  class="absolute top-1/2 left-3 -translate-y-1/2 transform text-gray-500"
-                  >$</span
-                >
-                <el-input-number
-                  v-model="formData.price"
-                  :precision="2"
-                  :min="0.01"
-                  controls-position="right"
-                  class="w-full pl-6 hover:border-blue-500 focus:border-blue-500"
-                />
-              </div>
-            </el-form-item>
-
-            <el-form-item label="Sale (%)" class="mb-0">
-              <div class="relative">
-                <el-input-number
-                  v-model="formData.sale"
-                  :min="0"
-                  :max="100"
-                  controls-position="right"
-                  class="w-full hover:border-blue-500 focus:border-blue-500"
-                />
-                <span
-                  class="absolute top-1/2 right-12 -translate-y-1/2 transform text-gray-500"
-                  >%</span
-                >
-              </div>
-            </el-form-item>
-          </div>
-
-          <el-form-item label="Brand" prop="brand" data-field="brand">
-            <el-input
-              v-model="formData.brand"
-              placeholder="Enter brand name"
-              class="hover:border-blue-500 focus:border-blue-500"
-            />
-          </el-form-item>
-        </div>
-      </div>
-
-      <!-- Step 3 - Categories -->
-      <div v-if="activeStep === 2" class="animate-fadeIn">
-        <div class="mb-6 rounded-lg bg-blue-50 p-1">
-          <h2 class="px-3 py-2 text-xl font-semibold text-blue-700">
-            Product Categories
-          </h2>
-        </div>
-
-        <div class="rounded-lg border border-gray-200 bg-white p-6 shadow-sm">
-          <el-form-item
-            label="Category"
-            prop="categories"
-            data-field="categories"
-          >
-            <el-select
-              v-model="formData.categories"
-              placeholder="Select categories (multiple allowed)"
-              filterable
-              class="w-full hover:border-blue-500 focus:border-blue-500"
-              :loading="categoryStore.loading"
-              multiple
-            >
-              <el-option
-                v-for="cat in categoryStore.categories"
-                :key="cat._id"
-                :label="cat.name"
-                :value="cat._id"
-              />
-            </el-select>
-          </el-form-item>
-
-          <div class="mt-4 text-sm text-gray-500">
-            <p>
-              Tip: Assigning relevant categories helps customers find your
-              product more easily
-            </p>
-          </div>
-        </div>
-      </div>
-
-      <!-- Step 4 - Colors & Images -->
-      <div v-if="activeStep === 3" class="animate-fadeIn">
-        <div class="mb-6 rounded-lg bg-blue-50 p-1">
-          <h2 class="px-3 py-2 text-xl font-semibold text-blue-700">
-            Colors & Images
-          </h2>
-        </div>
-
-        <div class="space-y-6">
-          <div
-            v-for="(color, index) in formData.colors"
-            :key="index"
-            class="rounded-lg border border-gray-200 bg-white p-6 shadow-sm"
-          >
-            <div class="mb-4 flex items-center justify-between">
-              <h3 class="text-lg font-semibold text-gray-700">
-                Color Option {{ index + 1 }}
-              </h3>
-              <button
-                v-if="index > 0"
-                @click="formData.colors.splice(index, 1)"
-                class="text-red-500 transition-colors hover:text-red-700"
-                type="button"
-              >
-                Remove
-              </button>
-            </div>
-
-            <div class="grid gap-6 md:grid-cols-3">
-              <el-form-item
-                :label="`Color Name`"
-                :prop="`colors.${index}.name`"
-                :rules="{
-                  required: true,
-                  message: 'Color name is required',
-                  trigger: 'blur',
-                }"
-                data-field="colors"
-              >
-                <el-input
-                  v-model="color.name"
-                  placeholder="e.g., Navy Blue"
-                  class="hover:border-blue-500 focus:border-blue-500"
-                />
-              </el-form-item>
-
-              <el-form-item
-                label="SKU"
-                :prop="`colors.${index}.sku`"
-                :rules="{
-                  required: true,
-                  message: 'SKU is required',
-                  trigger: 'blur',
-                }"
-                data-field="colors"
-              >
-                <el-input
-                  v-model="color.sku"
-                  placeholder="e.g., PROD-BLU-01"
-                  class="hover:border-blue-500 focus:border-blue-500"
-                />
-              </el-form-item>
-
-              <el-form-item
-                label="Quantity"
-                :prop="`colors.${index}.quantity`"
-                :rules="{
-                  type: 'number',
-                  min: 0,
-                  message: 'Quantity must be at least 0',
-                  trigger: 'blur',
-                }"
-                data-field="colors"
-              >
-                <el-input-number
-                  v-model="color.quantity"
-                  :min="0"
-                  class="w-full hover:border-blue-500 focus:border-blue-500"
-                  controls-position="right"
-                />
-              </el-form-item>
-            </div>
-
-            <el-form-item
-              label="Images"
-              :prop="`colors.${index}.images`"
-              :rules="{
-                validator: (_, v, cb) =>
-                  v.length
-                    ? cb()
-                    : cb(new Error('At least one image required')),
-              }"
-              data-field="colors"
-              class="mt-4"
-            >
-              <!-- Display existing images -->
               <div
-                v-if="color.images.length"
-                class="mb-4 grid w-full grid-cols-2 gap-4 md:grid-cols-5"
+                :class="[
+                  'flex h-10 w-10 items-center justify-center rounded-full text-sm font-medium transition-all duration-300',
+                  index < activeStep
+                    ? 'bg-green-500 text-white'
+                    : index === activeStep
+                      ? 'bg-blue-600 text-white ring-4 ring-blue-100'
+                      : 'bg-gray-200 text-gray-600',
+                ]"
               >
-                <div
-                  v-for="(img, imgIndex) in color.images"
-                  :key="img.public_id"
-                  class="relative h-42 rounded-lg border border-gray-200 bg-gray-50 p-1"
-                >
-                  <img
-                    :src="img.url"
-                    :alt="`Product color ${color.name} image ${imgIndex + 1}`"
-                    class="h-full w-full rounded object-cover"
-                  />
-                  <button
-                    @click="handleImageRemove(index, imgIndex)"
-                    class="absolute top-2 right-2 flex h-6 w-6 items-center justify-center rounded-full bg-red-500 text-xs text-white shadow-md"
-                    type="button"
-                  >
-                    &times;
-                  </button>
-                </div>
+                <span v-if="index < activeStep">✓</span>
+                <span v-else>{{ index + 1 }}</span>
               </div>
-              <div class="w-full">
-                <Dropzone
-                  @haleem="(data) => handleHaleam(data, index)"
-                  @removed-file="() => handleImageRemove(index)"
-                  class="rounded-lg border-2 border-dashed border-blue-300 p-8 text-center transition-colors hover:border-blue-500"
-                />
+              <div
+                class="mt-2 text-xs font-medium"
+                :class="{
+                  'text-green-600': index < activeStep,
+                  'text-blue-600': index === activeStep,
+                  'text-gray-500': index > activeStep,
+                }"
+              >
+                {{ step.title }}
               </div>
+            </div>
+          </div>
+
+          <!-- Connection line -->
+          <div
+            class="absolute top-5 left-0 -z-10 h-1 w-full -translate-y-1/2 transform bg-gray-200"
+          ></div>
+          <div
+            class="absolute top-5 left-0 -z-10 h-1 -translate-y-1/2 transform bg-blue-500 transition-all duration-500"
+            :style="`width: ${(activeStep / (steps.length - 1)) * 100}%`"
+          ></div>
+        </div>
+      </div>
+
+      <!-- Form Content -->
+      <el-form
+        ref="formRef"
+        :model="formData"
+        :rules="rules"
+        label-position="top"
+        class="space-y-8"
+        @submit.prevent
+        hide-required-asterisk
+        :validate-on-rule-change="false"
+      >
+        <!-- Step 1 - Basic Info -->
+        <div v-if="activeStep === 0" class="animate-fadeIn">
+          <div class="mb-6 rounded-lg bg-blue-50 p-1">
+            <h2 class="px-3 py-2 text-xl font-semibold text-blue-700">
+              Basic Information
+            </h2>
+          </div>
+
+          <div
+            class="space-y-6 rounded-lg border border-gray-200 bg-white p-6 shadow-sm"
+          >
+            <el-form-item label="Product Name" prop="name" data-field="name">
+              <el-input
+                v-model="formData.name"
+                placeholder="Enter product name"
+                class="hover:border-blue-500 focus:border-blue-500"
+              />
             </el-form-item>
+
+            <el-form-item
+              label="Subtitle"
+              prop="subtitle"
+              data-field="subtitle"
+            >
+              <el-input
+                v-model="formData.subtitle"
+                placeholder="Add a brief subtitle"
+                class="hover:border-blue-500 focus:border-blue-500"
+              />
+            </el-form-item>
+
+            <el-form-item
+              label="Description"
+              prop="description"
+              data-field="description"
+            >
+              <el-input
+                v-model="formData.description"
+                type="textarea"
+                :rows="5"
+                placeholder="Describe your product in detail"
+                class="hover:border-blue-500 focus:border-blue-500"
+              />
+            </el-form-item>
+          </div>
+        </div>
+
+        <!-- Step 2 - Pricing & Brand -->
+        <div v-if="activeStep === 1" class="animate-fadeIn">
+          <div class="mb-6 rounded-lg bg-blue-50 p-1">
+            <h2 class="px-3 py-2 text-xl font-semibold text-blue-700">
+              Pricing & Brand
+            </h2>
+          </div>
+
+          <div
+            class="space-y-6 rounded-lg border border-gray-200 bg-white p-6 shadow-sm"
+          >
+            <div class="grid gap-6 md:grid-cols-2">
+              <el-form-item
+                label="Price ($)"
+                prop="price"
+                data-field="price"
+                class="mb-0"
+              >
+                <div class="relative">
+                  <span
+                    class="absolute top-1/2 left-3 -translate-y-1/2 transform text-gray-500"
+                    >$</span
+                  >
+                  <el-input-number
+                    v-model="formData.price"
+                    :precision="2"
+                    :min="0.01"
+                    controls-position="right"
+                    class="w-full pl-6 hover:border-blue-500 focus:border-blue-500"
+                  />
+                </div>
+              </el-form-item>
+
+              <el-form-item label="Sale (%)" class="mb-0">
+                <div class="relative">
+                  <el-input-number
+                    v-model="formData.sale"
+                    :min="0"
+                    :max="100"
+                    controls-position="right"
+                    class="w-full hover:border-blue-500 focus:border-blue-500"
+                  />
+                  <span
+                    class="absolute top-1/2 right-12 -translate-y-1/2 transform text-gray-500"
+                    >%</span
+                  >
+                </div>
+              </el-form-item>
+            </div>
+
+            <el-form-item label="Brand" prop="brand" data-field="brand">
+              <el-input
+                v-model="formData.brand"
+                placeholder="Enter brand name"
+                class="hover:border-blue-500 focus:border-blue-500"
+              />
+            </el-form-item>
+          </div>
+        </div>
+
+        <!-- Step 3 - Categories -->
+        <div v-if="activeStep === 2" class="animate-fadeIn">
+          <div class="mb-6 rounded-lg bg-blue-50 p-1">
+            <h2 class="px-3 py-2 text-xl font-semibold text-blue-700">
+              Product Categories
+            </h2>
+          </div>
+
+          <div class="rounded-lg border border-gray-200 bg-white p-6 shadow-sm">
+            <el-form-item
+              label="Category"
+              prop="categories"
+              data-field="categories"
+            >
+              <el-select
+                v-model="formData.categories"
+                placeholder="Select categories (multiple allowed)"
+                filterable
+                class="w-full hover:border-blue-500 focus:border-blue-500"
+                :loading="categoryStore.loading"
+                multiple
+              >
+                <el-option
+                  v-for="cat in categoryStore.categories"
+                  :key="cat._id"
+                  :label="cat.name"
+                  :value="cat._id"
+                />
+              </el-select>
+            </el-form-item>
+
+            <div class="mt-4 text-sm text-gray-500">
+              <p>
+                Tip: Assigning relevant categories helps customers find your
+                product more easily
+              </p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Step 4 - Colors & Images -->
+        <div v-if="activeStep === 3" class="animate-fadeIn">
+          <div class="mb-6 rounded-lg bg-blue-50 p-1">
+            <h2 class="px-3 py-2 text-xl font-semibold text-blue-700">
+              Colors & Images
+            </h2>
+          </div>
+
+          <div class="space-y-6">
+            <div
+              v-for="(color, index) in formData.colors"
+              :key="index"
+              class="rounded-lg border border-gray-200 bg-white p-6 shadow-sm"
+            >
+              <div class="mb-4 flex items-center justify-between">
+                <h3 class="text-lg font-semibold text-gray-700">
+                  Color Option {{ index + 1 }}
+                </h3>
+                <button
+                  v-if="index > 0"
+                  @click="formData.colors.splice(index, 1)"
+                  class="text-red-500 transition-colors hover:text-red-700"
+                  type="button"
+                >
+                  Remove
+                </button>
+              </div>
+
+              <div class="grid gap-6 md:grid-cols-3">
+                <el-form-item
+                  :label="`Color Name`"
+                  :prop="`colors.${index}.name`"
+                  :rules="{
+                    required: true,
+                    message: 'Color name is required',
+                    trigger: 'blur',
+                  }"
+                  data-field="colors"
+                >
+                  <el-input
+                    v-model="color.name"
+                    placeholder="e.g., Navy Blue"
+                    class="hover:border-blue-500 focus:border-blue-500"
+                  />
+                </el-form-item>
+
+                <el-form-item
+                  label="SKU"
+                  :prop="`colors.${index}.sku`"
+                  :rules="{
+                    required: true,
+                    message: 'SKU is required',
+                    trigger: 'blur',
+                  }"
+                  data-field="colors"
+                >
+                  <el-input
+                    v-model="color.sku"
+                    placeholder="e.g., PROD-BLU-01"
+                    class="hover:border-blue-500 focus:border-blue-500"
+                  />
+                </el-form-item>
+
+                <el-form-item
+                  label="Quantity"
+                  :prop="`colors.${index}.quantity`"
+                  :rules="{
+                    type: 'number',
+                    min: 0,
+                    message: 'Quantity must be at least 0',
+                    trigger: 'blur',
+                  }"
+                  data-field="colors"
+                >
+                  <el-input-number
+                    v-model="color.quantity"
+                    :min="0"
+                    class="w-full hover:border-blue-500 focus:border-blue-500"
+                    controls-position="right"
+                  />
+                </el-form-item>
+              </div>
+
+              <el-form-item
+                label="Images"
+                :prop="`colors.${index}.images`"
+                :rules="{
+                  validator: (_, v, cb) =>
+                    v.length
+                      ? cb()
+                      : cb(new Error('At least one image required')),
+                }"
+                data-field="colors"
+                class="mt-4"
+              >
+                <!-- Display existing images -->
+                <div
+                  v-if="color.images.length"
+                  class="mb-4 grid w-full grid-cols-2 gap-4 md:grid-cols-5"
+                >
+                  <div
+                    v-for="(img, imgIndex) in color.images"
+                    :key="img.public_id"
+                    class="relative h-42 rounded-lg border border-gray-200 bg-gray-50 p-1"
+                  >
+                    <img
+                      :src="img.url"
+                      :alt="`Product color ${color.name} image ${imgIndex + 1}`"
+                      class="h-full w-full rounded object-cover"
+                    />
+                    <button
+                      @click="handleImageRemove(index, imgIndex)"
+                      class="absolute top-2 right-2 flex h-6 w-6 items-center justify-center rounded-full bg-red-500 text-xs text-white shadow-md"
+                      type="button"
+                    >
+                      &times;
+                    </button>
+                  </div>
+                </div>
+                <div class="w-full">
+                  <Dropzone
+                    @haleem="(data) => handleHaleam(data, index)"
+                    @removed-file="() => handleImageRemove(index)"
+                    class="rounded-lg border-2 border-dashed border-blue-300 p-8 text-center transition-colors hover:border-blue-500"
+                  />
+                </div>
+              </el-form-item>
+            </div>
+
+            <button
+              @click="addColor"
+              class="flex w-full items-center justify-center rounded-lg border-2 border-dashed border-blue-300 py-3 font-medium text-blue-600 transition-colors hover:border-blue-500 hover:text-blue-700"
+              type="button"
+            >
+              <PlusIcon class="mr-2 h-5 w-5" />
+              Add Another Color
+            </button>
+          </div>
+        </div>
+        <!-- Step 5 - Additional Info -->
+        <div v-if="activeStep === 4" class="animate-fadeIn">
+          <div class="mb-6 rounded-lg bg-blue-50 p-1">
+            <h2 class="px-3 py-2 text-xl font-semibold text-blue-700">
+              Additional Information
+            </h2>
+          </div>
+
+          <div class="space-y-6">
+            <!-- General Information -->
+            <div
+              class="rounded-lg border border-gray-200 bg-white p-6 shadow-sm"
+            >
+              <h3 class="mb-4 flex items-center font-semibold text-gray-700">
+                <span
+                  class="mr-2 flex h-8 w-8 items-center justify-center rounded-full bg-blue-100 text-blue-600"
+                  >1</span
+                >
+                General Information
+              </h3>
+
+              <div class="space-y-4">
+                <el-form-item label="Sales Package">
+                  <el-input
+                    v-model="
+                      formData.additionalInformation.general.salesPackage
+                    "
+                    placeholder="e.g., Box with assembly instructions"
+                    class="hover:border-blue-500 focus:border-blue-500"
+                  />
+                </el-form-item>
+
+                <el-form-item label="Model Number">
+                  <el-input
+                    v-model="formData.additionalInformation.general.modelNumber"
+                    placeholder="e.g., FN-2187"
+                    class="hover:border-blue-500 focus:border-blue-500"
+                  />
+                </el-form-item>
+
+                <el-form-item label="Upholstery Material">
+                  <el-input
+                    v-model="
+                      formData.additionalInformation.general.upholsteryMaterial
+                    "
+                    placeholder="e.g., 100% Cotton, Leather, etc."
+                    class="hover:border-blue-500 focus:border-blue-500"
+                  />
+                </el-form-item>
+              </div>
+            </div>
+
+            <!-- Product Details -->
+            <div
+              class="rounded-lg border border-gray-200 bg-white p-6 shadow-sm"
+            >
+              <h3 class="mb-4 flex items-center font-semibold text-gray-700">
+                <span
+                  class="mr-2 flex h-8 w-8 items-center justify-center rounded-full bg-blue-100 text-blue-600"
+                  >2</span
+                >
+                Product Details
+              </h3>
+
+              <div class="space-y-4">
+                <el-form-item label="Filling Material">
+                  <el-input
+                    v-model="
+                      formData.additionalInformation.productDetails
+                        .fillingMaterial
+                    "
+                    placeholder="e.g., Foam, Polyester Fiber"
+                    class="hover:border-blue-500 focus:border-blue-500"
+                  />
+                </el-form-item>
+
+                <el-form-item label="Finish Type">
+                  <el-input
+                    v-model="
+                      formData.additionalInformation.productDetails.finishType
+                    "
+                    placeholder="e.g., Matte, Glossy, Semi-Gloss"
+                    class="hover:border-blue-500 focus:border-blue-500"
+                  />
+                </el-form-item>
+
+                <el-form-item label="Origin of Manufacture">
+                  <el-input
+                    v-model="
+                      formData.additionalInformation.productDetails
+                        .originOfManufacture
+                    "
+                    placeholder="e.g., Italy, China, USA"
+                    class="hover:border-blue-500 focus:border-blue-500"
+                  />
+                </el-form-item>
+              </div>
+            </div>
+
+            <!-- Dimensions -->
+            <div
+              class="rounded-lg border border-gray-200 bg-white p-6 shadow-sm"
+            >
+              <h3 class="mb-4 flex items-center font-semibold text-gray-700">
+                <span
+                  class="mr-2 flex h-8 w-8 items-center justify-center rounded-full bg-blue-100 text-blue-600"
+                  >3</span
+                >
+                Dimensions (cm)
+              </h3>
+
+              <div class="grid gap-6 md:grid-cols-2">
+                <el-form-item label="Width">
+                  <div class="relative">
+                    <el-input-number
+                      v-model="formData.additionalInformation.dimensions.width"
+                      class="w-full hover:border-blue-500 focus:border-blue-500"
+                      controls-position="right"
+                    />
+                    <span
+                      class="absolute top-1/2 right-12 -translate-y-1/2 transform text-gray-500"
+                      >cm</span
+                    >
+                  </div>
+                </el-form-item>
+
+                <el-form-item label="Height">
+                  <div class="relative">
+                    <el-input-number
+                      v-model="formData.additionalInformation.dimensions.height"
+                      class="w-full hover:border-blue-500 focus:border-blue-500"
+                      controls-position="right"
+                    />
+                    <span
+                      class="absolute top-1/2 right-12 -translate-y-1/2 transform text-gray-500"
+                      >cm</span
+                    >
+                  </div>
+                </el-form-item>
+
+                <el-form-item label="Depth">
+                  <div class="relative">
+                    <el-input-number
+                      v-model="formData.additionalInformation.dimensions.depth"
+                      class="w-full hover:border-blue-500 focus:border-blue-500"
+                      controls-position="right"
+                    />
+                    <span
+                      class="absolute top-1/2 right-12 -translate-y-1/2 transform text-gray-500"
+                      >cm</span
+                    >
+                  </div>
+                </el-form-item>
+
+                <el-form-item label="Seat Height">
+                  <div class="relative">
+                    <el-input-number
+                      v-model="
+                        formData.additionalInformation.dimensions.seatHeight
+                      "
+                      class="w-full hover:border-blue-500 focus:border-blue-500"
+                      controls-position="right"
+                    />
+                    <span
+                      class="absolute top-1/2 right-12 -translate-y-1/2 transform text-gray-500"
+                      >cm</span
+                    >
+                  </div>
+                </el-form-item>
+              </div>
+            </div>
+
+            <!-- Warranty Information -->
+            <div
+              class="rounded-lg border border-gray-200 bg-white p-6 shadow-sm"
+            >
+              <h3 class="mb-4 flex items-center font-semibold text-gray-700">
+                <span
+                  class="mr-2 flex h-8 w-8 items-center justify-center rounded-full bg-blue-100 text-blue-600"
+                  >4</span
+                >
+                Warranty Information
+              </h3>
+
+              <div class="space-y-4">
+                <el-form-item label="Warranty Summary">
+                  <el-input
+                    v-model="formData.additionalInformation.warranty.summary"
+                    placeholder="e.g., 2 years limited warranty"
+                    class="hover:border-blue-500 focus:border-blue-500"
+                  />
+                </el-form-item>
+
+                <el-form-item label="Service Type">
+                  <el-input
+                    v-model="
+                      formData.additionalInformation.warranty.serviceType
+                    "
+                    placeholder="e.g., On-site, Carry-in"
+                    class="hover:border-blue-500 focus:border-blue-500"
+                  />
+                </el-form-item>
+
+                <div class="grid gap-6 md:grid-cols-2">
+                  <el-form-item label="Covered Items">
+                    <el-input
+                      v-model="formData.additionalInformation.warranty.covered"
+                      placeholder="e.g., Manufacturing defects"
+                      class="hover:border-blue-500 focus:border-blue-500"
+                    />
+                  </el-form-item>
+
+                  <el-form-item label="Exclusions">
+                    <el-input
+                      v-model="
+                        formData.additionalInformation.warranty.notCovered
+                      "
+                      placeholder="e.g., Physical damage"
+                      class="hover:border-blue-500 focus:border-blue-500"
+                    />
+                  </el-form-item>
+                </div>
+
+                <el-form-item label="Domestic Warranty">
+                  <el-input
+                    v-model="
+                      formData.additionalInformation.warranty.domesticWarranty
+                    "
+                    placeholder="e.g., Yes, valid in country of purchase"
+                    class="hover:border-blue-500 focus:border-blue-500"
+                  />
+                </el-form-item>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Navigation Buttons -->
+        <div
+          class="mt-10 flex flex-col items-center justify-between gap-4 sm:flex-row"
+        >
+          <button
+            v-if="activeStep > 0"
+            @click="activeStep--"
+            class="flex w-full items-center justify-center rounded-lg border border-gray-300 bg-white px-6 py-3 font-medium text-gray-700 transition-colors hover:bg-gray-50 sm:w-auto"
+            type="button"
+          >
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              class="mr-2 h-5 w-5"
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke="currentColor"
+            >
+              <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
+                d="M15 19l-7-7 7-7"
+              />
+            </svg>
+            Previous
+          </button>
+
+          <div class="text-sm text-gray-500">
+            Step {{ activeStep + 1 }} of {{ steps.length }}
           </div>
 
           <button
-            @click="addColor"
-            class="flex w-full items-center justify-center rounded-lg border-2 border-dashed border-blue-300 py-3 font-medium text-blue-600 transition-colors hover:border-blue-500 hover:text-blue-700"
+            v-if="activeStep < steps.length - 1"
+            @click="validateStep"
+            class="flex w-full items-center justify-center rounded-lg bg-blue-600 px-6 py-3 font-medium text-white transition-colors hover:bg-blue-700 sm:w-auto"
             type="button"
           >
-            <PlusIcon class="mr-2 h-5 w-5" />
-            Add Another Color
-          </button>
-        </div>
-      </div>
-      <!-- Step 5 - Additional Info -->
-      <div v-if="activeStep === 4" class="animate-fadeIn">
-        <div class="mb-6 rounded-lg bg-blue-50 p-1">
-          <h2 class="px-3 py-2 text-xl font-semibold text-blue-700">
-            Additional Information
-          </h2>
-        </div>
-
-        <div class="space-y-6">
-          <!-- General Information -->
-          <div class="rounded-lg border border-gray-200 bg-white p-6 shadow-sm">
-            <h3 class="mb-4 flex items-center font-semibold text-gray-700">
-              <span
-                class="mr-2 flex h-8 w-8 items-center justify-center rounded-full bg-blue-100 text-blue-600"
-                >1</span
-              >
-              General Information
-            </h3>
-
-            <div class="space-y-4">
-              <el-form-item label="Sales Package">
-                <el-input
-                  v-model="formData.additionalInformation.general.salesPackage"
-                  placeholder="e.g., Box with assembly instructions"
-                  class="hover:border-blue-500 focus:border-blue-500"
-                />
-              </el-form-item>
-
-              <el-form-item label="Model Number">
-                <el-input
-                  v-model="formData.additionalInformation.general.modelNumber"
-                  placeholder="e.g., FN-2187"
-                  class="hover:border-blue-500 focus:border-blue-500"
-                />
-              </el-form-item>
-
-              <el-form-item label="Upholstery Material">
-                <el-input
-                  v-model="
-                    formData.additionalInformation.general.upholsteryMaterial
-                  "
-                  placeholder="e.g., 100% Cotton, Leather, etc."
-                  class="hover:border-blue-500 focus:border-blue-500"
-                />
-              </el-form-item>
-            </div>
-          </div>
-
-          <!-- Product Details -->
-          <div class="rounded-lg border border-gray-200 bg-white p-6 shadow-sm">
-            <h3 class="mb-4 flex items-center font-semibold text-gray-700">
-              <span
-                class="mr-2 flex h-8 w-8 items-center justify-center rounded-full bg-blue-100 text-blue-600"
-                >2</span
-              >
-              Product Details
-            </h3>
-
-            <div class="space-y-4">
-              <el-form-item label="Filling Material">
-                <el-input
-                  v-model="
-                    formData.additionalInformation.productDetails
-                      .fillingMaterial
-                  "
-                  placeholder="e.g., Foam, Polyester Fiber"
-                  class="hover:border-blue-500 focus:border-blue-500"
-                />
-              </el-form-item>
-
-              <el-form-item label="Finish Type">
-                <el-input
-                  v-model="
-                    formData.additionalInformation.productDetails.finishType
-                  "
-                  placeholder="e.g., Matte, Glossy, Semi-Gloss"
-                  class="hover:border-blue-500 focus:border-blue-500"
-                />
-              </el-form-item>
-
-              <el-form-item label="Origin of Manufacture">
-                <el-input
-                  v-model="
-                    formData.additionalInformation.productDetails
-                      .originOfManufacture
-                  "
-                  placeholder="e.g., Italy, China, USA"
-                  class="hover:border-blue-500 focus:border-blue-500"
-                />
-              </el-form-item>
-            </div>
-          </div>
-
-          <!-- Dimensions -->
-          <div class="rounded-lg border border-gray-200 bg-white p-6 shadow-sm">
-            <h3 class="mb-4 flex items-center font-semibold text-gray-700">
-              <span
-                class="mr-2 flex h-8 w-8 items-center justify-center rounded-full bg-blue-100 text-blue-600"
-                >3</span
-              >
-              Dimensions (cm)
-            </h3>
-
-            <div class="grid gap-6 md:grid-cols-2">
-              <el-form-item label="Width">
-                <div class="relative">
-                  <el-input-number
-                    v-model="formData.additionalInformation.dimensions.width"
-                    class="w-full hover:border-blue-500 focus:border-blue-500"
-                    controls-position="right"
-                  />
-                  <span
-                    class="absolute top-1/2 right-12 -translate-y-1/2 transform text-gray-500"
-                    >cm</span
-                  >
-                </div>
-              </el-form-item>
-
-              <el-form-item label="Height">
-                <div class="relative">
-                  <el-input-number
-                    v-model="formData.additionalInformation.dimensions.height"
-                    class="w-full hover:border-blue-500 focus:border-blue-500"
-                    controls-position="right"
-                  />
-                  <span
-                    class="absolute top-1/2 right-12 -translate-y-1/2 transform text-gray-500"
-                    >cm</span
-                  >
-                </div>
-              </el-form-item>
-
-              <el-form-item label="Depth">
-                <div class="relative">
-                  <el-input-number
-                    v-model="formData.additionalInformation.dimensions.depth"
-                    class="w-full hover:border-blue-500 focus:border-blue-500"
-                    controls-position="right"
-                  />
-                  <span
-                    class="absolute top-1/2 right-12 -translate-y-1/2 transform text-gray-500"
-                    >cm</span
-                  >
-                </div>
-              </el-form-item>
-
-              <el-form-item label="Seat Height">
-                <div class="relative">
-                  <el-input-number
-                    v-model="
-                      formData.additionalInformation.dimensions.seatHeight
-                    "
-                    class="w-full hover:border-blue-500 focus:border-blue-500"
-                    controls-position="right"
-                  />
-                  <span
-                    class="absolute top-1/2 right-12 -translate-y-1/2 transform text-gray-500"
-                    >cm</span
-                  >
-                </div>
-              </el-form-item>
-            </div>
-          </div>
-
-          <!-- Warranty Information -->
-          <div class="rounded-lg border border-gray-200 bg-white p-6 shadow-sm">
-            <h3 class="mb-4 flex items-center font-semibold text-gray-700">
-              <span
-                class="mr-2 flex h-8 w-8 items-center justify-center rounded-full bg-blue-100 text-blue-600"
-                >4</span
-              >
-              Warranty Information
-            </h3>
-
-            <div class="space-y-4">
-              <el-form-item label="Warranty Summary">
-                <el-input
-                  v-model="formData.additionalInformation.warranty.summary"
-                  placeholder="e.g., 2 years limited warranty"
-                  class="hover:border-blue-500 focus:border-blue-500"
-                />
-              </el-form-item>
-
-              <el-form-item label="Service Type">
-                <el-input
-                  v-model="formData.additionalInformation.warranty.serviceType"
-                  placeholder="e.g., On-site, Carry-in"
-                  class="hover:border-blue-500 focus:border-blue-500"
-                />
-              </el-form-item>
-
-              <div class="grid gap-6 md:grid-cols-2">
-                <el-form-item label="Covered Items">
-                  <el-input
-                    v-model="formData.additionalInformation.warranty.covered"
-                    placeholder="e.g., Manufacturing defects"
-                    class="hover:border-blue-500 focus:border-blue-500"
-                  />
-                </el-form-item>
-
-                <el-form-item label="Exclusions">
-                  <el-input
-                    v-model="formData.additionalInformation.warranty.notCovered"
-                    placeholder="e.g., Physical damage"
-                    class="hover:border-blue-500 focus:border-blue-500"
-                  />
-                </el-form-item>
-              </div>
-
-              <el-form-item label="Domestic Warranty">
-                <el-input
-                  v-model="
-                    formData.additionalInformation.warranty.domesticWarranty
-                  "
-                  placeholder="e.g., Yes, valid in country of purchase"
-                  class="hover:border-blue-500 focus:border-blue-500"
-                />
-              </el-form-item>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <!-- Navigation Buttons -->
-      <div
-        class="mt-10 flex flex-col items-center justify-between gap-4 sm:flex-row"
-      >
-        <button
-          v-if="activeStep > 0"
-          @click="activeStep--"
-          class="flex w-full items-center justify-center rounded-lg border border-gray-300 bg-white px-6 py-3 font-medium text-gray-700 transition-colors hover:bg-gray-50 sm:w-auto"
-          type="button"
-        >
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            class="mr-2 h-5 w-5"
-            fill="none"
-            viewBox="0 0 24 24"
-            stroke="currentColor"
-          >
-            <path
-              stroke-linecap="round"
-              stroke-linejoin="round"
-              stroke-width="2"
-              d="M15 19l-7-7 7-7"
-            />
-          </svg>
-          Previous
-        </button>
-
-        <div class="text-sm text-gray-500">
-          Step {{ activeStep + 1 }} of {{ steps.length }}
-        </div>
-
-        <button
-          v-if="activeStep < steps.length - 1"
-          @click="validateStep"
-          class="flex w-full items-center justify-center rounded-lg bg-blue-600 px-6 py-3 font-medium text-white transition-colors hover:bg-blue-700 sm:w-auto"
-          type="button"
-        >
-          Next
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            class="ml-2 h-5 w-5"
-            fill="none"
-            viewBox="0 0 24 24"
-            stroke="currentColor"
-          >
-            <path
-              stroke-linecap="round"
-              stroke-linejoin="round"
-              stroke-width="2"
-              d="M9 5l7 7-7 7"
-            />
-          </svg>
-        </button>
-
-        <button
-          v-if="activeStep === steps.length - 1"
-          @click="submitForm"
-          :class="{ 'cursor-not-allowed opacity-75': isLoading }"
-          class="flex w-full items-center justify-center rounded-lg bg-green-600 px-6 py-3 font-medium text-white transition-colors hover:bg-green-700 sm:w-auto"
-          :disabled="isLoading"
-          type="button"
-        >
-          <span v-if="isLoading" class="mr-2">
+            Next
             <svg
-              class="h-5 w-5 animate-spin text-white"
               xmlns="http://www.w3.org/2000/svg"
+              class="ml-2 h-5 w-5"
               fill="none"
               viewBox="0 0 24 24"
+              stroke="currentColor"
             >
-              <circle
-                class="opacity-25"
-                cx="12"
-                cy="12"
-                r="10"
-                stroke="currentColor"
-                stroke-width="4"
-              ></circle>
               <path
-                class="opacity-75"
-                fill="currentColor"
-                d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
-              ></path>
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
+                d="M9 5l7 7-7 7"
+              />
             </svg>
-          </span>
-          Save changes
-        </button>
-      </div>
-    </el-form>
-  </div>
+          </button>
+
+          <button
+            v-if="activeStep === steps.length - 1"
+            @click="submitForm"
+            :class="{ 'cursor-not-allowed opacity-75': isLoading }"
+            class="flex w-full items-center justify-center rounded-lg bg-green-600 px-6 py-3 font-medium text-white transition-colors hover:bg-green-700 sm:w-auto"
+            :disabled="isLoading"
+            type="button"
+          >
+            <span v-if="isLoading" class="mr-2">
+              <svg
+                class="h-5 w-5 animate-spin text-white"
+                xmlns="http://www.w3.org/2000/svg"
+                fill="none"
+                viewBox="0 0 24 24"
+              >
+                <circle
+                  class="opacity-25"
+                  cx="12"
+                  cy="12"
+                  r="10"
+                  stroke="currentColor"
+                  stroke-width="4"
+                ></circle>
+                <path
+                  class="opacity-75"
+                  fill="currentColor"
+                  d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                ></path>
+              </svg>
+            </span>
+            Save changes
+          </button>
+        </div>
+      </el-form>
+    </div>
+  </ResourceWrapper>
 </template>
 
 <style>

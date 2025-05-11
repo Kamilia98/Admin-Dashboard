@@ -241,7 +241,7 @@ onMounted(() => {
 </script>
 
 <template>
-  <div class="mx-auto max-w-5xl rounded-lg bg-white p-8 shadow-lg">
+  <div class="mx-auto max-w-5xl rounded-lg bg-white p-6 shadow-lg">
     <!-- Header with progress indicator -->
     <div class="mb-10 text-center">
       <h1 class="mb-2 text-3xl font-bold text-gray-800">Add New Product</h1>
@@ -251,7 +251,7 @@ onMounted(() => {
 
       <!-- Custom Step Progress Bar -->
       <div class="relative">
-        <div class="mb-2 flex items-center justify-between">
+        <div class="mb-2 flex items-center justify-evenly">
           <div
             v-for="(step, index) in steps"
             :key="index"
@@ -543,11 +543,13 @@ onMounted(() => {
               data-field="colors"
               class="mt-4"
             >
-              <Dropzone
-                @haleem="(data) => handleHaleam(data, index)"
-                @removed-file="() => handleImageRemove(index)"
-                class="rounded-lg border-2 border-dashed border-blue-300 p-8 text-center transition-colors hover:border-blue-500"
-              />
+              <div class="w-full">
+                <Dropzone
+                  @haleem="(data) => handleHaleam(data, index)"
+                  @removed-file="() => handleImageRemove(index)"
+                  class="rounded-lg border-2 border-dashed border-blue-300 p-8 text-center transition-colors hover:border-blue-500"
+                />
+              </div>
             </el-form-item>
           </div>
 

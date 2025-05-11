@@ -81,6 +81,7 @@ export const useStoreConfigStore = defineStore('storeConfig', () => {
   // Computed properties
   const activeShippingMethods = ref([]);
   const currencies = ref([]);
+  const languages = ref([]);
 
   const activeUserRoles = computed(() =>
     storeConfig.value.userRoles.filter(
@@ -94,11 +95,11 @@ export const useStoreConfigStore = defineStore('storeConfig', () => {
   //   ),
   // );
 
-  const activeLanguages = computed(() =>
-    storeConfig.value.supportedLanguages.filter(
-      (language) => language.isActive && !language.deletedAt,
-    ),
-  );
+  // const activeLanguages = computed(() =>
+  //   storeConfig.value.supportedLanguages.filter(
+  //     (language) => language.isActive && !language.deletedAt,
+  //   ),
+  // );
 
   // Actions
   const updateStoreConfig = (config: Partial<StoreConfig>) => {
@@ -200,33 +201,61 @@ export const useStoreConfigStore = defineStore('storeConfig', () => {
     }
   };
 
-  const addLanguage = (language: Omit<Language, 'code'>) => {
-    const newLanguage: Language = {
-      ...language,
-      code: language.name.substring(0, 2).toLowerCase(),
-      isActive: true,
-    };
-    storeConfig.value.supportedLanguages.push(newLanguage);
+  const addLanguage = async (language: Omit<Language, 'code'>) => {
+    console.log(language);
+    try {
+      const data = await axios.post(
+        `${API_BASE}/language`,
+        { name: language.name },
+        {
+          headers: getAuthHeaders(),
+        },
+      );
+      languages.value = data.data.data.supportedLanguages;
+      console.log(languages.value);
+      return languages.value;
+    } catch (err) {
+      console.log('ERRORRRRR', err);
+    }
+    return;
   };
 
-  const updateLanguage = (code: string, updates: Partial<Language>) => {
-    const index = storeConfig.value.supportedLanguages.findIndex(
-      (l) => l.code === code,
-    );
-    if (index !== -1) {
-      storeConfig.value.supportedLanguages[index] = {
-        ...storeConfig.value.supportedLanguages[index],
-        ...updates,
-      };
+  const updateLanguage = async (id: string, updates: Partial<Language>) => {
+    try {
+      const data = await axios.put(`${API_BASE}/language`, updates, {
+        headers: getAuthHeaders(),
+        params: { id },
+      });
+      languages.value = data.data.data.supportedLanguages;
+      return languages.value;
+    } catch (err) {
+      console.log(err);
     }
   };
+  const setDefaultLanguage = async (id: string) => {
+    try {
+      const data = await axios.patch(
+        `${API_BASE}/language`,
+        {},
+        { headers: getAuthHeaders(), params: { id } },
+      );
+      languages.value = data.data.data.supportedLanguages;
 
-  const softDeleteLanguage = (code: string) => {
-    const language = storeConfig.value.supportedLanguages.find(
-      (l) => l.code === code,
-    );
-    if (language) {
-      language.deletedAt = new Date();
+      return languages.value;
+    } catch (err) {
+      console.log(err);
+    }
+  };
+  const softDeleteLanguage = async (id: string) => {
+    try {
+      const data = await axios.delete(`${API_BASE}/language`, {
+        headers: getAuthHeaders(),
+        params: { id },
+      });
+      languages.value = data.data.data.supportedlanguages;
+      return languages.value;
+    } catch (err) {
+      console.log(err);
     }
   };
 
@@ -420,7 +449,7 @@ export const useStoreConfigStore = defineStore('storeConfig', () => {
     activeShippingMethods,
     activeUserRoles,
     currencies,
-    activeLanguages,
+    languages,
     updateStoreConfig,
     addShippingMethod,
     updateShippingMethod,
@@ -432,6 +461,7 @@ export const useStoreConfigStore = defineStore('storeConfig', () => {
     updateLanguage,
     softDeleteLanguage,
     setDefaultCurrency,
+    setDefaultLanguage,
 
     // handle store config
     saveStoreConfig,

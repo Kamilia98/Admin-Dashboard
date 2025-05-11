@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref } from 'vue';
+import { ref, onMounted, watch } from 'vue';
 import { useStoreConfigStore } from '../../stores/storeConfigStore';
 import { ElInput, ElButton, ElIcon, ElTag, ElMessageBox } from 'element-plus';
 import {
@@ -27,16 +27,24 @@ const editLanguage = ref({
 });
 
 const {
+  loadStoreConfig,
   activeLanguages,
   addLanguage,
   updateLanguage,
   softDeleteLanguage,
   setDefaultLanguage,
 } = useStoreConfigStore();
-
-const handleAddLanguage = () => {
-  if (newLanguage.value.code && newLanguage.value.name) {
-    addLanguage(newLanguage.value);
+const languages = ref([]);
+onMounted(async () => {
+  const data = await loadStoreConfig();
+  languages.value = data.supportedLanguages;
+});
+watch(languages, (newLanguages) => {
+  languages.value = newLanguages;
+});
+const handleAddLanguage = async () => {
+  if (newLanguage.value.name) {
+    languages.value = await addLanguage(newLanguage.value);
     newLanguage.value = {
       code: '',
       name: '',
@@ -49,7 +57,7 @@ const handleAddLanguage = () => {
 const handleEditLanguage = (language: any) => {
   editingId.value = language.code;
   editLanguage.value = {
-    id: language.code,
+    id: language._id,
     code: language.code,
     name: language.name,
     isActive: language.isActive,
@@ -57,9 +65,12 @@ const handleEditLanguage = (language: any) => {
   };
 };
 
-const handleUpdateLanguage = () => {
+const handleUpdateLanguage = async () => {
   if (editLanguage.value.code && editLanguage.value.name) {
-    updateLanguage(editLanguage.value.id, editLanguage.value);
+    languages.value = await updateLanguage(
+      editLanguage.value.id,
+      editLanguage.value,
+    );
     editingId.value = null;
   }
 };
@@ -68,8 +79,8 @@ const handleCancelEdit = () => {
   editingId.value = null;
 };
 
-const handleSetDefault = (languageId: string) => {
-  setDefaultLanguage(languageId);
+const handleSetDefault = async (languageId: string) => {
+  languages.value = await setDefaultLanguage(languageId);
 };
 
 const handleDeleteLanguage = async (languageCode: string) => {
@@ -84,7 +95,7 @@ const handleDeleteLanguage = async (languageCode: string) => {
         confirmButtonClass: 'el-button--danger el-button--plain',
       },
     );
-    softDeleteLanguage(languageCode);
+    languages.value = await softDeleteLanguage(languageCode);
   } catch (error) {
     console.log('Deletion cancelled');
   }
@@ -126,7 +137,7 @@ const handleDeleteLanguage = async (languageCode: string) => {
       </h3>
       <div class="mt-2 space-y-4">
         <div
-          v-for="language in activeLanguages"
+          v-for="language in languages"
           :key="language.code"
           class="rounded-lg border border-gray-200 p-4 transition-colors duration-200 hover:bg-gray-50 dark:border-gray-700 dark:hover:bg-gray-700/50"
         >
@@ -142,7 +153,7 @@ const handleDeleteLanguage = async (languageCode: string) => {
                   v-if="!language.isDefault"
                   type="warning"
                   plain
-                  @click="handleSetDefault(language.code)"
+                  @click="handleSetDefault(language._id)"
                   class="flex items-center"
                 >
                   <el-icon class="mr-1"><Star /></el-icon>
@@ -160,7 +171,7 @@ const handleDeleteLanguage = async (languageCode: string) => {
                 <el-button
                   type="danger"
                   plain
-                  @click="handleDeleteLanguage(language.code)"
+                  @click="handleDeleteLanguage(language._id)"
                   class="flex items-center"
                 >
                   <el-icon class="mr-1"><Delete /></el-icon>

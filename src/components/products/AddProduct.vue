@@ -131,7 +131,6 @@ const steps = [
   { title: 'Categories', fields: ['categories'] },
   { title: 'Colors & Images', fields: [] },
   { title: 'Additional Info', fields: [] },
-  { title: 'Review' },
 ];
 
 const rules: FormRules = {
@@ -782,56 +781,6 @@ onMounted(() => {
                 />
               </el-form-item>
             </div>
-          </div>
-        </div>
-      </div>
-
-      <!-- Step 6 - Review -->
-      <div v-if="activeStep === 5" class="animate-fadeIn">
-        <div class="mb-6 rounded-lg bg-blue-50 p-1">
-          <h2 class="px-3 py-2 text-xl font-semibold text-blue-700">
-            Review & Submit
-          </h2>
-        </div>
-
-        <div
-          class="space-y-6 rounded-lg border border-gray-200 bg-white p-6 shadow-sm"
-        >
-          <div
-            class="mb-6 flex items-center justify-center rounded-lg bg-green-50 p-4 text-green-700"
-          >
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              class="mr-3 h-8 w-8"
-              fill="none"
-              viewBox="0 0 24 24"
-              stroke="currentColor"
-            >
-              <path
-                stroke-linecap="round"
-                stroke-linejoin="round"
-                stroke-width="2"
-                d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"
-              />
-            </svg>
-            <div>
-              <p class="font-semibold">
-                All set! Please review your product details before submitting
-              </p>
-              <p class="text-sm">
-                You can go back to any step if you need to make changes
-              </p>
-            </div>
-          </div>
-
-          <div class="overflow-hidden rounded-lg border border-gray-100">
-            <div class="bg-gray-50 px-4 py-3 font-medium text-gray-700">
-              Product Summary
-            </div>
-            <pre
-              class="max-h-96 overflow-x-auto bg-gray-50 p-4 text-sm whitespace-pre-wrap text-gray-700"
-              >{{ JSON.stringify(formData, null, 2) }}</pre
-            >
           </div>
         </div>
       </div>

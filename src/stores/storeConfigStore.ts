@@ -2,7 +2,15 @@ import { defineStore } from 'pinia';
 import { ref, computed } from 'vue';
 import axios from 'axios';
 import { ElMessage } from 'element-plus';
-
+import { useAuthStore } from './authStore';
+const API_BASE = 'http://localhost:5000';
+const getAuthHeaders = () => {
+  const { token } = useAuthStore();
+  return {
+    Authorization: `Bearer ${token}`,
+    'Content-Type': 'application/json',
+  };
+};
 interface AdminUser {
   _id: string;
   username: string;
@@ -71,11 +79,7 @@ export const useStoreConfigStore = defineStore('storeConfig', () => {
   const error = ref<string | null>(null);
 
   // Computed properties
-  const activeShippingMethods = computed(() =>
-    storeConfig.value.shippingMethods.filter(
-      (method) => method.isActive && !method.deletedAt,
-    ),
-  );
+  const activeShippingMethods = ref([]);
 
   const activeUserRoles = computed(() =>
     storeConfig.value.userRoles.filter(
@@ -100,7 +104,17 @@ export const useStoreConfigStore = defineStore('storeConfig', () => {
     storeConfig.value = { ...storeConfig.value, ...config };
   };
 
-  const addShippingMethod = (method: Omit<ShippingMethod, 'id'>) => {
+  const addShippingMethod = async (method: Omit<ShippingMethod, 'id'>) => {
+    try {
+      const data = await axios.post(`${API_BASE}/shippings`, method, {
+        headers: getAuthHeaders(),
+      });
+      activeShippingMethods.value = data.data.data.shippingMethods;
+      return activeShippingMethods.value;
+    } catch (err) {
+      console.log(err);
+    }
+    return;
     const newMethod: ShippingMethod = {
       ...method,
       id: crypto.randomUUID(),
@@ -109,25 +123,35 @@ export const useStoreConfigStore = defineStore('storeConfig', () => {
     storeConfig.value.shippingMethods.push(newMethod);
   };
 
-  const updateShippingMethod = (
+  const updateShippingMethod = async (
     id: string,
     updates: Partial<ShippingMethod>,
   ) => {
-    const index = storeConfig.value.shippingMethods.findIndex(
-      (m) => m.id === id,
-    );
-    if (index !== -1) {
-      storeConfig.value.shippingMethods[index] = {
-        ...storeConfig.value.shippingMethods[index],
-        ...updates,
-      };
+    try {
+      const data = await axios.put(
+        `${API_BASE}/shippings`,
+        { name: updates.name, cost: updates.cost },
+        { headers: getAuthHeaders(), params: { id } },
+      );
+      activeShippingMethods.value = data.data.data.shippingMethods;
+      return activeShippingMethods.value;
+    } catch (err) {
+      console.log(err);
     }
   };
 
-  const softDeleteShippingMethod = (id: string) => {
-    const method = storeConfig.value.shippingMethods.find((m) => m.id === id);
-    if (method) {
-      method.deletedAt = new Date();
+  const softDeleteShippingMethod = async (id: string) => {
+    storeConfig.value.shippingMethods =
+      storeConfig.value.shippingMethods.filter((m) => m.id !== id);
+    try {
+      const data = await axios.delete(`${API_BASE}/shippings`, {
+        headers: getAuthHeaders(),
+        params: { id },
+      });
+      activeShippingMethods.value = data.data.data.shippingMethods;
+      return activeShippingMethods.value;
+    } catch (err) {
+      console.log(err);
     }
   };
 
@@ -235,8 +259,8 @@ export const useStoreConfigStore = defineStore('storeConfig', () => {
           Authorization: `Bearer ${token}`,
         },
       });
-
       storeConfig.value = response.data.data;
+      return storeConfig.value;
     } catch (err) {
       error.value =
         err instanceof Error
@@ -257,7 +281,7 @@ export const useStoreConfigStore = defineStore('storeConfig', () => {
       const token =
         localStorage.getItem('token') || sessionStorage.getItem('token');
       const response = await axios.post(
-        'http://localhost:5000/auth/admin/invite', 
+        'http://localhost:5000/auth/admin/invite',
         admin,
         {
           headers: {
@@ -298,11 +322,12 @@ export const useStoreConfigStore = defineStore('storeConfig', () => {
       );
       if (response.data.status === 'success') {
         adminUsers.value = response.data.data;
+        return adminUsers.value;
       } else {
         error.value = response.data.message || 'Failed to load admin users.';
         ElMessage.error(error.value || 'An unknown error occurred');
       }
-    } catch ( err: any) {
+    } catch (err: any) {
       error.value =
         err instanceof Error ? err.message : 'Failed to load admin users.';
       ElMessage.error(error.value);
@@ -364,7 +389,7 @@ export const useStoreConfigStore = defineStore('storeConfig', () => {
         error.value = response.data.message || 'Failed to remove admin user.';
         ElMessage.error(error.value || 'An unknown error occurred');
       }
-    } catch (err : any) {
+    } catch (err: any) {
       error.value =
         err instanceof Error ? err.message : 'Failed to remove admin user.';
       ElMessage.error(error.value);

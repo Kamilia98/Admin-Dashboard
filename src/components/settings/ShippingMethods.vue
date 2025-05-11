@@ -1,35 +1,48 @@
 <script setup lang="ts">
-import { ref } from 'vue';
+import { ref, onMounted, watch } from 'vue';
 import { useStoreConfigStore } from '../../stores/storeConfigStore';
 import { ElInput, ElButton, ElIcon, ElMessageBox } from 'element-plus';
 import { Plus, Check, Close, Edit, Delete } from '@element-plus/icons-vue';
-
+import { storeToRefs } from 'pinia';
 const editingId = ref<string | null>(null);
 const newShippingMethod = ref({ name: '', cost: 0, isActive: true });
 const editShippingMethod = ref({ id: '', name: '', cost: 0, isActive: true });
 
 const {
+  loadStoreConfig,
+
   activeShippingMethods,
   addShippingMethod,
   updateShippingMethod,
   softDeleteShippingMethod,
 } = useStoreConfigStore();
-
-const handleAddShippingMethod = () => {
+const Methods = ref([]);
+onMounted(async () => {
+  const data = await loadStoreConfig();
+  Methods.value = data.shippingMethods;
+});
+watch(activeShippingMethods, (newMethods) => {
+  activeShippingMethods.value = newMethods;
+  console.log(activeShippingMethods.value);
+});
+const handleAddShippingMethod = async () => {
   if (newShippingMethod.value.name && newShippingMethod.value.cost >= 0) {
-    addShippingMethod(newShippingMethod.value);
+    Methods.value = await addShippingMethod(newShippingMethod.value);
     newShippingMethod.value = { name: '', cost: 0, isActive: true };
   }
 };
 
 const handleEditShippingMethod = (method: any) => {
-  editingId.value = method.id;
+  editingId.value = method._id;
   editShippingMethod.value = { ...method };
 };
 
-const handleUpdateShippingMethod = () => {
+const handleUpdateShippingMethod = async () => {
   if (editShippingMethod.value.name && editShippingMethod.value.cost >= 0) {
-    updateShippingMethod(editShippingMethod.value.id, editShippingMethod.value);
+    Methods.value = await updateShippingMethod(
+      editShippingMethod.value._id,
+      editShippingMethod.value,
+    );
     editingId.value = null;
   }
 };
@@ -50,7 +63,7 @@ const handleDeleteShippingMethod = async (methodId: string) => {
         confirmButtonClass: 'el-button--danger el-button--plain',
       },
     );
-    softDeleteShippingMethod(methodId);
+    Methods.value = await softDeleteShippingMethod(methodId);
   } catch (error) {
     console.log('Deletion cancelled');
   }
@@ -96,11 +109,11 @@ const handleDeleteShippingMethod = async (methodId: string) => {
       </h3>
       <div class="mt-2 space-y-2">
         <div
-          v-for="method in activeShippingMethods"
-          :key="method.id"
+          v-for="method in Methods"
+          :key="method._id"
           class="flex items-center justify-between rounded-lg border border-gray-200 p-4 transition-colors duration-200 hover:bg-gray-50 dark:border-gray-700 dark:hover:bg-gray-700/50"
         >
-          <div v-if="editingId !== method.id">
+          <div v-if="editingId !== method._id">
             <p class="font-medium text-gray-900 dark:text-white">
               {{ method.name }}
             </p>
@@ -122,7 +135,7 @@ const handleDeleteShippingMethod = async (methodId: string) => {
           </div>
           <div class="flex space-x-2">
             <el-button
-              v-if="editingId === method.id"
+              v-if="editingId === method._id"
               type="success"
               plain
               @click="handleUpdateShippingMethod"
@@ -132,7 +145,7 @@ const handleDeleteShippingMethod = async (methodId: string) => {
               Save
             </el-button>
             <el-button
-              v-if="editingId === method.id"
+              v-if="editingId === method._id"
               @click="handleCancelEdit"
               class="flex items-center"
             >
@@ -140,7 +153,7 @@ const handleDeleteShippingMethod = async (methodId: string) => {
               Cancel
             </el-button>
             <el-button
-              v-if="editingId !== method.id"
+              v-if="editingId !== method._id"
               type="primary"
               plain
               @click="handleEditShippingMethod(method)"
@@ -152,7 +165,7 @@ const handleDeleteShippingMethod = async (methodId: string) => {
             <el-button
               type="danger"
               plain
-              @click="handleDeleteShippingMethod(method.id)"
+              @click="handleDeleteShippingMethod(method._id)"
               class="flex items-center"
             >
               <el-icon class="mr-1"><Delete /></el-icon>

@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, watch,onMounted } from 'vue';
+import { ref, watch, onMounted } from 'vue';
 import {
   ElInput,
   ElButton,
@@ -12,10 +12,8 @@ import {
 import { Plus, Delete, Edit, Check, Close } from '@element-plus/icons-vue';
 import { useStoreConfigStore } from '../../stores/storeConfigStore';
 
-
 const editingAdminId = ref<string | null>(null);
 const editedAdminRole = ref('');
-
 
 const inviteForm = ref({
   email: '',
@@ -37,9 +35,10 @@ const {
   isLoading,
   error,
 } = useStoreConfigStore();
-
-onMounted(() => {
-  loadAdminUsers();
+const Admins = ref([]);
+onMounted(async () => {
+  const AdminsArr = await loadAdminUsers();
+  Admins.value = AdminsArr;
 });
 
 watch(
@@ -91,13 +90,15 @@ const handleDeleteAdmin = async (adminId: string) => {
 };
 
 const handleEditAdmin = (admin: any) => {
-  editingAdminId.value = admin._id; 
+  editingAdminId.value = admin._id;
   editedAdminRole.value = admin.role;
 };
 
 const handleSaveEdit = async (adminId: string) => {
   if (!editedAdminRole.value) {
-    ElMessageBox.alert('Please select a valid role.', 'Error', { type: 'error' });
+    ElMessageBox.alert('Please select a valid role.', 'Error', {
+      type: 'error',
+    });
     return;
   }
   await updateAdminUserRole(adminId, editedAdminRole.value);
@@ -127,12 +128,17 @@ const handleCancelEdit = () => {
             :value="role.value"
           />
         </el-select>
-        <el-button type="primary" plain @click="handleInvite" :loading="isLoading">
+        <el-button
+          type="primary"
+          plain
+          @click="handleInvite"
+          :loading="isLoading"
+        >
           <el-icon class="mr-1"><Plus /></el-icon>
           {{ isLoading ? 'Inviting...' : 'Invite Admin' }}
         </el-button>
       </div>
-      <div v-if="error" class="text-red-500 mt-2">{{ error }}</div>
+      <div v-if="error" class="mt-2 text-red-500">{{ error }}</div>
     </div>
 
     <div>
@@ -141,7 +147,7 @@ const handleCancelEdit = () => {
       </h3>
       <div class="space-y-4">
         <div
-          v-for="admin in adminUsers"
+          v-for="admin in Admins"
           :key="admin._id"
           class="flex items-center justify-between rounded-lg border border-gray-200 p-4 dark:border-gray-700"
         >
@@ -212,7 +218,9 @@ const handleCancelEdit = () => {
           </div>
         </div>
         <div v-if="isLoading && !adminUsers.length">Loading admin users...</div>
-        <div v-if="error && adminUsers.length === 0" class="text-red-500">{{ error }}</div>
+        <div v-if="error && adminUsers.length === 0" class="text-red-500">
+          {{ error }}
+        </div>
       </div>
     </div>
   </div>

@@ -6,11 +6,14 @@ import type {
 } from '../types/product-varient';
 import * as productService from '../services/productService';
 import { ref } from 'vue';
+import { ElMessageBox } from 'element-plus';
+import { router } from '../router';
 
 export const useProductStore = defineStore('productStore', () => {
   // States
   const products = ref<productVariant[]>([]);
   const totalProducts = ref(0);
+  const searchQuery = ref<string>('');
   const product = ref<Product | null>(null);
   const loading = ref(false);
   const error = ref<string | null>(null);
@@ -38,6 +41,7 @@ export const useProductStore = defineStore('productStore', () => {
           pageSize.value,
           sortBy.value,
           sortOrder.value,
+          searchQuery.value,
           {
             categories: selectedCategories.value,
             minPrice: minPrice.value,
@@ -78,26 +82,47 @@ export const useProductStore = defineStore('productStore', () => {
     }
   };
 
+  // const deleteProductById = async (id: string) => {
+  //   try {
+  //     await productService.deleteProduct(id);
+  //     await getAllProducts(currentPage.value);
+  //   } catch (err: any) {
+  //     console.error('Delete error:', err);
+  //     error.value = 'Failed to delete product.';
+  //   }
+  // };
+
   const deleteProductById = async (id: string) => {
     try {
+      await ElMessageBox.confirm(
+        'Are you sure you want to delete this product?',
+        'Confirm Deletion',
+        {
+          confirmButtonText: 'Delete',
+          cancelButtonText: 'Cancel',
+          type: 'warning',
+          confirmButtonClass: 'el-button--danger el-button--plain',
+        },
+      );
+
       await productService.deleteProduct(id);
-      await getAllProducts(currentPage.value); // Refresh list after deletion
-    } catch (err: any) {
-      console.error('Delete error:', err);
-      error.value = 'Failed to delete product.';
+      await getAllProducts(currentPage.value);
+      router.push({ name: 'products' });
+    } catch {
+      // Cancelled
     }
   };
-
   const addProduct = async (newProduct: Product) => {
     loading.value = true;
     error.value = null;
     try {
       const response = await productService.addProduct(newProduct);
-      products.value.push(response.data);
-      console.log('[Product added]', response.data);
+      getAllProducts(1);
+      // products.value.push(response.data.data);
+      console.log('[Product added]', response.data.data);
     } catch (err: any) {
       console.error('Add product error:', err);
-      error.value = err.message || 'Failed to add product.';
+      error.value = err.response?.data?.message || 'Failed to add product.';
     } finally {
       loading.value = false;
     }
@@ -150,7 +175,7 @@ export const useProductStore = defineStore('productStore', () => {
     selectedCategories,
     minPrice,
     maxPrice,
-
+    searchQuery,
     AnaylticsTotalProducts,
     lowStockCount,
     bestSellingProductName,

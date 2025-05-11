@@ -18,8 +18,6 @@ const CATEGORY_LIMIT = 3;
 
 export const useCategoryStore = defineStore('category', () => {
   const router = useRouter();
-
-  // State
   const loading = ref(false);
   const error = ref<string | null>(null);
   const searchQuery = ref('');
@@ -44,7 +42,6 @@ export const useCategoryStore = defineStore('category', () => {
     edit: { id: '', name: '', description: '', image: '' },
   });
 
-  // Utility
   const resetForm = (type: 'add' | 'edit') => {
     if (type === 'add') {
       formState.value.add = { name: '', description: '', image: '' };
@@ -120,15 +117,19 @@ export const useCategoryStore = defineStore('category', () => {
   };
 
   // CRUD operations
-  const getCategories = async (page = currentPage.value) =>
+  const getCategories = async (
+    page = currentPage.value,
+    limit = limits.value,
+  ) =>
     withLoading(async () => {
       const data = await fetchCategories({
         page,
-        limit: limits.value,
+        limit,
         searchQuery: searchQuery.value,
         sortBy: sortBy.value,
         sortOrder: sortOrder.value,
       });
+      console.log('[category store]');
       currentPage.value = page;
       totalPages.value = data.totalPages;
       totalFilteredCategories.value = data.totalCategories;

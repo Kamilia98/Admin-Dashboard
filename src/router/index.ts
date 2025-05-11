@@ -1,6 +1,32 @@
 import { createRouter, createWebHistory } from 'vue-router';
 import { useAuthStore } from '../stores/authStore';
 
+import axios from 'axios';
+import { ElMessage } from 'element-plus';
+const fetchUserProfile = async () => {
+  try {
+    const token =
+      localStorage.getItem('token') || sessionStorage.getItem('token');
+
+    if (!token) {
+      throw new Error('No authentication token found');
+    }
+
+    const response = await axios.get('http://localhost:5000/users/profile', {
+      headers: {
+        Authorization: `Bearer ${token}`,
+        'Content-Type': 'application/json',
+      },
+    });
+    const data = response.data.data.user;
+    console.log(data);
+    return data;
+  } catch (error: any) {
+    console.log('Error fetching user profile:', error);
+  }
+};
+const userRole: any = fetchUserProfile();
+console.log(userRole);
 const routes = [
   {
     path: '/login',
@@ -122,15 +148,32 @@ export const router = createRouter({
 
 router.beforeEach(async (to, from, next) => {
   const store = useAuthStore();
-
+  const userRole = await fetchUserProfile();
+  console.log(userRole);
   if (to.meta.requiresAuth && !store.isAuthenticated) {
     console.log('Route requires auth, redirecting to login');
-    return next({ name: 'login' });
+    next({ name: 'login' });
+  } else if (
+    to.name === 'login' &&
+    store.isAuthenticated.value &&
+    from.name !== 'signout'
+    // auth ---> store
+  ) {
+    console.log('Already logged in, redirecting to dashboard');
+
+    console.log(from);
+    return next({ name: from.name });
   }
 
-  if (to.name === 'login' && store.isAuthenticated && from.name !== 'signout') {
-    console.log('Already logged in, redirecting to dashboard');
-    console.log(from);
+  if (to.name === 'settings' && userRole.role !== 'OWNER') {
+    console.log(userRole.role);
+    ElMessage({
+      message: 'Access denied: Only OWNER can access the settings page',
+      type: 'error',
+      duration: 5000,
+    });
+
+    console.log('Access denied: Only OWNER role can access the settings page');
     return next({ name: from.name });
   }
   next();

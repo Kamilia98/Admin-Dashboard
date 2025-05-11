@@ -161,7 +161,11 @@ const selectVariant = (productId: string, index: number) => {
               ><ElIcon><View /></ElIcon
             ></template>
           </Button>
-          <Button variant="primary">
+          <Button
+            variant="primary"
+            tag="router-link"
+            :to="{ name: 'edit-product', params: { id: item._id } }"
+          >
             <template #icon
               ><ElIcon><Edit /></ElIcon
             ></template>

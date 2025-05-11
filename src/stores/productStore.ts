@@ -143,13 +143,18 @@ export const useProductStore = defineStore('productStore', () => {
     error.value = null;
     try {
       const { data } = await productService.updateProduct(id, updatedProduct);
-      // locally update the product in the store
+
+      const updated = data.data;
+
       const index = products.value.findIndex((item) => item._id === id);
       if (index !== -1) {
-        products.value[index] = data;
+        products.value[index] = updated;
       }
+
+      ElMessage.success('Product updated successfully!');
     } catch (err: any) {
-      error.value = err.message || 'Failed to update product';
+      console.error('Update error:', err);
+      error.value = err.response?.data?.message || 'Failed to update product';
     } finally {
       loading.value = false;
     }

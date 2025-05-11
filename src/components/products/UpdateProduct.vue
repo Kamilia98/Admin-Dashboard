@@ -1,6 +1,6 @@
 <script setup lang="ts">
-import { ref, reactive, onMounted } from 'vue';
-import { useRouter } from 'vue-router';
+import { ref, reactive, onMounted, watch, computed } from 'vue';
+import { useRouter, useRoute } from 'vue-router';
 import {
   ElForm,
   ElFormItem,
@@ -8,8 +8,6 @@ import {
   ElInputNumber,
   ElSelect,
   ElOption,
-  ElSteps,
-  ElStep,
   ElMessage,
 } from 'element-plus';
 import { useProductStore } from '../../stores/productStore';
@@ -20,13 +18,16 @@ import type { FormRules, FormInstance } from 'element-plus';
 import Dropzone from '../common/Dropzone.vue';
 
 const router = useRouter();
+const route = useRoute();
 const productStore = useProductStore();
 const categoryStore = useCategoryStore();
 
+const productId = route.params.id as string;
 const images = ref<{ public_id: string; url: string }[]>([]);
 const activeStep = ref(0);
 const formRef = ref<FormInstance>();
 const isLoading = ref(false);
+const isFetching = ref(true);
 
 interface ProductForm {
   name: string;
@@ -163,6 +164,7 @@ const handleHaleam = (data: any, colorIndex: number) => {
     url: data.secure_url,
   });
 };
+
 const handleImageRemove = (colorIndex: number, imageIndex?: number) => {
   if (typeof imageIndex === 'number') {
     formData.colors[colorIndex].images.splice(imageIndex, 1);
@@ -208,10 +210,108 @@ const validateStep = async () => {
   }
 };
 
+const fetchProductData = async () => {
+  try {
+    isFetching.value = true;
+    const product = await productStore.getProductById(productId);
+    if (product) {
+      // Map product data to form data
+      formData.name = product.name || '';
+      formData.subtitle = product.subtitle || '';
+      formData.description = product.description || '';
+      formData.price = product.price || 0;
+      formData.sale = product.sale || 0;
+      formData.brand = product.brand || '';
+      formData.categories =
+        product.categories?.map((cat: any) => cat._id || cat) || [];
+
+      // Handle colors with images
+      if (product.colors?.length) {
+        formData.colors = product.colors.map((color: any) => ({
+          name: color.name || '',
+          hex: color.hex,
+          quantity: color.quantity || 0,
+          sku: color.sku || '',
+          images: color.images || [],
+        }));
+      }
+
+      // Handle additional information
+      if (product.additionalInformation) {
+        // Map general info
+        if (product.additionalInformation.general) {
+          formData.additionalInformation.general = {
+            salesPackage:
+              product.additionalInformation.general.salesPackage || '',
+            modelNumber:
+              product.additionalInformation.general.modelNumber || '',
+            configuration:
+              product.additionalInformation.general.configuration || '',
+            upholsteryMaterial:
+              product.additionalInformation.general.upholsteryMaterial || '',
+            upholsteryColor:
+              product.additionalInformation.general.upholsteryColor || '',
+          };
+        }
+
+        // Map product details
+        if (product.additionalInformation.productDetails) {
+          formData.additionalInformation.productDetails = {
+            fillingMaterial:
+              product.additionalInformation.productDetails.fillingMaterial ||
+              '',
+            finishType:
+              product.additionalInformation.productDetails.finishType || '',
+            adjustableHeadrest:
+              product.additionalInformation.productDetails.adjustableHeadrest ||
+              false,
+            maximumLoadCapacity:
+              product.additionalInformation.productDetails
+                .maximumLoadCapacity || 0,
+            originOfManufacture:
+              product.additionalInformation.productDetails
+                .originOfManufacture || '',
+          };
+        }
+
+        // Map dimensions
+        if (product.additionalInformation.dimensions) {
+          formData.additionalInformation.dimensions = {
+            width: product.additionalInformation.dimensions.width || 0,
+            height: product.additionalInformation.dimensions.height || 0,
+            depth: product.additionalInformation.dimensions.depth || 0,
+            seatHeight:
+              product.additionalInformation.dimensions.seatHeight || 0,
+            legHeight: product.additionalInformation.dimensions.legHeight || 0,
+          };
+        }
+
+        // Map warranty
+        if (product.additionalInformation.warranty) {
+          formData.additionalInformation.warranty = {
+            summary: product.additionalInformation.warranty.summary || '',
+            serviceType:
+              product.additionalInformation.warranty.serviceType || '',
+            covered: product.additionalInformation.warranty.covered || '',
+            notCovered: product.additionalInformation.warranty.notCovered || '',
+            domesticWarranty:
+              product.additionalInformation.warranty.domesticWarranty || '',
+          };
+        }
+      }
+    }
+  } catch (error) {
+    console.error('Error fetching product data:', error);
+    ElMessage.error('Failed to load product data');
+  } finally {
+    isFetching.value = false;
+  }
+};
+
 const submitForm = async () => {
   try {
     // Validate entire form
-    console.log('Submission payload:', JSON.parse(JSON.stringify(formData)));
+    console.log('Update payload:', JSON.parse(JSON.stringify(formData)));
     const isValid = await formRef.value?.validate();
     if (!isValid) {
       ElMessage.error('Please fix all form errors before submitting');
@@ -220,12 +320,11 @@ const submitForm = async () => {
 
     isLoading.value = true;
     try {
-      const response = await productStore.addProduct(formData);
-      console.log('[Debug ----add product ]', response);
-      ElMessage.success('Product created successfully!');
+      const response = await productStore.updateProduct(productId, formData);
+      console.log('[Debug ----update product]', response);
       router.push({ name: 'products' });
     } catch (error) {
-      ElMessage.error('Failed to create product. Please check your inputs.');
+      ElMessage.error('Failed to update product. Please check your inputs.');
       console.error('Submission error:', error);
     } finally {
       isLoading.value = false;
@@ -237,16 +336,49 @@ const submitForm = async () => {
 
 onMounted(() => {
   categoryStore.getCategories(1, 10);
+  fetchProductData();
 });
+
+// Show loading while fetching product data
+const isReady = computed(() => !isFetching.value);
 </script>
 
 <template>
-  <div class="mx-auto max-w-5xl rounded-lg bg-white p-8 shadow-lg">
+  <div v-if="isFetching" class="flex h-96 items-center justify-center">
+    <div class="flex flex-col items-center space-y-4">
+      <svg
+        class="h-12 w-12 animate-spin text-blue-600"
+        xmlns="http://www.w3.org/2000/svg"
+        fill="none"
+        viewBox="0 0 24 24"
+      >
+        <circle
+          class="opacity-25"
+          cx="12"
+          cy="12"
+          r="10"
+          stroke="currentColor"
+          stroke-width="4"
+        ></circle>
+        <path
+          class="opacity-75"
+          fill="currentColor"
+          d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+        ></path>
+      </svg>
+      <p class="text-lg font-medium text-gray-700">Loading product data...</p>
+    </div>
+  </div>
+
+  <div
+    v-else
+    class="mx-auto max-w-5xl rounded-lg bg-white p-8 shadow-lg dark:bg-white/[0.03]"
+  >
     <!-- Header with progress indicator -->
     <div class="mb-10 text-center">
-      <h1 class="mb-2 text-3xl font-bold text-gray-800">Add New Product</h1>
+      <h1 class="mb-2 text-3xl font-bold text-gray-800">Update Product</h1>
       <p class="mb-6 text-gray-500">
-        Complete all information to add your product to the catalog
+        Edit your product information to update your catalog
       </p>
 
       <!-- Custom Step Progress Bar -->
@@ -543,11 +675,37 @@ onMounted(() => {
               data-field="colors"
               class="mt-4"
             >
-              <Dropzone
-                @haleem="(data) => handleHaleam(data, index)"
-                @removed-file="() => handleImageRemove(index)"
-                class="rounded-lg border-2 border-dashed border-blue-300 p-8 text-center transition-colors hover:border-blue-500"
-              />
+              <!-- Display existing images -->
+              <div
+                v-if="color.images.length"
+                class="mb-4 grid w-full grid-cols-2 gap-4 md:grid-cols-5"
+              >
+                <div
+                  v-for="(img, imgIndex) in color.images"
+                  :key="img.public_id"
+                  class="relative h-42 rounded-lg border border-gray-200 bg-gray-50 p-1"
+                >
+                  <img
+                    :src="img.url"
+                    :alt="`Product color ${color.name} image ${imgIndex + 1}`"
+                    class="h-full w-full rounded object-cover"
+                  />
+                  <button
+                    @click="handleImageRemove(index, imgIndex)"
+                    class="absolute top-2 right-2 flex h-6 w-6 items-center justify-center rounded-full bg-red-500 text-xs text-white shadow-md"
+                    type="button"
+                  >
+                    &times;
+                  </button>
+                </div>
+              </div>
+              <div class="w-full">
+                <Dropzone
+                  @haleem="(data) => handleHaleam(data, index)"
+                  @removed-file="() => handleImageRemove(index)"
+                  class="rounded-lg border-2 border-dashed border-blue-300 p-8 text-center transition-colors hover:border-blue-500"
+                />
+              </div>
             </el-form-item>
           </div>
 
@@ -561,7 +719,6 @@ onMounted(() => {
           </button>
         </div>
       </div>
-
       <!-- Step 5 - Additional Info -->
       <div v-if="activeStep === 4" class="animate-fadeIn">
         <div class="mb-6 rounded-lg bg-blue-50 p-1">
@@ -869,7 +1026,7 @@ onMounted(() => {
               ></path>
             </svg>
           </span>
-          Submit Product
+          Save changes
         </button>
       </div>
     </el-form>

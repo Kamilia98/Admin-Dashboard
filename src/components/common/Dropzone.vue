@@ -6,7 +6,7 @@
       class="dropzone flex justify-center rounded-xl border-dashed border-gray-300 bg-gray-50 p-7 hover:border-brand-500 lg:p-10 dark:border-gray-700 dark:bg-gray-900 dark:hover:border-brand-500"
     >
       <!-- Dropzone Message when no uploaded image -->
-      <div v-if="!uploadedImage" class="dz-message m-0!">
+      <div v-if="!uploadedImage || !modelValue" class="dz-message m-0!">
         <div class="mb-[22px] flex justify-center">
           <div
             class="flex h-[68px] w-[68px] items-center justify-center rounded-full bg-gray-200 text-gray-700 dark:bg-gray-800 dark:text-gray-400"

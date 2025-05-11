@@ -72,5 +72,8 @@ export const addProduct = async (newProduct: Product) => {
 };
 
 export const updateProduct = (id: string, updatedProduct: Partial<Product>) => {
-  return axios.put<Product>(`${BASE_URL}/update/${id}`, updatedProduct);
+  return axios.patch<{ status: string; message: string; data: Product }>(
+    `${BASE_URL}/update/${id}`,
+    updatedProduct,
+  );
 };

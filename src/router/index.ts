@@ -35,7 +35,6 @@ const routes = [
   {
     path: '/',
     redirect: '/dashboard',
-    
   },
   {
     path: '/orders',
@@ -84,6 +83,13 @@ const routes = [
     path: '/add-product',
     name: 'add-product',
     component: () => import('../components/products/AddProduct.vue'),
+    meta: { requiresAuth: true, layout: 'admin' },
+  },
+  {
+    path: '/edit-product/:id',
+    name: 'edit-product',
+    component: () => import('../components/products/UpdateProduct.vue'),
+    props: true,
     meta: { requiresAuth: true, layout: 'admin' },
   },
   {

@@ -6,7 +6,7 @@ import type {
 } from '../types/product-varient';
 import * as productService from '../services/productService';
 import { ref } from 'vue';
-import { ElMessageBox } from 'element-plus';
+import { ElMessage, ElMessageBox } from 'element-plus';
 import { router } from '../router';
 
 export const useProductStore = defineStore('productStore', () => {
@@ -106,12 +106,19 @@ export const useProductStore = defineStore('productStore', () => {
       );
 
       await productService.deleteProduct(id);
+      ElMessage.success('Product deleted successfully!');
       await getAllProducts(currentPage.value);
-      router.push({ name: 'products' });
-    } catch {
-      // Cancelled
+
+      setTimeout(() => {
+        router.push({ name: 'products' });
+      }, 500);
+    } catch (err) {
+      // cancel
+      console.error('Delete failed:', err);
+      // ElMessage.error('Failed to delete this product');
     }
   };
+
   const addProduct = async (newProduct: Product) => {
     loading.value = true;
     error.value = null;
@@ -136,13 +143,19 @@ export const useProductStore = defineStore('productStore', () => {
     error.value = null;
     try {
       const { data } = await productService.updateProduct(id, updatedProduct);
-      // locally update the product in the store
+
+      const updated = data.data;
+
       const index = products.value.findIndex((item) => item._id === id);
       if (index !== -1) {
-        products.value[index] = data;
+        products.value[index] = updated;
       }
+      console.log('[Product-service--updated-product]', updateProduct);
+
+      ElMessage.success('Product updated successfully!');
     } catch (err: any) {
-      error.value = err.message || 'Failed to update product';
+      console.error('Update error:', err);
+      error.value = err.response?.data?.message || 'Failed to update product';
     } finally {
       loading.value = false;
     }

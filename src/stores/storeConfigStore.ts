@@ -1,5 +1,5 @@
 import { defineStore } from 'pinia';
-import { ref, computed } from 'vue';
+import { ref, computed, watch } from 'vue';
 import axios from 'axios';
 import { ElMessage } from 'element-plus';
 
@@ -8,6 +8,7 @@ interface AdminUser {
   username: string;
   email: string;
   role: string;
+  permissions: string[];
   status: string;
   createdAt?: string;
 }
@@ -213,12 +214,14 @@ export const useStoreConfigStore = defineStore('storeConfig', () => {
       } else {
         error.value =
           response.data.message || 'Failed to save store configuration';
+        ElMessage.error(error.value || 'An unknown error occurred'); // show message
       }
-    } catch (err) {
+    } catch (err: any) {
       error.value =
         err instanceof Error
           ? err.message
           : 'Failed to save store configuration';
+      ElMessage.error(error.value);
     } finally {
       isLoading.value = false;
     }
@@ -236,29 +239,45 @@ export const useStoreConfigStore = defineStore('storeConfig', () => {
         },
       });
 
-      storeConfig.value = response.data.data;
-    } catch (err) {
+      if (response.data.status === 'success') {
+        storeConfig.value = response.data.data;
+      } else {
+        error.value =
+          response.data.message || 'Failed to load store configuration';
+        ElMessage.error(error.value || 'An unknown error occurred');
+      }
+    } catch (err: any) {
       error.value =
         err instanceof Error
           ? err.message
           : 'Failed to load store configuration';
+      ElMessage.error(error.value);
     } finally {
       isLoading.value = false;
     }
   };
 
   // ***********************************************/
-  //         Admin User Actions
+  //                Admin User Actions
   // ***********************************************/
-  const inviteAdminUser = async (admin: { email: string; role: string }) => {
+  const inviteAdminUser = async (admin: {
+    email: string;
+    role: string;
+    permissions?: string[];
+  }) => {
+    //add permission
     isLoading.value = true;
     error.value = null;
     try {
       const token =
         localStorage.getItem('token') || sessionStorage.getItem('token');
       const response = await axios.post(
-        'http://localhost:5000/auth/admin/invite', 
-        admin,
+        'http://localhost:5000/auth/admin/invite',
+        {
+          email: admin.email,
+          role: admin.role,
+          permissions: admin.permissions,
+        },
         {
           headers: {
             Authorization: `Bearer ${token}`,
@@ -268,11 +287,10 @@ export const useStoreConfigStore = defineStore('storeConfig', () => {
       );
       if (response.data.status === 'success') {
         ElMessage.success('Invitation sent successfully!');
-
         await loadAdminUsers();
       } else {
         error.value = response.data.message || 'Failed to send invitation.';
-        ElMessage.error('An unknown error occurred');
+        ElMessage.error(error.value || 'An unknown error occurred');
       }
     } catch (err: any) {
       error.value =
@@ -302,7 +320,7 @@ export const useStoreConfigStore = defineStore('storeConfig', () => {
         error.value = response.data.message || 'Failed to load admin users.';
         ElMessage.error(error.value || 'An unknown error occurred');
       }
-    } catch ( err: any) {
+    } catch (err: any) {
       error.value =
         err instanceof Error ? err.message : 'Failed to load admin users.';
       ElMessage.error(error.value);
@@ -311,7 +329,11 @@ export const useStoreConfigStore = defineStore('storeConfig', () => {
     }
   };
 
-  const updateAdminUserRole = async (adminId: string, newRole: string) => {
+  const updateAdminUserPermissions = async (
+    adminId: string,
+    updates: { permissions: string[] },
+  ) => {
+    // Updated action name
     isLoading.value = true;
     error.value = null;
     try {
@@ -319,7 +341,7 @@ export const useStoreConfigStore = defineStore('storeConfig', () => {
         localStorage.getItem('token') || sessionStorage.getItem('token');
       const response = await axios.patch(
         `http://localhost:5000/users/admin/users/${adminId}`,
-        { role: newRole },
+        updates,
         {
           headers: {
             Authorization: `Bearer ${token}`,
@@ -328,21 +350,23 @@ export const useStoreConfigStore = defineStore('storeConfig', () => {
         },
       );
       if (response.data.status === 'success') {
-        ElMessage.success('Admin role updated successfully!');
+        ElMessage.success('Admin permissions updated successfully!');
         await loadAdminUsers();
       } else {
-        error.value = response.data.message || 'Failed to update admin role.';
+        error.value =
+          response.data.message || 'Failed to update admin permissions.';
         ElMessage.error(error.value || 'An unknown error occurred');
       }
     } catch (err: any) {
       error.value =
-        err instanceof Error ? err.message : 'Failed to update admin role.';
+        err instanceof Error
+          ? err.message
+          : 'Failed to update admin permissions.';
       ElMessage.error(error.value);
     } finally {
       isLoading.value = false;
     }
   };
-
   const removeAdminUser = async (adminId: string) => {
     isLoading.value = true;
     error.value = null;
@@ -364,12 +388,58 @@ export const useStoreConfigStore = defineStore('storeConfig', () => {
         error.value = response.data.message || 'Failed to remove admin user.';
         ElMessage.error(error.value || 'An unknown error occurred');
       }
-    } catch (err : any) {
+    } catch (err: any) {
       error.value =
         err instanceof Error ? err.message : 'Failed to remove admin user.';
       ElMessage.error(error.value);
     } finally {
       isLoading.value = false;
+    }
+  };
+
+  // Watch for changes in storeConfig
+  watch(
+    () => storeConfig.value,
+    (newConfig, prevConfig) => {
+      if (prevConfig) {
+        if (newConfig.storeName !== prevConfig.storeName) {
+          console.log('Store name changed:', newConfig.storeName);
+        }
+        if (newConfig.defaultCurrency !== prevConfig.defaultCurrency) {
+          console.log('Default currency changed:', newConfig.defaultCurrency);
+        }
+        if (newConfig.defaultLanguage !== prevConfig.defaultLanguage) {
+          console.log('Default language changed:', newConfig.defaultLanguage);
+        }
+      }
+    },
+    { deep: true },
+  );
+
+  //add new user role
+  const addRole = (role: Omit<UserRole, 'id'>) => {
+    const newRole: UserRole = {
+      ...role,
+      id: crypto.randomUUID(),
+      isActive: true,
+    };
+    storeConfig.value.userRoles.push(newRole);
+  };
+
+  const updateRole = (id: string, updates: Partial<UserRole>) => {
+    const index = storeConfig.value.userRoles.findIndex((r) => r.id === id);
+    if (index !== -1) {
+      storeConfig.value.userRoles[index] = {
+        ...storeConfig.value.userRoles[index],
+        ...updates,
+      };
+    }
+  };
+
+  const softDeleteRole = (id: string) => {
+    const role = storeConfig.value.userRoles.find((r) => r.id === id);
+    if (role) {
+      role.deletedAt = new Date();
     }
   };
 
@@ -391,16 +461,15 @@ export const useStoreConfigStore = defineStore('storeConfig', () => {
     addLanguage,
     updateLanguage,
     softDeleteLanguage,
-
-    // handle store config
     saveStoreConfig,
     loadStoreConfig,
-
-    // handle admin users
     adminUsers,
     inviteAdminUser,
-    updateAdminUserRole,
+    updateAdminUserPermissions,
     removeAdminUser,
     loadAdminUsers,
+    addRole,
+    updateRole,
+    softDeleteRole,
   };
 });

@@ -8,10 +8,13 @@ export const useAuth = () => {
   const router = useRouter();
   const error = ref<string | null>(null);
   const isLoading = ref(false);
-  const user = ref(null);
+   const user = ref<{ role: string; [key: string]: any } | null>(null); 
   const token = ref<string | null>(null);
   const rememberMe = ref(false);
+  const permissions = ref<string[]>([]);
+ 
 
+  // Computed
   const isAuthenticated = computed(() => !!token.value);
 
   const initAuth = () => {
@@ -43,7 +46,8 @@ export const useAuth = () => {
 
       if (response.data.status === 'success') {
         token.value = response.data.data.token;
-
+        user.value = response.data.data.user;
+        permissions.value = response.data.data.permissions;
         // Handle remember me functionality
         if (remember) {
           localStorage.setItem('token', response.data.data.token);
@@ -56,6 +60,7 @@ export const useAuth = () => {
         axios.defaults.headers.common['Authorization'] =
           `Bearer ${response.data.data.token}`;
         await router.push('/dashboard');
+        
       }
     } catch (err: any) {
       if (err.response) {
@@ -135,6 +140,10 @@ export const useAuth = () => {
     }
   };
 
+ 
+  // Initialize auth state on store creation
+  initAuth();
+
   return {
     login,
     logout,
@@ -148,5 +157,7 @@ export const useAuth = () => {
     token,
     rememberMe,
     getToken,
+    initAuth,
+    permissions,
   };
 };

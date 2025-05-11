@@ -14,8 +14,10 @@ export const useAuthStore = defineStore('auth', () => {
   const error = ref<string | null>(null);
   const isLoading = ref(false);
   const user = ref(null);
+  // const user = ref<{ role: string; [key: string]: any } | null>(null);
   const token = ref<string | null>(null);
   const rememberMe = ref(false);
+  const permissions = ref<string[]>([]);
 
   // Computed
   const isAuthenticated = computed(() => !!token.value);
@@ -47,7 +49,8 @@ export const useAuthStore = defineStore('auth', () => {
 
       if (response.data.status === 'success') {
         token.value = response.data.data.token;
-
+        user.value = response.data.data.user;
+        permissions.value = response.data.data.permissions;
         // Handle remember me functionality
         if (remember) {
           localStorage.setItem('token', response.data.data.token);
@@ -94,10 +97,10 @@ export const useAuthStore = defineStore('auth', () => {
       console.error('Logout error:', err);
     } finally {
       token.value = null;
-      delete axios.defaults.headers.common['Authorization'];
       localStorage.removeItem('token');
       localStorage.removeItem('rememberMe');
       sessionStorage.removeItem('token');
+      delete axios.defaults.headers.common['Authorization'];
       router.push('/login');
     }
   };
@@ -161,5 +164,6 @@ export const useAuthStore = defineStore('auth', () => {
     resetPassword,
     getToken,
     initAuth,
+    permissions,
   };
 });

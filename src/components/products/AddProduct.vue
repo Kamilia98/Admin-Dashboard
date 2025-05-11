@@ -158,17 +158,18 @@ const rules: FormRules = {
   ],
 };
 
-const handleHaleam = (data) => {
-  console.log('Halemmmmmmmmmmmmmmmmm', data);
-  formData.colors[0].images = [
-    {
-      public_id: data.public_id,
-      url: data.secure_url,
-    },
-  ];
+const handleHaleam = (data: any, colorIndex: number) => {
+  formData.colors[colorIndex].images.push({
+    public_id: data.public_id,
+    url: data.secure_url,
+  });
 };
-const handleImageRemove = (colorIndex: number) => {
-  formData.colors[colorIndex].images = [];
+const handleImageRemove = (colorIndex: number, imageIndex?: number) => {
+  if (typeof imageIndex === 'number') {
+    formData.colors[colorIndex].images.splice(imageIndex, 1);
+  } else {
+    formData.colors[colorIndex].images = [];
+  }
 };
 
 const addColor = () => {
@@ -383,7 +384,7 @@ onMounted(() => {
             data-field="colors"
           >
             <Dropzone
-              @haleem="(data) => handleHaleam(data)"
+              @haleem="(data) => handleHaleam(data, index)"
               @removed-file="() => handleImageRemove(index)"
             />
           </el-form-item>

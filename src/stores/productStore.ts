@@ -6,7 +6,7 @@ import type {
 } from '../types/product-varient';
 import * as productService from '../services/productService';
 import { ref } from 'vue';
-import { ElMessageBox } from 'element-plus';
+import { ElMessage, ElMessageBox } from 'element-plus';
 import { router } from '../router';
 
 export const useProductStore = defineStore('productStore', () => {
@@ -106,12 +106,19 @@ export const useProductStore = defineStore('productStore', () => {
       );
 
       await productService.deleteProduct(id);
+      ElMessage.success('Product deleted successfully!');
       await getAllProducts(currentPage.value);
-      router.push({ name: 'products' });
-    } catch {
-      // Cancelled
+
+      setTimeout(() => {
+        router.push({ name: 'products' });
+      }, 500);
+    } catch (err) {
+      // cancel
+      console.error('Delete failed:', err);
+      // ElMessage.error('Failed to delete this product');
     }
   };
+
   const addProduct = async (newProduct: Product) => {
     loading.value = true;
     error.value = null;

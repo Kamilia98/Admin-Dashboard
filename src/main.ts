@@ -6,6 +6,7 @@ import { router } from './router';
 import VueApexCharts from 'vue3-apexcharts';
 import 'jsvectormap/dist/jsvectormap.css';
 import { useAuthStore } from './stores/authStore';
+import 'element-plus/dist/index.css';
 
 const app = createApp(App);
 

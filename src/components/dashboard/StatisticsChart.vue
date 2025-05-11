@@ -58,9 +58,9 @@ const options = [
 
 const selected = ref('current');
 const loading = ref(false);
-const error = ref(null);
+const error = ref<string | null>(null);
 
-const series = ref([
+const series = ref<{ name: string; data: number[] }[]>([
   {
     name: 'Sales Growth (%)',
     data: [],

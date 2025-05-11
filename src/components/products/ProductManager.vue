@@ -64,7 +64,6 @@ const handleDelete = async (id: string) => {
 watch(
   () => props.categoryId,
   (newCategoryId) => {
-    console.log('Watch11111111111111111111111111111');
     if (newCategoryId) {
       productStore.selectedCategories = [newCategoryId];
     } else {
@@ -78,7 +77,6 @@ watch(
 watch(
   () => productStore.products,
   (newProducts) => {
-    console.log('watch222222222222222222222222');
     newProducts.forEach((product) => {
       if (!(product._id in selectedVariantIndex.value)) {
         selectedVariantIndex.value[product._id] = 0;
@@ -89,8 +87,7 @@ watch(
 );
 
 onMounted(() => {
-  console.log('Kamiliaaaaa');
-  categoryStore.getCategories(1, 10);
+  categoryStore.getCategories(1);
 });
 
 const selectVariant = (productId: string, index: number) => {

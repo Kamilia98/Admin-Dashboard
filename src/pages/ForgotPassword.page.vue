@@ -1,7 +1,6 @@
 <script setup lang="ts">
 import { ref } from 'vue';
 import { useRouter } from 'vue-router';
-import { useAuth } from '../composables/useAuth';
 import { ElIcon, ElMessage } from 'element-plus';
 import { Loading } from '@element-plus/icons-vue';
 import axios from 'axios';
@@ -28,7 +27,6 @@ const validateEmail = () => {
   return true;
 };
 
-const { forgotPassword } = useAuth();
 const handleSendResetLink = async () => {
   if (!validateEmail()) return;
 

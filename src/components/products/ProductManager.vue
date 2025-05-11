@@ -16,12 +16,14 @@ import {
   ElIcon,
 } from 'element-plus';
 import { Edit, Delete, Plus, View, RefreshLeft } from '@element-plus/icons-vue';
+import { useCategoryStore } from '../../stores/categoryStore';
 
 const props = defineProps<{
   categoryId?: string;
 }>();
 
 const productStore = useProductStore();
+const categoryStore = useCategoryStore();
 
 const selectedVariantIndex = ref<Record<string, number>>({});
 
@@ -84,24 +86,19 @@ watch(
   { immediate: true },
 );
 
+onMounted(() => {
+  categoryStore.getCategories(1);
+});
+
 const selectVariant = (productId: string, index: number) => {
   selectedVariantIndex.value[productId] = index;
 };
 </script>
 
 <template>
-  <div class="flex flex-col gap-8">
-    <div class="flex justify-end">
-      <Button tag="router-link" :to="{ name: 'add-product' }">
-        <template #icon>
-          <ElIcon><Plus /></ElIcon>
-        </template>
-        Add Product
-      </Button>
-    </div>
-
+  <div class="flex flex-col gap-4">
     <Table
-      caption="All Products"
+      caption="Products"
       :headers="headers"
       :items="productStore.products"
       :loading="productStore.loading"
@@ -180,7 +177,10 @@ const selectVariant = (productId: string, index: number) => {
       <!-- Filter/Search -->
       <template #actions>
         <div class="flex items-center justify-end gap-4 md:gap-6">
-          <Search @search="productStore.getAllProducts(1)" />
+          <Search
+            @search="productStore.getAllProducts(1)"
+            v-model="productStore.searchQuery"
+          />
 
           <ElDropdown
             trigger="click"
@@ -205,15 +205,10 @@ const selectVariant = (productId: string, index: number) => {
                         :teleported="false"
                       >
                         <ElOption
-                          v-for="cat in [
-                            'Electronics',
-                            'Furniture',
-                            'Clothing',
-                            'Books',
-                          ]"
-                          :key="cat"
-                          :label="cat"
-                          :value="cat"
+                          v-for="cat in categoryStore.categories"
+                          :key="cat._id"
+                          :label="cat.name"
+                          :value="cat._id"
                         />
                       </ElSelect>
                     </div>
@@ -222,13 +217,13 @@ const selectVariant = (productId: string, index: number) => {
                     <div class="mb-2 flex items-center gap-2">
                       <label class="w-16">Price:</label>
                       <ElInputNumber
-                        v-model="productStore.minPrice"
+                        :v-model="productStore.minPrice"
                         placeholder="Min"
                         :precision="2"
                       />
                       <span>to</span>
                       <ElInputNumber
-                        v-model="productStore.maxPrice"
+                        :v-model="productStore.maxPrice"
                         placeholder="Max"
                         :precision="2"
                       />
@@ -259,7 +254,7 @@ const selectVariant = (productId: string, index: number) => {
 
     <!-- Pagination -->
     <Pagination
-      title="Product Pagination"
+      title="products"
       :current-page="productStore.currentPage"
       :total-pages="
         Math.ceil(productStore.totalProducts / productStore.pageSize)

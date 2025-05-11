@@ -60,11 +60,11 @@ const handleSelect = async (option: string) => {
 };
 const selected = ref('current');
 
-// This holds the dynamic series data
+
 const series = ref([
   {
     name: 'Sales',
-    data: [], // start empty, to be filled from backend
+    data: [], 
   },
 ]);
 

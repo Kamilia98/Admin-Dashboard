@@ -3,12 +3,12 @@
     class="rounded-2xl border border-gray-200 bg-white px-5 pt-5 pb-5 sm:px-6 sm:pt-6 dark:border-gray-800 dark:bg-white/[0.03]"
   >
     <div class="mb-6 flex flex-col gap-5 sm:flex-row sm:justify-between">
-      <div class="w-full">
+      <div class="">
         <h3 class="text-lg font-semibold text-gray-800 dark:text-white/90">
-          Statistics
+          {{ series[0].name }}
         </h3>
         <p class="mt-1 text-theme-sm text-gray-500 dark:text-gray-400">
-          Target you’ve set for each month
+          {{ subtitle }}
         </p>
       </div>
 
@@ -19,7 +19,7 @@
           <button
             v-for="option in options"
             :key="option.value"
-            @click="selected = option.value"
+            @click="fetchAnalyticsData(option.value)"
             :class="[
               selected === option.value
                 ? 'bg-white text-gray-900 shadow-theme-xs dark:bg-gray-800 dark:text-white'
@@ -32,6 +32,7 @@
         </div>
       </div>
     </div>
+
     <div class="custom-scrollbar max-w-full overflow-x-auto">
       <div id="chartThree" class="-ml-4 min-w-[1000px] pl-2 xl:min-w-full">
         <VueApexCharts
@@ -46,25 +47,23 @@
 </template>
 
 <script setup lang="ts">
-import { ref } from 'vue';
-
-const options = [
-  { value: 'optionOne', label: 'Monthly' },
-  { value: 'optionTwo', label: 'Quarterly' },
-  { value: 'optionThree', label: 'Annually' },
-];
-
-const selected = ref('optionOne');
+import { ref, onMounted, computed } from 'vue';
+import axios from 'axios';
 import VueApexCharts from 'vue3-apexcharts';
 
-const series = ref([
+const options = [
+  { value: 'last', label: 'Last year' },
+  { value: 'current', label: 'This Year' },
+];
+
+const selected = ref('current');
+const loading = ref(false);
+const error = ref<string | null>(null);
+
+const series = ref<{ name: string; data: number[] }[]>([
   {
-    name: 'Sales',
-    data: [180, 190, 170, 160, 175, 165, 170, 205, 230, 210, 240, 235],
-  },
-  {
-    name: 'Revenue',
-    data: [40, 30, 50, 40, 55, 40, 70, 100, 110, 120, 150, 140],
+    name: 'Sales Growth (%)',
+    data: [],
   },
 ]);
 
@@ -153,6 +152,66 @@ const chartOptions = ref({
       },
     },
   },
+});
+
+// Function to compute growth %
+const computeGrowth = (data: number[]): number[] => {
+  const growth: number[] = [];
+  for (let i = 1; i < data.length; i++) {
+    const prev = data[i - 1];
+    const current = data[i];
+    const change = prev !== 0 ? ((current - prev) / prev) * 100 : 0;
+    growth.push(Number(change.toFixed(2)));
+  }
+  return growth;
+};
+
+const fetchAnalyticsData = async (period: string) => {
+  loading.value = true;
+  error.value = null;
+  selected.value = period;
+
+  try {
+    const res = await axios.get('http://localhost:5000/dashboard/salesGrowth', {
+      params: { period },
+    });
+
+    const monthlySales = res.data.data.map((el: { totalSales: string }) =>
+      Number(el.totalSales),
+    );
+
+    const growthData = computeGrowth(monthlySales);
+
+    series.value = [
+      {
+        name: 'Sales Growth (%)',
+        data: growthData,
+      },
+    ];
+
+    // Adjust categories dynamically if needed
+    if (growthData.length < 12) {
+      chartOptions.value.xaxis.categories = growthData.map(
+        (_, i) => `Month ${i + 1}`,
+      );
+    }
+  } catch (err) {
+    console.error('Error fetching analytics data:', err);
+    error.value = 'Failed to fetch analytics data.';
+  } finally {
+    loading.value = false;
+  }
+};
+
+// Initial load
+onMounted(() => {
+  fetchAnalyticsData(selected.value);
+});
+
+const subtitle = computed(() => {
+  const periodLabel =
+    options.find((opt) => opt.value === selected.value)?.label || '';
+  return `Showing ${series.value[0].name.toLowerCase()} data (${periodLabel})`;
 });
 </script>
 

@@ -1,11 +1,17 @@
 import axios from 'axios';
 import type { User } from '../types/user';
+import { useAuthStore } from '../stores/authStore';
 
 const API_BASE = 'http://localhost:5000/users';
-const getAuthHeaders = () => ({
-  Authorization: `Bearer ${localStorage.getItem('token')}`,
-  'Content-Type': 'application/json',
-});
+
+const getAuthHeaders = () => {
+  const { token } = useAuthStore();
+  return {
+    Authorization: `Bearer ${token}`,
+    'Content-Type': 'application/json',
+  };
+};
+
 export const fetchAllUsers = async (
   page: number,
   limit: number,

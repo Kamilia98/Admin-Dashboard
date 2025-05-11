@@ -11,7 +11,7 @@ import {
 import { ElMessage } from 'element-plus';
 
 // --- Constants ---
-const ORDER_LIMIT = 8;
+const ORDER_LIMIT = 10;
 const ORDER_STAGES: OrderStatus[] = [
   OrderStatus.pending,
   OrderStatus.processing,
@@ -31,6 +31,7 @@ export const useOrdersStore = defineStore('orders', () => {
   const orders = ref<Order[]>([]);
   const currentPage = ref(1);
   const totalPages = ref(1);
+  const totalFilteredOrders = ref(0);
   const limits = ref(ORDER_LIMIT);
   const totalOrders = ref(0);
   const loading = ref(false);
@@ -103,7 +104,7 @@ export const useOrdersStore = defineStore('orders', () => {
 
       orders.value = data.orders;
       totalPages.value = data.totalPages;
-
+      totalFilteredOrders.value = data.totalOrders;
       currentPage.value = page;
       limits.value = limit;
     } catch (err) {
@@ -231,6 +232,7 @@ export const useOrdersStore = defineStore('orders', () => {
     orders,
     currentPage,
     totalPages,
+    totalFilteredOrders,
     limits,
     totalOrders,
     totalRevenue,

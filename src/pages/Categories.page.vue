@@ -50,6 +50,7 @@ onMounted(() => {
           },
           { key: 'image', label: 'Image', sortable: false },
           { key: 'productCount', label: 'Products', sortable: true },
+          { key: 'totalSales', label: 'Sales', sortable: true },
           { key: 'actions', label: 'Actions', sortable: false },
         ]"
         @sort="store.handleSort"
@@ -109,7 +110,7 @@ onMounted(() => {
         title="categories"
         :currentPage="store.currentPage"
         :totalPages="store.totalPages"
-        :totalItems="store.totalCategories"
+        :totalItems="store.totalFilteredCategories"
         :limit="store.CATEGORY_LIMIT"
         @changePage="store.getCategories"
       />

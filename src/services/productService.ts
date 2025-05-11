@@ -1,9 +1,8 @@
 import axios from 'axios';
 import type { Product } from '../types/product';
-import type {
-  productVariant,
-  ProductApiResponse,
-} from '../types/product-varient';
+
+import type { ProductApiResponse } from '../types/product-varient';
+
 const BASE_URL = 'http://localhost:5000/products';
 
 / * * * Api calls * * * /;
@@ -13,6 +12,7 @@ export const fetchAllProducts = async (
   limit = 10,
   sortBy = '',
   order: 'asc' | 'desc' = 'asc',
+  searchQuery = '',
   filters?: {
     categories?: string[];
     minPrice?: number | null;
@@ -24,6 +24,7 @@ export const fetchAllProducts = async (
     limit,
     sortBy,
     order,
+    searchQuery,
   };
 
   if (filters?.categories?.length) {
@@ -56,13 +57,20 @@ export const fetchProductById = async (id: string) => {
   }>(`${BASE_URL}/${id}`);
   return response.data;
 };
+
+export const fetchProductAnalytics = async () => {
+  return await axios.get(`${BASE_URL}/analytics`);
+};
+
 export const deleteProduct = (id: string) => {
   return axios.delete(`${BASE_URL}/${id}`);
 };
+
 export const addProduct = async (newProduct: Product) => {
   const response = await axios.post(`${BASE_URL}/create`, newProduct);
   return response.data;
 };
+
 export const updateProduct = (id: string, updatedProduct: Partial<Product>) => {
   return axios.put<Product>(`${BASE_URL}/update/${id}`, updatedProduct);
 };

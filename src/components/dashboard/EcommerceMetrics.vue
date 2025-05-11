@@ -1,60 +1,31 @@
 <script setup lang="ts">
-import { computed, ref, onMounted } from 'vue';
+import { computed, onMounted } from 'vue';
 import { OrdersIcon, UserGroupIcon } from '../../icons';
 import { ElIcon } from 'element-plus';
 import { Top, Bottom, Minus } from '@element-plus/icons-vue';
-import type { AnalyticsData } from '../../types/analytics-data';
-import axios from 'axios';
 
-const analyticsData = ref<AnalyticsData>({
-  totalProducts: 0,
-  totalCustomers: 0,
-  totalOrders: 0,
-  totalSales: 0,
-  trends: {
-    orders: { trend: '', percentageChange: '' },
-    customers: { trend: '', percentageChange: '' },
-    sales: { trend: '', percentageChange: '' },
-    products: { trend: '', percentageChange: '' },
-  },
-});
+import { useDashboardStore } from '../../stores/dashboardStore';
 
-const loading = ref(false);
-const error = ref<string | null>(null);
-
-const fetchAnalyticsData = async () => {
-  loading.value = true;
-  error.value = null;
-  try {
-    const res = await axios.get('http://localhost:5000/dashboard/metrics');
-    analyticsData.value = res.data.data;
-    console.log('Analytics Data:', analyticsData.value);
-  } catch (err) {
-    console.error('Error fetching analytics data:', err);
-    error.value = 'Failed to fetch analytics data.';
-  } finally {
-    loading.value = false;
-  }
-};
+const store = useDashboardStore();
 
 onMounted(() => {
-  fetchAnalyticsData();
+  store.fetchAnalyticsData();
 });
 
 const cardList = computed(() => [
   {
     label: 'Customers',
-    value: analyticsData.value.totalCustomers,
-    trend: analyticsData.value.trends?.customers?.trend,
+    value: store.analyticsData.totalCustomers,
+    trend: store.analyticsData.trends?.customers?.trend,
     percentageChange:
-      analyticsData.value.trends?.customers?.percentageChange ?? 0,
+      store.analyticsData.trends?.customers?.percentageChange ?? 0,
     icon: UserGroupIcon,
   },
   {
     label: 'Orders',
-    value: analyticsData.value.totalOrders,
-    trend: analyticsData.value.trends?.orders?.trend,
-    percentageChange: analyticsData.value.trends?.orders?.percentageChange ?? 0,
+    value: store.analyticsData.totalOrders,
+    trend: store.analyticsData.trends?.orders?.trend,
+    percentageChange: store.analyticsData.trends?.orders?.percentageChange ?? 0,
     icon: OrdersIcon,
   },
 ]);

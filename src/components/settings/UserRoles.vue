@@ -1,97 +1,111 @@
 <script setup lang="ts">
-import { ref } from 'vue';
-import { useStoreConfigStore } from '../../stores/storeConfigStore';
+import { ref, watch,onMounted } from 'vue';
 import {
   ElInput,
   ElButton,
-  ElIcon,
-  ElCheckbox,
   ElTag,
   ElMessageBox,
+  ElSelect,
+  ElOption,
+  ElIcon,
 } from 'element-plus';
-import { Plus, Edit, Delete, Check, Close } from '@element-plus/icons-vue';
+import { Plus, Delete, Edit, Check, Close } from '@element-plus/icons-vue';
+import { useStoreConfigStore } from '../../stores/storeConfigStore';
 
-interface Permission {
-  name: string;
-  value: string;
-}
 
-const editingId = ref<string | null>(null);
-const newUserRole = ref({
-  name: '',
-  permissions: [] as string[],
-  isActive: true,
+const editingAdminId = ref<string | null>(null);
+const editedAdminRole = ref('');
+
+
+const inviteForm = ref({
+  email: '',
+  role: 'ADMIN',
 });
-const editUserRole = ref({
-  id: '',
-  name: '',
-  permissions: [] as string[],
-  isActive: true,
+const roles = ref([
+  { name: 'Manager', value: 'MANAGER' },
+  { name: 'Support', value: 'SUPPORT' },
+  { name: 'Editor', value: 'EDITOR' },
+  { name: 'Admin', value: 'ADMIN' },
+]);
+
+const {
+  adminUsers,
+  inviteAdminUser,
+  removeAdminUser,
+  updateAdminUserRole,
+  loadAdminUsers,
+  isLoading,
+  error,
+} = useStoreConfigStore();
+
+onMounted(() => {
+  loadAdminUsers();
 });
 
-const { activeUserRoles, addUserRole, updateUserRole, softDeleteUserRole } =
-  useStoreConfigStore();
+watch(
+  () => adminUsers,
+  (newUsers) => {
+    if (newUsers && newUsers.length > 0) {
+      editedAdminRole.value = newUsers[0].role || '';
+    }
+  },
+  { immediate: true },
+);
 
-const availablePermissions: Permission[] = [
-  { name: 'Manage Products', value: 'manage_products' },
-  { name: 'Manage Orders', value: 'manage_orders' },
-  { name: 'Manage Customers', value: 'manage_customers' },
-  { name: 'Manage Settings', value: 'manage_settings' },
-  { name: 'View Reports', value: 'view_reports' },
-  { name: 'Manage Users', value: 'manage_users' },
-];
-
-const handleAddUserRole = () => {
-  if (newUserRole.value.name && newUserRole.value.permissions.length > 0) {
-    addUserRole(newUserRole.value);
-    newUserRole.value = { name: '', permissions: [], isActive: true };
+const handleInvite = async () => {
+  if (!inviteForm.value.email || !inviteForm.value.role) {
+    ElMessageBox.alert(
+      'Please enter both email and role.',
+      'Missing Information',
+      { type: 'warning' },
+    );
+    return;
   }
+  try {
+    console.log('Inviting admin with:', inviteForm.value);
+    await inviteAdminUser({
+      email: inviteForm.value.email,
+      role: inviteForm.value.role,
+    });
+    inviteForm.value.email = '';
+    inviteForm.value.role = 'ADMIN';
+  } catch (error) {}
 };
 
-const handleEditUserRole = (role: any) => {
-  editingId.value = role.id;
-  editUserRole.value = { ...role };
-};
-
-const handleUpdateUserRole = () => {
-  if (editUserRole.value.name && editUserRole.value.permissions.length > 0) {
-    updateUserRole(editUserRole.value.id, editUserRole.value);
-    editingId.value = null;
-  }
-};
-
-const handleCancelEdit = () => {
-  editingId.value = null;
-};
-
-const togglePermission = (permission: string, isNew: boolean = false) => {
-  const permissions = isNew
-    ? newUserRole.value.permissions
-    : editUserRole.value.permissions;
-  const index = permissions.indexOf(permission);
-  if (index === -1) {
-    permissions.push(permission);
-  } else {
-    permissions.splice(index, 1);
-  }
-};
-
-const handleDeleteUserRole = async (roleId: string) => {
+const handleDeleteAdmin = async (adminId: string) => {
   try {
     await ElMessageBox.confirm(
-      'Are you sure you want to delete this user role?',
-      'Confirm Deletion',
+      'Are you sure you want to remove this admin?',
+      'Confirm',
       {
-        confirmButtonText: 'Delete',
+        confirmButtonText: 'Remove',
         cancelButtonText: 'Cancel',
         type: 'warning',
         confirmButtonClass: 'el-button--danger el-button--plain',
       },
     );
-    softDeleteUserRole(roleId);
+    await removeAdminUser(adminId);
   } catch (error) {
-    console.log('Deletion cancelled');
+    console.log('Cancelled');
   }
+};
+
+const handleEditAdmin = (admin: any) => {
+  editingAdminId.value = admin._id; 
+  editedAdminRole.value = admin.role;
+};
+
+const handleSaveEdit = async (adminId: string) => {
+  if (!editedAdminRole.value) {
+    ElMessageBox.alert('Please select a valid role.', 'Error', { type: 'error' });
+    return;
+  }
+  await updateAdminUserRole(adminId, editedAdminRole.value);
+  editingAdminId.value = null;
+};
+
+const handleCancelEdit = () => {
+  editingAdminId.value = null;
 };
 </script>
 
@@ -99,152 +113,106 @@ const handleDeleteUserRole = async (roleId: string) => {
   <div class="space-y-6 font-['Inter',sans-serif]">
     <div class="rounded-lg border border-gray-200 p-4 dark:border-gray-700">
       <label
-        class="block text-sm font-medium tracking-wide text-gray-700 dark:text-gray-300"
+        class="mb-2 block text-sm font-medium text-gray-700 dark:text-gray-300"
       >
-        Add New User Role
+        Invite New Admin
       </label>
-      <div class="mt-1 space-y-4">
-        <el-input
-          v-model="newUserRole.name"
-          placeholder="Role name"
-          class="w-full"
-        />
-        <div>
-          <label
-            class="block text-sm font-medium tracking-wide text-gray-700 dark:text-gray-300"
-          >
-            Permissions
-          </label>
-          <div class="mt-2 grid grid-cols-2 gap-2 sm:grid-cols-3">
-            <el-checkbox
-              v-for="permission in availablePermissions"
-              :key="permission.value"
-              v-model="newUserRole.permissions"
-              :label="permission.value"
-              class="flex items-center"
-            >
-              {{ permission.name }}
-            </el-checkbox>
-          </div>
-        </div>
-        <el-button
-          type="primary"
-          plain
-          @click="handleAddUserRole"
-          class="flex items-center"
-        >
+      <div class="grid grid-cols-1 gap-4 sm:grid-cols-3">
+        <el-input v-model="inviteForm.email" placeholder="Admin Email" />
+        <el-select v-model="inviteForm.role" placeholder="Select Role">
+          <el-option
+            v-for="role in roles"
+            :key="role.value"
+            :label="role.name"
+            :value="role.value"
+          />
+        </el-select>
+        <el-button type="primary" plain @click="handleInvite" :loading="isLoading">
           <el-icon class="mr-1"><Plus /></el-icon>
-          Add Role
+          {{ isLoading ? 'Inviting...' : 'Invite Admin' }}
         </el-button>
       </div>
+      <div v-if="error" class="text-red-500 mt-2">{{ error }}</div>
     </div>
 
     <div>
-      <h3
-        class="text-sm font-medium tracking-wide text-gray-700 dark:text-gray-300"
-      >
-        Active User Roles
+      <h3 class="mb-2 text-sm font-medium text-gray-700 dark:text-gray-300">
+        Admin Users
       </h3>
-      <div class="mt-2 space-y-4">
+      <div class="space-y-4">
         <div
-          v-for="role in activeUserRoles"
-          :key="role.id"
-          class="rounded-lg border border-gray-200 p-4 transition-colors duration-200 hover:bg-gray-50 dark:border-gray-700 dark:hover:bg-gray-700/50"
+          v-for="admin in adminUsers"
+          :key="admin._id"
+          class="flex items-center justify-between rounded-lg border border-gray-200 p-4 dark:border-gray-700"
         >
-          <div v-if="editingId !== role.id">
-            <div class="flex items-center justify-between">
-              <p class="font-medium text-gray-900 dark:text-white">
-                {{ role.name }}
-              </p>
-              <div class="flex space-x-2">
-                <el-button
-                  type="primary"
-                  plain
-                  @click="handleEditUserRole(role)"
-                  class="flex items-center"
-                >
-                  <el-icon class="mr-1"><Edit /></el-icon>
-                  Edit
-                </el-button>
-                <el-button
-                  type="danger"
-                  plain
-                  @click="handleDeleteUserRole(role.id)"
-                  class="flex items-center"
-                >
-                  <el-icon class="mr-1"><Delete /></el-icon>
-                  Delete
-                </el-button>
-              </div>
-            </div>
-            <div class="mt-2">
-              <span
-                class="text-sm font-medium tracking-wide text-gray-700 dark:text-gray-300"
+          <div>
+            <p class="font-medium text-gray-900 dark:text-white">
+              {{ admin.email }}
+            </p>
+            <div class="mt-2 flex items-center gap-4">
+              <el-select
+                v-if="editingAdminId === admin._id"
+                v-model="editedAdminRole"
+                size="small"
+                class="w-40"
               >
-                Permissions:
-              </span>
-              <div class="mt-1 flex flex-wrap gap-2">
-                <el-tag
-                  v-for="permission in role.permissions"
-                  :key="permission"
-                  class="bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-100"
-                >
-                  {{
-                    permission
-                      .replace('_', ' ')
-                      .replace(/\b\w/g, (l) => l.toUpperCase())
-                  }}
-                </el-tag>
-              </div>
+                <el-option
+                  v-for="role in roles"
+                  :key="role.value"
+                  :label="role.name"
+                  :value="role.value"
+                />
+              </el-select>
+              <el-tag v-else>{{ admin.role }}</el-tag>
+              <el-tag
+                :type="admin.status === 'pending' ? 'warning' : 'success'"
+              >
+                {{ admin.status }}
+              </el-tag>
             </div>
           </div>
-          <div v-else>
-            <div class="space-y-4">
-              <el-input
-                v-model="editUserRole.name"
-                placeholder="Role name"
-                class="w-full"
-              />
-              <div>
-                <label
-                  class="block text-sm font-medium tracking-wide text-gray-700 dark:text-gray-300"
-                >
-                  Permissions
-                </label>
-                <div class="mt-2 grid grid-cols-2 gap-2 sm:grid-cols-3">
-                  <el-checkbox
-                    v-for="permission in availablePermissions"
-                    :key="permission.value"
-                    v-model="editUserRole.permissions"
-                    :label="permission.value"
-                    class="flex items-center"
-                  >
-                    {{ permission.name }}
-                  </el-checkbox>
-                </div>
-              </div>
-              <div class="flex space-x-2">
-                <el-button
-                  type="success"
-                  plain
-                  @click="handleUpdateUserRole"
-                  class="flex items-center"
-                >
-                  <el-icon class="mr-1"><Check /></el-icon>
-                  Save
-                </el-button>
-                <el-button
-                  plain
-                  @click="handleCancelEdit"
-                  class="flex items-center"
-                >
-                  <el-icon class="mr-1"><Close /></el-icon>
-                  Cancel
-                </el-button>
-              </div>
-            </div>
+          <div class="flex space-x-2">
+            <el-button
+              v-if="editingAdminId === admin._id"
+              type="success"
+              plain
+              @click="handleSaveEdit(admin._id)"
+              class="flex items-center"
+              :loading="isLoading"
+            >
+              <el-icon class="mr-1"><Check /></el-icon>
+              {{ isLoading ? 'Saving...' : 'Save' }}
+            </el-button>
+            <el-button
+              v-if="editingAdminId === admin._id"
+              @click="handleCancelEdit"
+              class="flex items-center"
+            >
+              <el-icon class="mr-1"><Close /></el-icon> Cancel
+            </el-button>
+            <el-button
+              v-if="editingAdminId !== admin._id"
+              type="primary"
+              plain
+              @click="handleEditAdmin(admin)"
+              class="flex items-center"
+            >
+              <el-icon class="mr-1"><Edit /></el-icon> Edit
+            </el-button>
+            <el-button
+              type="danger"
+              plain
+              @click="handleDeleteAdmin(admin._id)"
+              class="flex items-center"
+              :loading="isLoading"
+            >
+              <el-icon class="mr-1"><Delete /></el-icon>
+              {{ isLoading ? 'Deleting...' : 'Delete' }}
+            </el-button>
           </div>
         </div>
+        <div v-if="isLoading && !adminUsers.length">Loading admin users...</div>
+        <div v-if="error && adminUsers.length === 0" class="text-red-500">{{ error }}</div>
       </div>
     </div>
   </div>

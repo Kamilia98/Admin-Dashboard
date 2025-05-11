@@ -208,7 +208,7 @@ watch(
       title="orders"
       :currentPage="store.currentPage"
       :totalPages="store.totalPages"
-      :totalItems="store.totalOrders"
+      :totalItems="store.totalFilteredOrders"
       :limit="store.limits"
       @changePage="(page) => store.fetchOrders({ page, limit: limit })"
     />

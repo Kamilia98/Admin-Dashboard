@@ -158,17 +158,6 @@ const rules: FormRules = {
   ],
 };
 
-// In your AddProduct.vue script
-const handleImageUpload = (colorIndex: number, cloudinaryResponse: any) => {
-  console.log('[dsmjdnjd]', colorIndex);
-  console.log('[dsdaedsad]', cloudinaryResponse);
-  formData.colors[colorIndex].images = [
-    {
-      public_id: cloudinaryResponse.public_id,
-      url: cloudinaryResponse.secure_url,
-    },
-  ];
-};
 const handleHaleam = (data) => {
   console.log('Halemmmmmmmmmmmmmmmmm', data);
   formData.colors[0].images = [
@@ -247,9 +236,7 @@ const submitForm = async () => {
 };
 
 onMounted(() => {
-  categoryStore.getCategories().then(() => {
-    console.log('[Fetched Categories:]', categoryStore.categories);
-  });
+  categoryStore.getCategories(1, 10);
 });
 </script>
 

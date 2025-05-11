@@ -1,13 +1,7 @@
 import { createRouter, createWebHistory } from 'vue-router';
-import { useAuth } from '../composables/useAuth';
+import { useAuthStore } from '../stores/authStore';
 
 const routes = [
-  // {
-  //   path: '/signup',
-  //   name: 'signup',
-  //   component: () => import('../pages/Signup.page.vue'),
-  //   meta: { requiresAuth: false, layout: 'auth' },
-  // },
   {
     path: '/login',
     name: 'login',
@@ -41,6 +35,7 @@ const routes = [
   {
     path: '/',
     redirect: '/dashboard',
+    
   },
   {
     path: '/orders',
@@ -54,25 +49,18 @@ const routes = [
     component: () => import('../pages/Order.page.vue'),
     meta: { requiresAuth: true, layout: 'admin' },
   },
-  {
-    path: '/customers/:id',
-    name: 'edit-customers',
-    component: () => import('../pages/Customer.page.vue'),
-    // props: true,
-    meta: { requiresAuth: true },
-  },
+
   {
     path: '/customer/:userId',
     name: 'customer-details',
     component: () => import('../pages/CustomerDetails.page.vue'),
-    // props: true,
-    meta: { requiresAuth: true },
+    meta: { requiresAuth: true, layout: 'admin' },
   },
   {
     path: '/customers',
     name: 'customers',
     component: () => import('../pages/Customers.page.vue'),
-    meta: { requiresAuth: true },
+    meta: { requiresAuth: true, layout: 'admin' },
   },
   {
     path: '/profile',
@@ -127,21 +115,17 @@ export const router = createRouter({
 });
 
 router.beforeEach(async (to, from, next) => {
-  const auth = useAuth();
+  const store = useAuthStore();
 
-  auth.initAuth();
-
-  if (to.meta.requiresAuth && !auth.isAuthenticated.value) {
+  if (to.meta.requiresAuth && !store.isAuthenticated) {
     console.log('Route requires auth, redirecting to login');
-    next({ name: 'login' });
-  } else if (
-    to.name === 'login' &&
-    auth.isAuthenticated.value &&
-    from.name !== 'signout'
-  ) {
-    console.log('Already logged in, redirecting to dashboard');
-    next({ name: 'dashboard' });
-  } else {
-    next();
+    return next({ name: 'login' });
   }
+
+  if (to.name === 'login' && store.isAuthenticated && from.name !== 'signout') {
+    console.log('Already logged in, redirecting to dashboard');
+    console.log(from);
+    return next({ name: from.name });
+  }
+  next();
 });

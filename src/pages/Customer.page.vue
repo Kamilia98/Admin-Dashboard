@@ -12,19 +12,26 @@ import {
 import axios from 'axios';
 
 import { ElMessage } from 'element-plus';
+import { useAuthStore } from '../stores/authStore';
 
 const route = useRoute();
 const router = useRouter();
 const user = ref<any>(null);
 
+const getAuthHeaders = () => {
+  const { getToken } = useAuthStore();
+  const token = getToken();
+  return {
+    Authorization: `Bearer ${token}`,
+    'Content-Type': 'application/json',
+  };
+};
+
 onMounted(async () => {
   const { data } = await axios.get(
     `http://localhost:5000/users/${route.params.id}`,
     {
-      headers: {
-        Authorization: `Bearer ${localStorage.getItem('token')}`,
-        'Content-Type': 'application/json',
-      },
+      headers: getAuthHeaders(),
     },
   );
   user.value = data.data.user;

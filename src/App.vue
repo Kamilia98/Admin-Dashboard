@@ -18,6 +18,7 @@ import ThemeProvider from './layouts/ThemeProvider.vue';
 
 const route = useRoute();
 const currentLayout = computed(() => {
-  return route.meta.layout === 'auth' ? AuthLayout : AdminLayout;
+  if (route.meta.layout === 'auth') return AuthLayout;
+  else if (route.meta.layout === 'admin') return AdminLayout;
 });
 </script>

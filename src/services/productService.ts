@@ -12,6 +12,7 @@ export const fetchAllProducts = async (
   limit = 10,
   sortBy = '',
   order: 'asc' | 'desc' = 'asc',
+  searchQuery = '',
   filters?: {
     categories?: string[];
     minPrice?: number | null;
@@ -23,6 +24,7 @@ export const fetchAllProducts = async (
     limit,
     sortBy,
     order,
+    searchQuery,
   };
 
   if (filters?.categories?.length) {

@@ -22,7 +22,7 @@ onMounted(async () => {
   <div class="grid grid-cols-1 gap-4 sm:grid-cols-3 md:grid-cols-3 md:gap-6">
     <Card
       title="Total Products"
-      :value="store.totalProducts"
+      :value="store.AnaylticsTotalProducts"
       :icon="ProductsIcon"
     />
     <Card

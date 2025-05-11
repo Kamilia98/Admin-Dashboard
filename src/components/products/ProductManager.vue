@@ -16,12 +16,14 @@ import {
   ElIcon,
 } from 'element-plus';
 import { Edit, Delete, Plus, View, RefreshLeft } from '@element-plus/icons-vue';
+import { useCategoryStore } from '../../stores/categoryStore';
 
 const props = defineProps<{
   categoryId?: string;
 }>();
 
 const productStore = useProductStore();
+const categoryStore = useCategoryStore();
 
 const selectedVariantIndex = ref<Record<string, number>>({});
 
@@ -62,6 +64,7 @@ const handleDelete = async (id: string) => {
 watch(
   () => props.categoryId,
   (newCategoryId) => {
+    console.log('Watch11111111111111111111111111111');
     if (newCategoryId) {
       productStore.selectedCategories = [newCategoryId];
     } else {
@@ -75,6 +78,7 @@ watch(
 watch(
   () => productStore.products,
   (newProducts) => {
+    console.log('watch222222222222222222222222');
     newProducts.forEach((product) => {
       if (!(product._id in selectedVariantIndex.value)) {
         selectedVariantIndex.value[product._id] = 0;
@@ -83,6 +87,11 @@ watch(
   },
   { immediate: true },
 );
+
+onMounted(() => {
+  console.log('Kamiliaaaaa');
+  categoryStore.getCategories(1, 10);
+});
 
 const selectVariant = (productId: string, index: number) => {
   selectedVariantIndex.value[productId] = index;
@@ -171,7 +180,10 @@ const selectVariant = (productId: string, index: number) => {
       <!-- Filter/Search -->
       <template #actions>
         <div class="flex items-center justify-end gap-4 md:gap-6">
-          <Search @search="productStore.getAllProducts(1)" />
+          <Search
+            @search="productStore.getAllProducts(1)"
+            v-model="productStore.searchQuery"
+          />
 
           <ElDropdown
             trigger="click"
@@ -196,15 +208,10 @@ const selectVariant = (productId: string, index: number) => {
                         :teleported="false"
                       >
                         <ElOption
-                          v-for="cat in [
-                            'Electronics',
-                            'Furniture',
-                            'Clothing',
-                            'Books',
-                          ]"
-                          :key="cat"
-                          :label="cat"
-                          :value="cat"
+                          v-for="cat in categoryStore.categories"
+                          :key="cat._id"
+                          :label="cat.name"
+                          :value="cat._id"
                         />
                       </ElSelect>
                     </div>
@@ -213,13 +220,13 @@ const selectVariant = (productId: string, index: number) => {
                     <div class="mb-2 flex items-center gap-2">
                       <label class="w-16">Price:</label>
                       <ElInputNumber
-                        v-model="productStore.minPrice"
+                        :v-model="productStore.minPrice"
                         placeholder="Min"
                         :precision="2"
                       />
                       <span>to</span>
                       <ElInputNumber
-                        v-model="productStore.maxPrice"
+                        :v-model="productStore.maxPrice"
                         placeholder="Max"
                         :precision="2"
                       />

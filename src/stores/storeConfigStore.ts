@@ -80,6 +80,7 @@ export const useStoreConfigStore = defineStore('storeConfig', () => {
 
   // Computed properties
   const activeShippingMethods = ref([]);
+  const currencies = ref([]);
 
   const activeUserRoles = computed(() =>
     storeConfig.value.userRoles.filter(
@@ -87,11 +88,11 @@ export const useStoreConfigStore = defineStore('storeConfig', () => {
     ),
   );
 
-  const activeCurrencies = computed(() =>
-    storeConfig.value.supportedCurrencies.filter(
-      (currency) => currency.isActive && !currency.deletedAt,
-    ),
-  );
+  // const activeCurrencies = computed(() =>
+  //   storeConfig.value.supportedCurrencies.filter(
+  //     (currency) => currency.isActive && !currency.deletedAt,
+  //   ),
+  // );
 
   const activeLanguages = computed(() =>
     storeConfig.value.supportedLanguages.filter(
@@ -114,13 +115,6 @@ export const useStoreConfigStore = defineStore('storeConfig', () => {
     } catch (err) {
       console.log(err);
     }
-    return;
-    const newMethod: ShippingMethod = {
-      ...method,
-      id: crypto.randomUUID(),
-      isActive: true,
-    };
-    storeConfig.value.shippingMethods.push(newMethod);
   };
 
   const updateShippingMethod = async (
@@ -155,33 +149,54 @@ export const useStoreConfigStore = defineStore('storeConfig', () => {
     }
   };
 
-  const addCurrency = (currency: Omit<Currency, 'code'>) => {
-    const newCurrency: Currency = {
-      ...currency,
-      code: currency.symbol.toUpperCase(),
-      isActive: true,
-    };
-    storeConfig.value.supportedCurrencies.push(newCurrency);
-  };
-
-  const updateCurrency = (code: string, updates: Partial<Currency>) => {
-    const index = storeConfig.value.supportedCurrencies.findIndex(
-      (c) => c.code === code,
-    );
-    if (index !== -1) {
-      storeConfig.value.supportedCurrencies[index] = {
-        ...storeConfig.value.supportedCurrencies[index],
-        ...updates,
-      };
+  const addCurrency = async (currency: Omit<Currency, 'code'>) => {
+    try {
+      const data = await axios.post(`${API_BASE}/currency`, currency, {
+        headers: getAuthHeaders(),
+      });
+      currencies.value = data.data.data.supportedCurrencies;
+      console.log(currencies.value);
+      return currencies.value;
+    } catch (err) {
+      console.log(err);
     }
   };
 
-  const softDeleteCurrency = (code: string) => {
-    const currency = storeConfig.value.supportedCurrencies.find(
-      (c) => c.code === code,
-    );
-    if (currency) {
-      currency.deletedAt = new Date();
+  const updateCurrency = async (id: string, updates: Partial<Currency>) => {
+    try {
+      const data = await axios.put(`${API_BASE}/currency`, updates, {
+        headers: getAuthHeaders(),
+        params: { id },
+      });
+      currencies.value = data.data.data.supportedCurrencies;
+      return currencies.value;
+    } catch (err) {
+      console.log(err);
+    }
+  };
+  const setDefaultCurrency = async (id: string) => {
+    try {
+      const data = await axios.patch(
+        `${API_BASE}/currency`,
+        {},
+        { headers: getAuthHeaders(), params: { id } },
+      );
+      currencies.value = data.data.data.supportedCurrencies;
+      return currencies.value;
+    } catch (err) {
+      console.log(err);
+    }
+  };
+  const softDeleteCurrency = async (code: string) => {
+    try {
+      const data = await axios.delete(`${API_BASE}/currency`, {
+        headers: getAuthHeaders(),
+        params: { id: code },
+      });
+      currencies.value = data.data.data.supportedCurrencies;
+      return currencies.value;
+    } catch (err) {
+      console.log(err);
     }
   };
 
@@ -404,7 +419,7 @@ export const useStoreConfigStore = defineStore('storeConfig', () => {
     error,
     activeShippingMethods,
     activeUserRoles,
-    activeCurrencies,
+    currencies,
     activeLanguages,
     updateStoreConfig,
     addShippingMethod,
@@ -416,6 +431,7 @@ export const useStoreConfigStore = defineStore('storeConfig', () => {
     addLanguage,
     updateLanguage,
     softDeleteLanguage,
+    setDefaultCurrency,
 
     // handle store config
     saveStoreConfig,

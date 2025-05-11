@@ -210,7 +210,7 @@ watch(
       :totalPages="store.totalPages"
       :totalItems="store.totalFilteredOrders"
       :limit="store.limits"
-      @changePage="(page) => store.fetchOrders({ page, limit: limit })"
+      @changePage="(page) => store.fetchOrders({ page, limit: limit, userId })"
     />
   </div>
 </template>

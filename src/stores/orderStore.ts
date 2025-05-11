@@ -105,6 +105,7 @@ export const useOrdersStore = defineStore('orders', () => {
       orders.value = data.orders;
       totalPages.value = data.totalPages;
       totalFilteredOrders.value = data.totalOrders;
+      console.log('total', totalFilteredOrders);
       currentPage.value = page;
       limits.value = limit;
     } catch (err) {

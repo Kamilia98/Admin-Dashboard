@@ -67,7 +67,7 @@
 </template>
 
 <script setup lang="ts">
-import { onMounted, ref } from 'vue';
+import { onMounted } from 'vue';
 
 import { ElIcon } from 'element-plus';
 import { View } from '@element-plus/icons-vue';

@@ -2,7 +2,15 @@ import { defineStore } from 'pinia';
 import { ref, computed } from 'vue';
 import axios from 'axios';
 import { ElMessage } from 'element-plus';
-
+import { useAuthStore } from './authStore';
+const API_BASE = 'http://localhost:5000';
+const getAuthHeaders = () => {
+  const { token } = useAuthStore();
+  return {
+    Authorization: `Bearer ${token}`,
+    'Content-Type': 'application/json',
+  };
+};
 interface AdminUser {
   _id: string;
   username: string;
@@ -71,11 +79,9 @@ export const useStoreConfigStore = defineStore('storeConfig', () => {
   const error = ref<string | null>(null);
 
   // Computed properties
-  const activeShippingMethods = computed(() =>
-    storeConfig.value.shippingMethods.filter(
-      (method) => method.isActive && !method.deletedAt,
-    ),
-  );
+  const activeShippingMethods = ref([]);
+  const currencies = ref([]);
+  const languages = ref([]);
 
   const activeUserRoles = computed(() =>
     storeConfig.value.userRoles.filter(
@@ -83,111 +89,173 @@ export const useStoreConfigStore = defineStore('storeConfig', () => {
     ),
   );
 
-  const activeCurrencies = computed(() =>
-    storeConfig.value.supportedCurrencies.filter(
-      (currency) => currency.isActive && !currency.deletedAt,
-    ),
-  );
+  // const activeCurrencies = computed(() =>
+  //   storeConfig.value.supportedCurrencies.filter(
+  //     (currency) => currency.isActive && !currency.deletedAt,
+  //   ),
+  // );
 
-  const activeLanguages = computed(() =>
-    storeConfig.value.supportedLanguages.filter(
-      (language) => language.isActive && !language.deletedAt,
-    ),
-  );
+  // const activeLanguages = computed(() =>
+  //   storeConfig.value.supportedLanguages.filter(
+  //     (language) => language.isActive && !language.deletedAt,
+  //   ),
+  // );
 
   // Actions
   const updateStoreConfig = (config: Partial<StoreConfig>) => {
     storeConfig.value = { ...storeConfig.value, ...config };
   };
 
-  const addShippingMethod = (method: Omit<ShippingMethod, 'id'>) => {
-    const newMethod: ShippingMethod = {
-      ...method,
-      id: crypto.randomUUID(),
-      isActive: true,
-    };
-    storeConfig.value.shippingMethods.push(newMethod);
+  const addShippingMethod = async (method: Omit<ShippingMethod, 'id'>) => {
+    try {
+      const data = await axios.post(`${API_BASE}/shippings`, method, {
+        headers: getAuthHeaders(),
+      });
+      activeShippingMethods.value = data.data.data.shippingMethods;
+      return activeShippingMethods.value;
+    } catch (err) {
+      console.log(err);
+    }
   };
 
-  const updateShippingMethod = (
+  const updateShippingMethod = async (
     id: string,
     updates: Partial<ShippingMethod>,
   ) => {
-    const index = storeConfig.value.shippingMethods.findIndex(
-      (m) => m.id === id,
-    );
-    if (index !== -1) {
-      storeConfig.value.shippingMethods[index] = {
-        ...storeConfig.value.shippingMethods[index],
-        ...updates,
-      };
+    try {
+      const data = await axios.put(
+        `${API_BASE}/shippings`,
+        { name: updates.name, cost: updates.cost },
+        { headers: getAuthHeaders(), params: { id } },
+      );
+      activeShippingMethods.value = data.data.data.shippingMethods;
+      return activeShippingMethods.value;
+    } catch (err) {
+      console.log(err);
     }
   };
 
-  const softDeleteShippingMethod = (id: string) => {
-    const method = storeConfig.value.shippingMethods.find((m) => m.id === id);
-    if (method) {
-      method.deletedAt = new Date();
+  const softDeleteShippingMethod = async (id: string) => {
+    storeConfig.value.shippingMethods =
+      storeConfig.value.shippingMethods.filter((m) => m.id !== id);
+    try {
+      const data = await axios.delete(`${API_BASE}/shippings`, {
+        headers: getAuthHeaders(),
+        params: { id },
+      });
+      activeShippingMethods.value = data.data.data.shippingMethods;
+      return activeShippingMethods.value;
+    } catch (err) {
+      console.log(err);
     }
   };
 
-  const addCurrency = (currency: Omit<Currency, 'code'>) => {
-    const newCurrency: Currency = {
-      ...currency,
-      code: currency.symbol.toUpperCase(),
-      isActive: true,
-    };
-    storeConfig.value.supportedCurrencies.push(newCurrency);
-  };
-
-  const updateCurrency = (code: string, updates: Partial<Currency>) => {
-    const index = storeConfig.value.supportedCurrencies.findIndex(
-      (c) => c.code === code,
-    );
-    if (index !== -1) {
-      storeConfig.value.supportedCurrencies[index] = {
-        ...storeConfig.value.supportedCurrencies[index],
-        ...updates,
-      };
+  const addCurrency = async (currency: Omit<Currency, 'code'>) => {
+    try {
+      const data = await axios.post(`${API_BASE}/currency`, currency, {
+        headers: getAuthHeaders(),
+      });
+      currencies.value = data.data.data.supportedCurrencies;
+      console.log(currencies.value);
+      return currencies.value;
+    } catch (err) {
+      console.log(err);
     }
   };
 
-  const softDeleteCurrency = (code: string) => {
-    const currency = storeConfig.value.supportedCurrencies.find(
-      (c) => c.code === code,
-    );
-    if (currency) {
-      currency.deletedAt = new Date();
+  const updateCurrency = async (id: string, updates: Partial<Currency>) => {
+    try {
+      const data = await axios.put(`${API_BASE}/currency`, updates, {
+        headers: getAuthHeaders(),
+        params: { id },
+      });
+      currencies.value = data.data.data.supportedCurrencies;
+      return currencies.value;
+    } catch (err) {
+      console.log(err);
+    }
+  };
+  const setDefaultCurrency = async (id: string) => {
+    try {
+      const data = await axios.patch(
+        `${API_BASE}/currency`,
+        {},
+        { headers: getAuthHeaders(), params: { id } },
+      );
+      currencies.value = data.data.data.supportedCurrencies;
+      return currencies.value;
+    } catch (err) {
+      console.log(err);
+    }
+  };
+  const softDeleteCurrency = async (code: string) => {
+    try {
+      const data = await axios.delete(`${API_BASE}/currency`, {
+        headers: getAuthHeaders(),
+        params: { id: code },
+      });
+      currencies.value = data.data.data.supportedCurrencies;
+      return currencies.value;
+    } catch (err) {
+      console.log(err);
     }
   };
 
-  const addLanguage = (language: Omit<Language, 'code'>) => {
-    const newLanguage: Language = {
-      ...language,
-      code: language.name.substring(0, 2).toLowerCase(),
-      isActive: true,
-    };
-    storeConfig.value.supportedLanguages.push(newLanguage);
+  const addLanguage = async (language: Omit<Language, 'code'>) => {
+    console.log(language);
+    try {
+      const data = await axios.post(
+        `${API_BASE}/language`,
+        { name: language.name },
+        {
+          headers: getAuthHeaders(),
+        },
+      );
+      languages.value = data.data.data.supportedLanguages;
+      console.log(languages.value);
+      return languages.value;
+    } catch (err) {
+      console.log('ERRORRRRR', err);
+    }
+    return;
   };
 
-  const updateLanguage = (code: string, updates: Partial<Language>) => {
-    const index = storeConfig.value.supportedLanguages.findIndex(
-      (l) => l.code === code,
-    );
-    if (index !== -1) {
-      storeConfig.value.supportedLanguages[index] = {
-        ...storeConfig.value.supportedLanguages[index],
-        ...updates,
-      };
+  const updateLanguage = async (id: string, updates: Partial<Language>) => {
+    try {
+      const data = await axios.put(`${API_BASE}/language`, updates, {
+        headers: getAuthHeaders(),
+        params: { id },
+      });
+      languages.value = data.data.data.supportedLanguages;
+      return languages.value;
+    } catch (err) {
+      console.log(err);
     }
   };
+  const setDefaultLanguage = async (id: string) => {
+    try {
+      const data = await axios.patch(
+        `${API_BASE}/language`,
+        {},
+        { headers: getAuthHeaders(), params: { id } },
+      );
+      languages.value = data.data.data.supportedLanguages;
 
-  const softDeleteLanguage = (code: string) => {
-    const language = storeConfig.value.supportedLanguages.find(
-      (l) => l.code === code,
-    );
-    if (language) {
-      language.deletedAt = new Date();
+      return languages.value;
+    } catch (err) {
+      console.log(err);
+    }
+  };
+  const softDeleteLanguage = async (id: string) => {
+    try {
+      const data = await axios.delete(`${API_BASE}/language`, {
+        headers: getAuthHeaders(),
+        params: { id },
+      });
+      languages.value = data.data.data.supportedlanguages;
+      return languages.value;
+    } catch (err) {
+      console.log(err);
     }
   };
 
@@ -235,8 +303,8 @@ export const useStoreConfigStore = defineStore('storeConfig', () => {
           Authorization: `Bearer ${token}`,
         },
       });
-
       storeConfig.value = response.data.data;
+      return storeConfig.value;
     } catch (err) {
       error.value =
         err instanceof Error
@@ -257,7 +325,7 @@ export const useStoreConfigStore = defineStore('storeConfig', () => {
       const token =
         localStorage.getItem('token') || sessionStorage.getItem('token');
       const response = await axios.post(
-        'http://localhost:5000/auth/admin/invite', 
+        'http://localhost:5000/auth/admin/invite',
         admin,
         {
           headers: {
@@ -298,11 +366,12 @@ export const useStoreConfigStore = defineStore('storeConfig', () => {
       );
       if (response.data.status === 'success') {
         adminUsers.value = response.data.data;
+        return adminUsers.value;
       } else {
         error.value = response.data.message || 'Failed to load admin users.';
         ElMessage.error(error.value || 'An unknown error occurred');
       }
-    } catch ( err: any) {
+    } catch (err: any) {
       error.value =
         err instanceof Error ? err.message : 'Failed to load admin users.';
       ElMessage.error(error.value);
@@ -364,7 +433,7 @@ export const useStoreConfigStore = defineStore('storeConfig', () => {
         error.value = response.data.message || 'Failed to remove admin user.';
         ElMessage.error(error.value || 'An unknown error occurred');
       }
-    } catch (err : any) {
+    } catch (err: any) {
       error.value =
         err instanceof Error ? err.message : 'Failed to remove admin user.';
       ElMessage.error(error.value);
@@ -379,8 +448,8 @@ export const useStoreConfigStore = defineStore('storeConfig', () => {
     error,
     activeShippingMethods,
     activeUserRoles,
-    activeCurrencies,
-    activeLanguages,
+    currencies,
+    languages,
     updateStoreConfig,
     addShippingMethod,
     updateShippingMethod,
@@ -391,6 +460,8 @@ export const useStoreConfigStore = defineStore('storeConfig', () => {
     addLanguage,
     updateLanguage,
     softDeleteLanguage,
+    setDefaultCurrency,
+    setDefaultLanguage,
 
     // handle store config
     saveStoreConfig,

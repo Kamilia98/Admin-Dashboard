@@ -20,7 +20,7 @@ interface Tab {
 
 const activeTab = ref<string>('basic');
 const storeConfigStore = useStoreConfigStore();
-const { saveStoreConfig, loadStoreConfig,isLoading } = storeConfigStore;
+const { saveStoreConfig, loadStoreConfig, isLoading } = storeConfigStore;
 
 const tabs: Tab[] = [
   {
@@ -53,7 +53,6 @@ const tabs: Tab[] = [
 const handleSave = async () => {
   try {
     await saveStoreConfig();
-    
   } catch (error) {
     console.error('Failed to save store configuration:', error);
   }
@@ -61,6 +60,7 @@ const handleSave = async () => {
 
 onMounted(async () => {
   try {
+    console.log('STORE PAGE MOUNTED');
     await loadStoreConfig();
   } catch (error) {
     console.error('Failed to load store configuration:', error);
@@ -78,9 +78,10 @@ onMounted(async () => {
           class="text-2xl font-bold tracking-tight text-gray-900 dark:text-white"
         >
           Store Configuration
-    </h1>
+        </h1>
         <button
-           @click="handleSave" :disabled="isLoading"
+          @click="handleSave"
+          :disabled="isLoading"
           class="inline-flex items-center rounded-md border border-transparent bg-blue-600 px-4 py-2 text-sm font-medium text-white shadow-sm transition-colors duration-200 hover:bg-blue-700 focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 focus:outline-none"
         >
           <svg
@@ -98,7 +99,7 @@ onMounted(async () => {
           </svg>
           Save Changes
         </button>
-    </div>
+      </div>
 
       <div class="mb-6">
         <nav class="flex space-x-4" aria-label="Tabs">

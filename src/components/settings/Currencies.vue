@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref } from 'vue';
+import { ref, onMounted, watch } from 'vue';
 import { useStoreConfigStore } from '../../stores/storeConfigStore';
 import { ElInput, ElButton, ElIcon, ElTag, ElMessageBox } from 'element-plus';
 import {
@@ -31,20 +31,28 @@ const editCurrency = ref({
 });
 
 const {
+  loadStoreConfig,
   activeCurrencies,
   addCurrency,
   updateCurrency,
   softDeleteCurrency,
   setDefaultCurrency,
 } = useStoreConfigStore();
-
-const handleAddCurrency = () => {
+const currencies = ref([]);
+onMounted(async () => {
+  const data = await loadStoreConfig();
+  currencies.value = data.supportedCurrencies;
+});
+watch(currencies, (newCurrencies) => {
+  currencies.value = newCurrencies;
+});
+const handleAddCurrency = async () => {
   if (
     newCurrency.value.code &&
     newCurrency.value.name &&
     newCurrency.value.symbol
   ) {
-    addCurrency(newCurrency.value);
+    currencies.value = await addCurrency(newCurrency.value);
     newCurrency.value = {
       code: '',
       name: '',
@@ -59,7 +67,7 @@ const handleAddCurrency = () => {
 const handleEditCurrency = (currency: any) => {
   editingId.value = currency.code;
   editCurrency.value = {
-    id: currency.code,
+    id: currency._id,
     code: currency.code,
     name: currency.name,
     symbol: currency.symbol,
@@ -69,13 +77,16 @@ const handleEditCurrency = (currency: any) => {
   };
 };
 
-const handleUpdateCurrency = () => {
+const handleUpdateCurrency = async () => {
   if (
     editCurrency.value.code &&
     editCurrency.value.name &&
     editCurrency.value.symbol
   ) {
-    updateCurrency(editCurrency.value.id, editCurrency.value);
+    currencies.value = await updateCurrency(
+      editCurrency.value.id,
+      editCurrency.value,
+    );
     editingId.value = null;
   }
 };
@@ -84,8 +95,8 @@ const handleCancelEdit = () => {
   editingId.value = null;
 };
 
-const handleSetDefault = (currencyCode: string) => {
-  setDefaultCurrency(currencyCode);
+const handleSetDefault = async (currencyCode: string) => {
+  currencies.value = await setDefaultCurrency(currencyCode);
 };
 
 const handleDeleteCurrency = async (currencyCode: string) => {
@@ -100,7 +111,7 @@ const handleDeleteCurrency = async (currencyCode: string) => {
         confirmButtonClass: 'el-button--danger el-button--plain',
       },
     );
-    softDeleteCurrency(currencyCode);
+    currencies.value = await softDeleteCurrency(currencyCode);
   } catch (error) {
     console.log('Deletion cancelled');
   }
@@ -187,7 +198,7 @@ const handleDeleteCurrency = async (currencyCode: string) => {
       </h3>
       <div class="mt-2 space-y-4">
         <div
-          v-for="currency in activeCurrencies"
+          v-for="currency in currencies"
           :key="currency.code"
           class="rounded-lg border border-gray-200 p-4 transition-colors duration-200 hover:bg-gray-50 dark:border-gray-700 dark:hover:bg-gray-700/50"
         >
@@ -207,7 +218,7 @@ const handleDeleteCurrency = async (currencyCode: string) => {
                   v-if="!currency.isDefault"
                   type="warning"
                   plain
-                  @click="handleSetDefault(currency.code)"
+                  @click="handleSetDefault(currency._id)"
                   class="flex items-center"
                 >
                   <el-icon class="mr-1"><Star /></el-icon>
@@ -225,7 +236,7 @@ const handleDeleteCurrency = async (currencyCode: string) => {
                 <el-button
                   type="danger"
                   plain
-                  @click="handleDeleteCurrency(currency.code)"
+                  @click="handleDeleteCurrency(currency._id)"
                   class="flex items-center"
                 >
                   <el-icon class="mr-1"><Delete /></el-icon>

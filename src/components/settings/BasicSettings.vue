@@ -1,9 +1,16 @@
 <script setup lang="ts">
 import { useStoreConfigStore } from '../../stores/storeConfigStore';
 import { ElInput, ElSelect, ElOption } from 'element-plus';
+import { onMounted, ref } from 'vue';
 
-const { storeConfig, activeCurrencies, activeLanguages } =
+const { storeConfig, activeCurrencies, activeLanguages, loadStoreConfig } =
   useStoreConfigStore();
+
+const Basics = ref({});
+onMounted(async () => {
+  const basics = await loadStoreConfig();
+  Basics.value = basics;
+});
 </script>
 
 <template>
@@ -16,7 +23,7 @@ const { storeConfig, activeCurrencies, activeLanguages } =
       </label>
       <div class="mt-1">
         <el-input
-          v-model="storeConfig.storeName"
+          v-model="Basics.storeName"
           placeholder="Your store name"
           class="w-full"
         />
@@ -31,12 +38,12 @@ const { storeConfig, activeCurrencies, activeLanguages } =
       </label>
       <div class="mt-1">
         <el-select
-          v-model="storeConfig.defaultCurrency"
+          v-model="Basics.defaultCurrency"
           class="w-full"
           placeholder="Select default currency"
         >
           <el-option
-            v-for="currency in activeCurrencies"
+            v-for="currency in Basics.supportedCurrencies"
             :key="currency.code"
             :label="`${currency.name} (${currency.symbol})`"
             :value="currency.code"
@@ -53,12 +60,12 @@ const { storeConfig, activeCurrencies, activeLanguages } =
       </label>
       <div class="mt-1">
         <el-select
-          v-model="storeConfig.defaultLanguage"
+          v-model="Basics.defaultLanguage"
           class="w-full"
           placeholder="Select default language"
         >
           <el-option
-            v-for="language in activeLanguages"
+            v-for="language in Basics.supportedLanguages"
             :key="language.code"
             :label="language.name"
             :value="language.code"
@@ -68,4 +75,3 @@ const { storeConfig, activeCurrencies, activeLanguages } =
     </div>
   </div>
 </template>
- 

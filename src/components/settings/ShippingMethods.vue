@@ -19,6 +19,7 @@ const {
 const Methods = ref([]);
 onMounted(async () => {
   const data = await loadStoreConfig();
+  console.log('[data--------------data]', data);
   Methods.value = data.shippingMethods;
 });
 watch(activeShippingMethods, (newMethods) => {

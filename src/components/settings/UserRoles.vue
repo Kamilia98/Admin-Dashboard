@@ -1,6 +1,5 @@
 <script setup lang="ts">
-import { ref, onMounted } from 'vue';
-// THis is my last tttttttttttttttt
+import { ref, onMounted, watch } from 'vue';
 
 import {
   ElInput,
@@ -19,11 +18,15 @@ const {
   adminUsers,
   inviteAdminUser,
   removeAdminUser,
-  updateAdminUserPermissions,
   loadAdminUsers,
   isLoading,
   error,
 } = useStoreConfigStore();
+const Admins = ref([]);
+onMounted(async () => {
+  const AdminsArr = await loadAdminUsers();
+  Admins.value = AdminsArr;
+});
 
 const editingAdminId = ref<string | null>(null);
 const editedAdminPermissions = ref<string[]>([]);
@@ -174,7 +177,7 @@ const handleCancelEdit = () => {
       </h3>
       <div class="space-y-4">
         <div
-          v-for="admin in adminUsers"
+          v-for="admin in Admins"
           :key="admin._id"
           class="flex flex-col items-start justify-between rounded-lg border border-gray-200 p-4 sm:flex-row sm:items-center dark:border-gray-700"
         >

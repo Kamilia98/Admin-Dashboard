@@ -3,13 +3,10 @@ import { useStoreConfigStore } from '../../stores/storeConfigStore';
 import { ElInput, ElSelect, ElOption } from 'element-plus';
 import { onMounted, ref } from 'vue';
 
-const { storeConfig, activeCurrencies, activeLanguages, loadStoreConfig } =
-  useStoreConfigStore();
+const store = useStoreConfigStore();
 
-const Basics = ref({});
 onMounted(async () => {
-  const basics = await loadStoreConfig();
-  Basics.value = basics;
+  await store.loadStoreConfig();
 });
 </script>
 
@@ -23,7 +20,7 @@ onMounted(async () => {
       </label>
       <div class="mt-1">
         <el-input
-          v-model="Basics.storeName"
+          v-model="store.storeConfig.storeName"
           placeholder="Your store name"
           class="w-full"
         />
@@ -38,12 +35,12 @@ onMounted(async () => {
       </label>
       <div class="mt-1">
         <el-select
-          v-model="Basics.defaultCurrency"
+          v-model="store.storeConfig.defaultCurrency"
           class="w-full"
           placeholder="Select default currency"
         >
           <el-option
-            v-for="currency in Basics.supportedCurrencies"
+            v-for="currency in store.storeConfig.supportedCurrencies"
             :key="currency.code"
             :label="`${currency.name} (${currency.symbol})`"
             :value="currency.code"
@@ -60,12 +57,12 @@ onMounted(async () => {
       </label>
       <div class="mt-1">
         <el-select
-          v-model="Basics.defaultLanguage"
+          v-model="store.storeConfig.defaultLanguage"
           class="w-full"
           placeholder="Select default language"
         >
           <el-option
-            v-for="language in Basics.supportedLanguages"
+            v-for="language in store.storeConfig.supportedLanguages"
             :key="language.code"
             :label="language.name"
             :value="language.code"

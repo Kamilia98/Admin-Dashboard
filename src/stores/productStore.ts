@@ -150,6 +150,7 @@ export const useProductStore = defineStore('productStore', () => {
       if (index !== -1) {
         products.value[index] = updated;
       }
+      console.log('[Product-service--updated-product]', updateProduct);
 
       ElMessage.success('Product updated successfully!');
     } catch (err: any) {

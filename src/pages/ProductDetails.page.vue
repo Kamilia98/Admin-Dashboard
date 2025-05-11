@@ -64,7 +64,8 @@ function getImageIndex() {
         <div class="flex gap-4">
           <Button
             variant="primary"
-            @click="productStore.updateProduct(productId)"
+            tag="router-link"
+            :to="{ name: 'edit-product', params: { id: productId } }"
           >
             Edit
             <template #icon>

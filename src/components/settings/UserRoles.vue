@@ -175,42 +175,7 @@ const handleCancelEdit = () => {
           v-for="admin in adminUsers"
           :key="admin._id"
           class="flex flex-col items-start justify-between rounded-lg border border-gray-200 p-4 sm:flex-row sm:items-center dark:border-gray-700"
-        >
-          <!-- <div>
-            <p class="font-medium text-gray-900 dark:text-white">
-              {{ admin.email }}
-            </p>
-            <div class="mt-2 flex flex-col gap-4 sm:flex-row">
-              <el-checkbox-group
-                v-if="editingAdminId === admin._id"
-                v-model="editedAdminPermissions"
-                class="grid w-full grid-cols-1 gap-2 space-y-1  sm:grid-cols-2 lg:grid-cols-2"
-              >
-                <el-checkbox
-                  v-for="permission in allPermissions"
-                  :key="permission.value"
-                  :value="permission.value"
-                  class="mr-0 w-full sm:w-[200px]"
-                >
-                  {{ permission.name }}
-                </el-checkbox>
-              </el-checkbox-group>
-              <el-tag
-                v-else
-                v-for="permission in admin.permissions"
-                :key="permission"
-                >{{
-                  allPermissions.find((p) => p.value === permission)?.name ||
-                  permission
-                }}</el-tag
-              >
-              <el-tag
-                :type="admin.status === 'pending' ? 'warning' : 'success'"
-              >
-                {{ admin.status }}
-              </el-tag>
-            </div>
-          </div> -->
+        >          
           <div>
             <p class="font-medium text-gray-900 dark:text-white">
               {{ admin.email }}

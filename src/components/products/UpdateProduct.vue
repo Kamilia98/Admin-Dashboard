@@ -1027,7 +1027,7 @@ onMounted(() => {
   </ResourceWrapper>
 </template>
 
-<style>
+<style scoped>
 .el-form-item.is-error .el-input__inner,
 .el-form-item.is-error .el-input-number .el-input__inner,
 .el-form-item.is-error .el-textarea__inner {

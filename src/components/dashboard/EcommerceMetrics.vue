@@ -14,7 +14,7 @@ onMounted(() => {
 
 const cardList = computed(() => [
   {
-    label: 'Customers',
+    label: 'New Customers',
     value: store.analyticsData.totalCustomers,
     trend: store.analyticsData.trends?.customers?.trend,
     percentageChange:
@@ -22,7 +22,7 @@ const cardList = computed(() => [
     icon: UserGroupIcon,
   },
   {
-    label: 'Orders',
+    label: 'New Orders',
     value: store.analyticsData.totalOrders,
     trend: store.analyticsData.trends?.orders?.trend,
     percentageChange: store.analyticsData.trends?.orders?.percentageChange ?? 0,

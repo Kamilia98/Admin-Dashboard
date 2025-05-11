@@ -228,10 +228,10 @@
 
         <div class="flex flex-1 flex-col justify-between gap-3">
           <div
-            class="flex h-24 w-full items-center justify-center overflow-hidden rounded-lg bg-gray-100 sm:h-28 md:h-32"
+            class="flex h-24 w-full items-center justify-center overflow-hidden rounded-lg bg-gray-100 sm:h-28 md:h-32 dark:bg-white/[0.03]"
           >
             <div
-              class="flex h-16 w-16 items-center justify-center overflow-hidden rounded-full bg-gray-100 md:h-20 md:w-20"
+              class="flex h-16 w-16 items-center justify-center overflow-hidden rounded-full bg-gray-100 md:h-20 md:w-20 dark:bg-white/[0.03]"
             >
               <img
                 v-if="bestEntities.bestUser?.thumbnail"
@@ -302,59 +302,6 @@
               View Details
             </Button>
           </div>
-        </div>
-      </div>
-    </template>
-
-    <!-- Loading state -->
-    <template v-else-if="loading">
-      <div
-        v-for="i in 3"
-        :key="i"
-        class="rounded-2xl border border-gray-200 bg-white p-4 sm:p-5 md:p-6 dark:border-gray-800 dark:bg-white/[0.03]"
-      >
-        <div class="flex animate-pulse flex-col gap-4">
-          <div
-            class="h-5 w-1/3 rounded-full bg-gray-200 dark:bg-gray-700"
-          ></div>
-          <div
-            class="h-24 w-full rounded-lg bg-gray-200 sm:h-28 md:h-32 dark:bg-gray-700"
-          ></div>
-          <div
-            class="h-4 w-2/3 rounded-full bg-gray-200 dark:bg-gray-700"
-          ></div>
-          <div
-            class="h-4 w-1/2 rounded-full bg-gray-200 dark:bg-gray-700"
-          ></div>
-        </div>
-      </div>
-    </template>
-
-    <!-- Error state -->
-    <template v-else-if="error">
-      <div
-        class="col-span-1 rounded-2xl border border-red-200 bg-red-50 p-4 sm:col-span-2 sm:p-5 md:col-span-3 md:p-6 dark:border-red-800 dark:bg-red-900/20"
-      >
-        <div class="flex items-center gap-3">
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            class="h-5 w-5 text-red-600 md:h-6 md:w-6 dark:text-red-400"
-            fill="none"
-            viewBox="0 0 24 24"
-            stroke="currentColor"
-          >
-            <path
-              stroke-linecap="round"
-              stroke-linejoin="round"
-              stroke-width="2"
-              d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
-            />
-          </svg>
-          <p
-            class="text-sm font-medium text-red-800 md:text-base dark:text-red-200"
-          >
-            {{ error }}
-          </p>
         </div>
       </div>
     </template>

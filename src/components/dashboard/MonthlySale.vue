@@ -60,11 +60,10 @@ const handleSelect = async (option: string) => {
 };
 const selected = ref('current');
 
-
 const series = ref([
   {
     name: 'Sales',
-    data: [], 
+    data: [],
   },
 ]);
 

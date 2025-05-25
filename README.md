@@ -1,5 +1,69 @@
-# Vue 3 + TypeScript + Vite
+# 🛒 Vue.js E-commerce Admin Dashboard
 
-This template should help get you started developing with Vue 3 and TypeScript in Vite. The template uses Vue 3 `<script setup>` SFCs, check out the [script setup docs](https://v3.vuejs.org/api/sfc-script-setup.html#sfc-script-setup) to learn more.
+A modern and powerful admin dashboard for managing an e-commerce store, built with **Vue 3**, **Pinia**, and **Element Plus**.
 
-Learn more about the recommended Project Setup and IDE Support in the [Vue Docs TypeScript Guide](https://vuejs.org/guide/typescript/overview.html#project-setup).
+---
+
+## ✅ Implemented Features
+
+### 🔐 Authentication & Authorization
+- Admin login and registration
+- Role-based access control for restricted views and actions
+
+### 📊 Dashboard
+- Overview of:
+  - Total revenue
+  - Number of orders
+  - Average order value
+  - New customers, products, and orders
+- Visual charts for quick insights 
+
+### 🛍️ Product Management
+- Create, read, update, delete (CRUD)
+- Product attributes: name, description, price, stock, categories, tags, ...etc.
+- Upload and manage multiple product images
+- Some Analytics about our products
+- Search and filter functionalites
+
+### 📦 Order Management
+- View, filter, and sort customer orders
+- Update order statuses (e.g., pending, shipped, delivered)
+- Access full order details including customer and payment info
+
+### 👤 Customer Management
+- View customer list and details
+- Search/filter customers
+- Tag or segment customers (e.g., Premium user)
+
+### ⚙️ Store Configuration
+- Update store name, default currency, and default language.
+- Manage roles and promote users (e.g., Owner > Admin)
+
+
+
+## 🧩 Technical Stack
+
+| Tech | Description |
+|------|-------------|
+| **Vue 3** | Composition API |
+| **Pinia** | State management |
+| **Element Plus** | UI component library |
+| **Vue Router** | Dynamic routing with meta-based auth guard |
+| **Axios** | API communication |
+
+
+
+
+
+## ⚙️ Project Setup
+
+```bash
+# Install dependencies
+npm install
+
+# Start development server
+npm run dev
+
+# Build for production
+npm run build
+

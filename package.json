@@ -11,7 +11,7 @@
   "dependencies": {
     "@tailwindcss/vite": "^4.1.4",
     "admin-dashboard": "file:",
-    "axios": "^1.8.4",
+    "axios": "^1.12.0",
     "dropzone": "^6.0.0-beta.2",
     "element-plus": "^2.9.8",
     "jsvectormap": "^1.6.0",
